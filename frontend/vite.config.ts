@@ -14,14 +14,5 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-  },
-  server: {
-    proxy: {
-      '/api': 'http://localhost:5000',
-      '/socket.io': {
-        target: 'http://localhost:5000',
-        ws: true,
-      },
-    },
-  },
+  }
 })

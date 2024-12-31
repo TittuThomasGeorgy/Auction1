@@ -1,21 +1,44 @@
-import { createBrowserRouter, Navigate, RouteObject, RouterProvider } from 'react-router-dom';
-import React, { useEffect } from 'react';
-import HomePageRoutes from '../pages/home/services/HomeRoutes';
-import Home from '../pages/Home';
-import HomePage from '../pages/home/pages';
+import HomePage from "../pages/HomePage";
+import { createBrowserRouter,  RouteObject, RouterProvider } from 'react-router-dom';
+import TeamPage from "../pages/TeamPage";
+import AuctionPage from "../pages/AuctionPage";
+import PlayerPage from "../pages/PlayerPage";
 
 export const allModuleRoutes = [
-  HomePageRoutes
+  {
+    title: 'Home',
+    path: '/',
+    element: <HomePage />,
+  },
+  {
+    title: 'Team',
+    path: '/team',
+    element: <TeamPage />,
+  },
+  {
+    title: 'Auction',
+    path: '/auction',
+    element: <AuctionPage />,
+  },
+  {
+    title: 'Player',
+    path: '/player',
+    element: <PlayerPage />,
+  },
+
 ];
 const Router = () => {
+
+
   const router = createBrowserRouter(
     ([] as RouteObject[]).concat(
-      ...allModuleRoutes.map((moduleRoute) =>
-        moduleRoute.pages.map((page) => ({
-          path: moduleRoute.base + page.path,
-          element: <HomePage/>
-          // element: page.element,
-        })))));
+      ...allModuleRoutes.map((page) =>
+      ({
+        path: page.path,
+        element:
+          page.element
+        // element: page.element,
+      }))));
   return <RouterProvider router={router} />;
 };
 

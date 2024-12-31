@@ -1,51 +1,53 @@
-import {  Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import Home from './pages/Home';
+import { ThemeProvider } from "@emotion/react";
+import { setupIonicReact, IonApp } from "@ionic/react";
+import { createTheme, CssBaseline } from "@mui/material";
+import axios from "axios";
+import { useMemo, useEffect } from "react";
+import CommonServices from "./services/CommonServices";
+import { useLoader } from "./hooks/Loader";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import Router from "./services/CommonRouter";
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
-
-import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
-
-/* Theme variables */
-import './theme/variables.css';
-import { io } from 'socket.io-client';
-import CommonServices from './services/CommonServices';
-import { useLoader } from './hooks/Loader';
-import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { useMemo } from 'react';
-import Router from './services/CommonRouter';
-
+// Initialize Ionic
 setupIonicReact();
 
-const socket = io('http://localhost:5000');
-socket.on('connect', () => console.log('Connected to server:', socket.id));
+// Configure Axios
+const serverURL = import.meta.env.VITE_SERVER_URL || `http://192.168.1.7:8005`;
+axios.defaults.baseURL = serverURL;
+console.log("Server URL:", serverURL);
 
 const App: React.FC = () => {
-  CommonServices.setLoader(useLoader())
-  CommonServices.setEnqueueSnackbar(enqueueSnackbar)
+  // Set up common services
+  CommonServices.setLoader(useLoader());
+  CommonServices.setEnqueueSnackbar(enqueueSnackbar);
 
-
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
           background: {
-            default: prefersDarkMode ? '#121212' : '#f7f7f7 ',
-          },
-          primary: {
-            main: '#009688',
+            default: '#000000'
           },
         },
         components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              body: {
+                backgroundImage: 'url(/bg.jpg)', // Add your image URL
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+                backgroundAttachment: 'fixed', // Optional for fixed background
+                backgroundPosition: 'center',
+                color: '#fff', // Default text color set to white
+              }, // No changes for light mode
+              
+            },
+          },
           MuiDrawer: {
             styleOverrides: {
               paper: {
-                backgroundColor: prefersDarkMode ? '#1b253d' : '#FFFFFF',
+                backgroundColor: '#1b253d',
               },
             },
           },
@@ -55,7 +57,7 @@ const App: React.FC = () => {
             },
             styleOverrides: {
               root: {
-                backgroundColor: prefersDarkMode ? '#1b253d' : '#FFFFFF',
+                backgroundColor: '#1b253d',
               },
             },
           },
@@ -66,96 +68,62 @@ const App: React.FC = () => {
               },
             },
           },
-
-          MuiInputBase: {
+          // MuiInputBase: {
+          //   styleOverrides: {
+          //     root: {
+          //       color: 'white', // Text color
+          //       backgroundColor: '#424242', // Background color
+          //       '&::placeholder': {
+          //         color: 'lightgrey', // Placeholder color
+          //       },
+          //       '&.Mui-disabled': {
+          //         color: '#757575', // Disabled text color
+          //         backgroundColor: '#303030', // Disabled background color
+          //       },
+          //     },
+          //   },
+          // },
+          MuiButton: {
             styleOverrides: {
               root: {
-                color: prefersDarkMode ? 'white' : 'black',  // Text color based on mode
-                backgroundColor: prefersDarkMode ? '#424242' : '#f4f5f4',  // Background color based on mode
-                '&::placeholder': {
-                  color: prefersDarkMode ? 'lightgrey' : 'grey',  // Placeholder color based on mode
-                },
-                '&.Mui-disabled': {
-                  color: prefersDarkMode ? '#757575' : '#C0C0C0',  // Disabled text color based on mode
-                  backgroundColor: prefersDarkMode ? '#303030' : '#F8F9FA',  // Disabled background color
-                },
-              },
-            },
-          },
-
-          MuiAutocomplete: {
-            styleOverrides: {
-              root: {
-                color: prefersDarkMode ? 'white' : 'black',  // Text color based on mode
-                backgroundColor: prefersDarkMode ? '#424242' : '#f4f5f4',  // Background color based on mode
-                borderRadius: 50,
-                padding: 1,
-                '& .MuiOutlinedInput-root': {
-                  paddingLeft: '12px',
-                  '& fieldset': {
-                    borderColor: prefersDarkMode ? '#616161' : '#ccc',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: prefersDarkMode ? '#757575' : '#888',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: prefersDarkMode ? '#90caf9' : '#1976d2',
-                  },
-                  '&.Mui-disabled': {
-                    color: prefersDarkMode ? '#757575' : '#C0C0C0',  // Disabled text color
-                    backgroundColor: prefersDarkMode ? '#303030' : '#F8F9FA',  // Disabled background color
-                  },
-                },
-              },
-              inputRoot: {
-                color: prefersDarkMode ? 'white' : 'black',  // Text color based on mode
-                backgroundColor: prefersDarkMode ? '#424242' : '#f4f5f4',  // Background color
-                '& .MuiInputBase-input': {
-                  color: prefersDarkMode ? '#fff' : '#000',
-                  '&::placeholder': {
-                    color: prefersDarkMode ? 'lightgrey' : '#909190',  // Placeholder color
-                  },
-                  '&.Mui-disabled': {
-                    color: prefersDarkMode ? '#757575' : '#C0C0C0',  // Disabled text color
-                    backgroundColor: prefersDarkMode ? '#303030' : '#F8F9FA',  // Disabled background color
-                  },
-                },
-              },
-              paper: {
-                backgroundColor: prefersDarkMode ? '#424242' : '#f4f5f4',
-                // borderRadius: 10,
-              },
-              option: {
-                backgroundColor: prefersDarkMode ? '#424242' : '#fff',
-                '&[aria-selected="true"]': {
-                  backgroundColor: prefersDarkMode ? '#616161' : '#f4f5f4',
-                },
+                background: 'linear-gradient(45deg, #009688, #2196f3)', // Gradient from light green to blue
+                color: '#ffffff', // White text color
+                marginBottom: 4,
                 '&:hover': {
-                  backgroundColor: prefersDarkMode ? '#757575' : '#e0e0e0',
-                },
-                '&.Mui-disabled': {
-                  color: prefersDarkMode ? '#757575' : '#C0C0C0',  // Disabled option text color
-                  backgroundColor: prefersDarkMode ? '#303030' : '#F8F9FA',  // Disabled option background color
+                  background: 'linear-gradient(45deg, #00796b, #1976d2)', // Darker gradient for hover effect
                 },
               },
             },
           },
-
         },
       }),
-    [prefersDarkMode]
-  );
+    [] );
+
+
+
+  // WebSocket setup
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8006"); // Example WebSocket server
+
+    socket.onopen = () => console.log("WebSocket connected");
+    socket.onerror = (error) => console.error("WebSocket error:", error);
+    socket.onclose = () => console.log("WebSocket disconnected");
+
+    // Clean up the WebSocket connection on unmount
+    return () => socket.close();
+  }, []);
 
   return (
     <IonApp>
       <ThemeProvider theme={theme}>
-        {/* <LoaderProvider> */}
+        <CssBaseline />
         <SnackbarProvider>
           <Router />
+          {/* <div>hi</div> */}
         </SnackbarProvider>
-        {/* </LoaderProvider> */}
       </ThemeProvider>
     </IonApp>
   );
 };
+
 export default App;

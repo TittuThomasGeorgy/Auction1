@@ -1,9 +1,10 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { ISchool } from '../../pages/school/types/SchoolTypes';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = (props: { children: ReactNode }) => {
-    const [school, setSchool] = useState< null | false>(null);
+    const [school, setSchool] = useState<ISchool | null | false>(null);
     const value = useMemo<AuthContextType>(() => ({ school, setSchool }), [school]);
     return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
 };
@@ -17,6 +18,6 @@ export const useAuth = () => {
 };
 
 interface AuthContextType {
-    school:  null | false;
-    setSchool: React.Dispatch<React.SetStateAction< null | false>>;
+    school: ISchool | null | false;
+    setSchool: React.Dispatch<React.SetStateAction<ISchool | null | false>>;
 }
