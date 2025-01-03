@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createClub, getClubByIdReq, getClubLogin, getClubs, loggedClub, updateClub } from "../controllers/club.controller";
+import { getClubs, loggedClub, getClubByIdReq, createClub, getClubLogin, updateClub } from "../controllers/club.controller";
 import multer from "multer";
 import { authCheck } from "../../common/controllers/authorization.controller";
 
