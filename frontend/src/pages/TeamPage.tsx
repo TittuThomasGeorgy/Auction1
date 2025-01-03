@@ -13,7 +13,11 @@ const defTeam = {
     logo: '',
     username: '',
     password: '',
-    isAdmin: false
+    isAdmin: false,
+    manager: {
+        img: '',
+        name: '',
+    }
 }
 
 const TeamPage = () => {

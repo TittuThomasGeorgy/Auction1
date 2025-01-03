@@ -5,6 +5,10 @@ export interface ICreatableTeam {
     username: string;
     password: string;
     isAdmin:boolean;
+    manager:{
+        img:string;
+        name:string;
+    }
 }
 export interface ITeam extends ICreatableTeam {
     _id: string;

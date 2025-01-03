@@ -5,7 +5,7 @@ import Student from "../models/Student";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
 import { IStudent } from "../types/student";
-import { ISchool } from "../../school/types/school";
+import { ITeam } from "../../school/types/team";
 import Participant from "../../events/models/Participate";
 import Events from "../../events/models/Events";
 
@@ -80,14 +80,14 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
             return sendApiResponse(res, 'NOT FOUND', null, 'Student Not Found');
         }
         const logoObj = (_data.logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
-        const logoObj2 = ((_data.school as ISchool).logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
+        const logoObj2 = ((_data.school as ITeam).logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
         const score = await getStudentTotalScore(new Types.ObjectId(req.params.id));
         // If your logo is being populated correctly, we need to handle it properly in the map function
         const data: IStudent = {
             ..._data.toObject(),  // Convert mongoose document to a plain object
             logo: logoObj ?? '',  // Use the downloadURL if it exists
             school: {
-                ...(_data.toObject().school as ISchool),  // Convert mongoose document to a plain object
+                ...(_data.toObject().school as ITeam),  // Convert mongoose document to a plain object
                 logo: logoObj2 ?? '',  // Use the downloadURL if it exists
             },
             score: score,

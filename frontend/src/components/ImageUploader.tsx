@@ -1,8 +1,9 @@
-import { Avatar } from '@mui/material';
+import { Avatar, SxProps } from '@mui/material';
 import React from 'react'
 import { Delete as DeleteIcon, Image as ImageIcon } from '@mui/icons-material';
+import { Theme } from '@emotion/react';
 
-const ImageUploader = (props: { id?: string, value: string, onChange: (newVal: string) => void, onFileUpload: (file: File) => void }) => {
+const ImageUploader = (props: { id?: string, value: string, onChange: (newVal: string) => void, onFileUpload: (file: File) => void, sx?: SxProps<Theme>, variant?: "rounded" | "circular" | "square" }) => {
     return (
         <>
             <label htmlFor={props.id ?? "imagePicker"}>
@@ -12,13 +13,14 @@ const ImageUploader = (props: { id?: string, value: string, onChange: (newVal: s
                         width: 150,
                         marginLeft: 'auto',
                         marginRight: 'auto',
+                        ...props.sx
                     }}
-                    variant="rounded"
+                    variant={props.variant ?? "rounded"}
                     src={props.value.replace('uc', 'thumbnail') ?? ''}
                 >
                     {!props.value && <ImageIcon sx={{ fontSize: 100 }} />}
                 </Avatar>
-            </label>
+            </label >
             <input
                 type="file"
                 accept="image/*"

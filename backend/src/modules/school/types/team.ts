@@ -1,13 +1,16 @@
 import { Types } from "mongoose";
 
-export interface ISchool {
+export interface ITeam {
     _id: Types.ObjectId;
     name: string;
     code: string;
-    address: string;
     logo: Types.ObjectId | string;
     score?: number;
     username?: string;
     password?: string;
     isAdmin:boolean;
+    manager:{
+        img:Types.ObjectId | string;
+        name:string;
+    }
 }

@@ -1,16 +1,16 @@
 import mongoose, { ObjectId, Types } from "mongoose";
 import sendApiResponse from "../../../common/extras/sendApiResponse";
 import { NextFunction, Request, Response } from "express";
-import School from "../models/School";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
-import { ISchool } from "../types/school";
+import { ITeam } from "../types/team";
 import Events from "../../events/models/Events";
+import Team from "../models/Team";
 
-export const getSchools = async (req: Request, res: Response, next: NextFunction) => {
+export const getTeams = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const searchKey = req.query.searchKey;
-        const _data = await School.find({
+        const _data = await Team.find({
             ...(searchKey
                 ? {
                     $or: [
@@ -36,9 +36,9 @@ export const getSchools = async (req: Request, res: Response, next: NextFunction
         })
             .populate('logo')
             .sort({ 'name': 1 });
-        const schoolScore = await calculateSchoolScores();
+        const schoolScore = await calculateTeamScores();
         // If your logo is being populated correctly, we need to handle it properly in the map function
-        const data: ISchool[] = _data.map((scl) => {
+        const data: ITeam[] = _data.map((scl) => {
             const logoObj = (scl.logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
             delete scl.password;
 
@@ -49,19 +49,19 @@ export const getSchools = async (req: Request, res: Response, next: NextFunction
             };
         });
 
-        sendApiResponse(res, 'OK', data, 'Successfully fetched list of Schools');
+        sendApiResponse(res, 'OK', data, 'Successfully fetched list of Teams');
     } catch (error) {
         next(error);
     }
 }
 // Updated controller function
-export const getSchoolByIdReq = async (req: Request, res: Response, next: NextFunction) => {
+export const getTeamByIdReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data: ISchool = await getSchoolById(req.params.id);
-        sendApiResponse(res, 'OK', data, 'Successfully fetched School');
+        const data: ITeam = await getTeamById(req.params.id);
+        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
     } catch (error) {
-        if (error.message === 'SchoolNotFound') {
-            sendApiResponse(res, 'NOT FOUND', null, 'School Not Found');
+        if ((error as any).message === 'TeamNotFound') {
+            sendApiResponse(res, 'NOT FOUND', null, 'Team Not Found');
         } else {
             next(error); // Pass the error to the error-handling middleware for unexpected errors
         }
@@ -69,19 +69,19 @@ export const getSchoolByIdReq = async (req: Request, res: Response, next: NextFu
 };
 
 // Service function to fetch the school data
-export const getSchoolById = async (id: string | Types.ObjectId): Promise<ISchool> => {
-    const _data = await School.findById(id)
+export const getTeamById = async (id: string | Types.ObjectId): Promise<ITeam> => {
+    const _data = await Team.findById(id)
         .populate('logo')
         .sort({ 'name': 1 });
 
     if (!_data) {
-        throw new Error('SchoolNotFound'); // Throw an error if the school is not found
+        throw new Error('TeamNotFound'); // Throw an error if the school is not found
     }
 
     const logoObj = (_data.logo as unknown as IFileModel).downloadURL;
-    const schoolScore = await calculateSchoolScores();
+    const schoolScore = await calculateTeamScores();
 
-    const data: ISchool = {
+    const data: ITeam = {
         ..._data.toObject(),
         logo: logoObj ?? '',
         score: schoolScore.find(sclScr => sclScr._id.equals(id))?.totalPoints ?? 0
@@ -91,12 +91,16 @@ export const getSchoolById = async (id: string | Types.ObjectId): Promise<ISchoo
     return data; // Return the data to the controller function
 };
 const userNameExist = async (username: string) => {
-    const school = await School.find({ username: username });
+    const school = await Team.find({ username: username });
     return school;
 }
-export const createSchool = async (req: Request, res: Response, next: NextFunction) => {
+export const createTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.file) {
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+        const file1 = files?.file1?.[0];
+        const file2 = files?.file2?.[0];
+        if (!file1 || !file2) {
             return sendApiResponse(res, 'NOT FOUND', null,
                 `File Not Found`);
         }
@@ -104,61 +108,71 @@ export const createSchool = async (req: Request, res: Response, next: NextFuncti
         if (isUserNameExist.length > 0)
             return sendApiResponse(res, 'CONFLICT', null,
                 `Username Already Exist`);
-        const _file = await uploadFiles(req.body.name, req.file, process.env.SCHOOL_FOLDER ?? '',);
-        const newSchool = new School({ ...req.body, _id: new mongoose.Types.ObjectId() });
-        if (_file) {
-            newSchool.logo = _file._id;
+        const _file1 = await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '',);
+        const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
+        const newTeam = new Team({ ...req.body, _id: new mongoose.Types.ObjectId() });
+        if (_file1&&_file2) {
+            newTeam.logo = _file1._id;
+            newTeam.manager.img = _file2._id;
         }
         else {
             return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
                 `File upload Failed`);
         }
-        newSchool.save();
-        if (!newSchool) {
-            return sendApiResponse(res, 'CONFLICT', null, 'School Not Created');
+        newTeam.save();
+        if (!newTeam) {
+            return sendApiResponse(res, 'CONFLICT', null, 'Team Not Created');
         }
-        sendApiResponse(res, 'CREATED', newSchool,
-            `Added School successfully`);
+        sendApiResponse(res, 'CREATED', newTeam,
+            `Added Team successfully`);
     } catch (error) {
         next(error);
     }
 }
-export const updateSchool = async (req: Request, res: Response, next: NextFunction) => {
+export const updateTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const _updatedSchool = req.body;
-        const prevSchool = await School.findById(req.params.id).populate('logo');
-        if (!prevSchool) {
-            return sendApiResponse(res, 'NOT FOUND', null, 'School Not Found');
+        const _updatedTeam = req.body;
+        const prevTeam = await Team.findById(req.params.id).populate('logo');
+        if (!prevTeam) {
+            return sendApiResponse(res, 'NOT FOUND', null, 'Team Not Found');
         }
 
-        const prevSchoolLogo = (prevSchool?.logo as unknown as IFileModel);
-        const isSameLogo = prevSchoolLogo.downloadURL === _updatedSchool.logo;
+        const prevTeamLogo = (prevTeam?.logo as unknown as IFileModel);
+        const isSameLogo = prevTeamLogo.downloadURL === _updatedTeam.logo;
         let _file: IFileModel | null = null;
-        if (!isSameLogo && req.file) {
-            _file = (await uploadFiles(req.body.name, req.file, process.env.SCHOOL_FOLDER ?? '', prevSchoolLogo.fileId));
-            _updatedSchool.logo = _file?._id
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+        const file1 = files?.file1?.[0];
+        const file2 = files?.file2?.[0];
+        if (!file1 || !file2) {
+            return sendApiResponse(res, 'NOT FOUND', null,
+                `File Not Found`);
+        }
+        if (!isSameLogo && file1) {
+            _file = (await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '', prevTeamLogo.fileId));
+            _updatedTeam.logo = _file?._id
         }
         else {
-            _updatedSchool.logo = prevSchool?.logo
+            _updatedTeam.logo = prevTeam?.logo
         }
 
-        const updatedSchool = await School.findByIdAndUpdate(req.params.id, { ...req.body, });
-        if (!updatedSchool) {
-            return sendApiResponse(res, 'CONFLICT', null, 'School Not Updated');
+        const updatedTeam = await Team.findByIdAndUpdate(req.params.id, { ...req.body, });
+        if (!updatedTeam) {
+            return sendApiResponse(res, 'CONFLICT', null, 'Team Not Updated');
         }
-        sendApiResponse(res, 'OK', updatedSchool,
-            `School updated successfully`);
+        sendApiResponse(res, 'OK', updatedTeam,
+            `Team updated successfully`);
     } catch (error) {
         next(error);
     }
 }
 
 // Define the type for the score result
-interface SchoolScore {
-    _id: Types.ObjectId;       // School ID
+interface TeamScore {
+    _id: Types.ObjectId;       // Team ID
     totalPoints: number;       // Total points earned by the school
 }
-export const calculateSchoolScores: () => Promise<SchoolScore[]> = async () => {
+export const calculateTeamScores: () => Promise<TeamScore[]> = async () => {
     const events = await Events.aggregate([
         // Lookup students for first, second, and third place in all events
         {
@@ -189,9 +203,9 @@ export const calculateSchoolScores: () => Promise<SchoolScore[]> = async () => {
         // Project school IDs for each placement
         {
             $project: {
-                firstSchoolIds: { $map: { input: "$firstPlaceStudents", as: "student", in: "$$student.school" } },
-                secondSchoolIds: { $map: { input: "$secondPlaceStudents", as: "student", in: "$$student.school" } },
-                thirdSchoolIds: { $map: { input: "$thirdPlaceStudents", as: "student", in: "$$student.school" } },
+                firstTeamIds: { $map: { input: "$firstPlaceStudents", as: "student", in: "$$student.school" } },
+                secondTeamIds: { $map: { input: "$secondPlaceStudents", as: "student", in: "$$student.school" } },
+                thirdTeamIds: { $map: { input: "$thirdPlaceStudents", as: "student", in: "$$student.school" } },
             },
         },
     ]);
@@ -202,17 +216,17 @@ export const calculateSchoolScores: () => Promise<SchoolScore[]> = async () => {
     // Iterate through all events and calculate scores
     events.forEach(event => {
         // Add 5 points for each school in the first place
-        event.firstSchoolIds.forEach((schoolId: Types.ObjectId) => {
+        event.firstTeamIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 5;
         });
 
         // Add 3 points for each school in the second place
-        event.secondSchoolIds.forEach((schoolId: Types.ObjectId) => {
+        event.secondTeamIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 3;
         });
 
         // Add 1 point for each school in the third place
-        event.thirdSchoolIds.forEach((schoolId: Types.ObjectId) => {
+        event.thirdTeamIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 1;
         });
     });
@@ -229,11 +243,11 @@ export const calculateSchoolScores: () => Promise<SchoolScore[]> = async () => {
     return result;
 }
 
-export const getSchoolLogin = async (req: Request, res: Response, next: NextFunction) => {
+export const getTeamLogin = async (req: Request, res: Response, next: NextFunction) => {
     const { username, password } = req.body;
     console.log({ username, password }, req.body);
     try {
-        const _data = await School.findOne({ username: username, password: password })
+        const _data = await Team.findOne({ username: username, password: password })
             .populate('logo')
             .sort({ 'name': 1 });
         if (!_data) {
@@ -241,27 +255,27 @@ export const getSchoolLogin = async (req: Request, res: Response, next: NextFunc
         }
         const logoObj = (_data.logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
         // If your logo is being populated correctly, we need to handle it properly in the map function
-        const schoolScore = await calculateSchoolScores();
+        const schoolScore = await calculateTeamScores();
 
-        const data: ISchool = {
+        const data: ITeam = {
             ..._data.toObject(),  // Convert mongoose document to a plain object
             logo: logoObj ?? '', // Use the downloadURL if it exists
             score: schoolScore.find(sclScr => sclScr._id.equals(req.params.id))?.totalPoints ?? 0
 
         };
         delete data.password;
-        sendApiResponse(res, 'OK', data, 'Successfully fetched School');
+        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
     } catch (error) {
         next(error);
     }
 }
 
-export const loggedSchool = async (req: Request, res: Response, next: NextFunction) => {
+export const loggedTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log('hle');
 
-        const data: ISchool = res.locals.school;
-        sendApiResponse(res, 'OK', data, 'Successfully fetched School');
+        const data: ITeam = res.locals.school;
+        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }

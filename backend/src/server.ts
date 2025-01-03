@@ -10,6 +10,7 @@ import router from './modules/router';
 import { sendStandardResponse } from './common/extras/helpers';
 import Events from './modules/events/models/Events';
 import WebSocket from 'ws';
+import Google from './extras/google';
 
 dotenv.config();
 
@@ -55,7 +56,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/auction')
 app.listen(PORT, () => console.log(`Server running: http://localhost:${PORT}`.bgGreen))
     .on('error', (error) => console.log('Received an error event!'.bgRed, error));
 
-// Google.Drive.initialize(Google.Auth.getAuth()); // GoogleMail
+Google.Drive.initialize(Google.Auth.getAuth()); // GoogleMail
 const wbServer = new WebSocket.Server({ port: 8006 });
 
 wbServer.on('connection', (socket) => {

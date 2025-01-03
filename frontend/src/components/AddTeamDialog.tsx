@@ -13,12 +13,17 @@ const defTeam = {
     logo: '',
     username: '',
     password: '',
-    isAdmin: false
+    isAdmin: false,
+    manager: {
+        img: '',
+        name: '',
+    }
 }
 const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: ITeam) => void; action: 'add' | 'edit'; value: ITeam }) => {
-    const schoolServ = useTeam();
+    const teamServ = useTeam();
     const [creatableTeam, setCreatableTeam] = useState<ITeam>(defTeam);
     const [file1, setFile1] = useState<File>();
+    const [file2, setFile2] = useState<File>();
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState('');
     const [passwordError, setPasswordError] = useState('');
@@ -76,9 +81,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                     return;
                 }
                 props.action === 'edit' ?
-                    schoolServ.update(creatableTeam, file1).then((res) => {
+                    teamServ.update(creatableTeam, file1, file2).then((res) => {
                         if (res.success) {
-                            // setTeams((schools) => schools.map(scl => scl._id === creatableTeam._id ? creatableTeam : scl))
+                            // setTeams((teams) => teams.map(scl => scl._id === creatableTeam._id ? creatableTeam : scl))
                             props.onSubmit({ ...creatableTeam, score: 0 })
                             enqueueSnackbar({
                                 variant: "success",
@@ -91,7 +96,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 message: `Editing Failed`
                             })
                     }) :
-                    schoolServ.create(creatableTeam, file1).then((res) => {
+                    teamServ.create(creatableTeam, file1, file2).then((res) => {
                         if (res.success) {
                             props.onSubmit({ ...creatableTeam, score: 0 })
                             enqueueSnackbar({
@@ -113,7 +118,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                         <Grid container spacing={0}>
                             <Grid size={12}>
                                 <ImageUploader value={creatableTeam.logo} onChange={(newVal) => {
-                                    setCreatableTeam(school => ({ ...school, logo: newVal }))
+                                    setCreatableTeam(team => ({ ...team, logo: newVal }))
                                 }}
                                     onFileUpload={(fil) => {
                                         setFile1(fil)
@@ -125,7 +130,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     label="Name"
                                     value={creatableTeam.name}
                                     onChange={(e) => {
-                                        setCreatableTeam(school => ({ ...school, name: e.target.value }))
+                                        setCreatableTeam(team => ({ ...team, name: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -137,7 +142,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     label="Code"
                                     value={creatableTeam.code}
                                     onChange={(e) => {
-                                        setCreatableTeam(school => ({ ...school, code: e.target.value }))
+                                        setCreatableTeam(team => ({ ...team, code: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -149,7 +154,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     label="Username"
                                     value={creatableTeam.username}
                                     onChange={(e) => {
-                                        setCreatableTeam(school => ({ ...school, username: e.target.value }))
+                                        setCreatableTeam(team => ({ ...team, username: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -165,7 +170,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     type={showPassword ? 'text' : 'password'}
                                     value={creatableTeam.password}
                                     onChange={(e) => {
-                                        setCreatableTeam(school => ({ ...school, password: e.target.value }));
+                                        setCreatableTeam(team => ({ ...team, password: e.target.value }));
                                     }}
                                     fullWidth
                                     required={props.action != 'edit'}
@@ -186,6 +191,30 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     error={!!passwordError}
                                     helperText={passwordError}
 
+                                />
+                            </Grid>
+                            <Grid size={2}>
+                                <ImageUploader value={creatableTeam.manager.img} onChange={(newVal) => {
+                                    setCreatableTeam(team => ({ ...team, manager: { ...team.manager, img: newVal } }))
+
+                                }}
+                                    onFileUpload={(fil) => {
+                                        setFile2(fil)
+                                    }}
+                                    sx={{ height: 50, width: 50 ,mt:3}} 
+                                    variant='circular'
+                                    id='manager'/>
+                            </Grid>
+                            <Grid size={10}>
+                                &ensp;
+                                <TextField
+                                    label="Manager"
+                                    value={creatableTeam.manager.name}
+                                    onChange={(e) => {
+                                        setCreatableTeam(team => ({ ...team, manager: { ...team.manager, name: e.target.value } }))
+                                    }}
+                                    fullWidth
+                                    required
                                 />
                             </Grid>
                         </Grid>

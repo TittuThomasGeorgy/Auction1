@@ -1,20 +1,26 @@
 import { Router } from "express";
-import { createSchool, getSchoolByIdReq, getSchoolLogin, getSchools, loggedSchool, updateSchool } from "../controllers/school.controller";
+import { createTeam, getTeamByIdReq, getTeamLogin, getTeams, loggedTeam, updateTeam } from "../controllers/team.controller";
 import multer from "multer";
 import { authCheck } from "../../common/controllers/authorization.controller";
 
-const schoolRouter = Router();
+const teamRouter = Router();
 
 // for uploading profile pic
 const upload = multer({
   storage: multer.diskStorage({}),
 });
 
-schoolRouter.get('/', getSchools);
-schoolRouter.get('/me', authCheck, loggedSchool);
-schoolRouter.get('/:id', getSchoolByIdReq);
-schoolRouter.post('/', upload.single('file'), createSchool);
-schoolRouter.post('/login', getSchoolLogin);
-schoolRouter.patch('/:id', upload.single('file'), updateSchool);
+teamRouter.get('/', getTeams);
+teamRouter.get('/me', authCheck, loggedTeam);
+teamRouter.get('/:id', getTeamByIdReq);
+teamRouter.post('/',  upload.fields([
+    { name: 'file1', maxCount: 1 },
+    { name: 'file2', maxCount: 1 },
+  ]), createTeam);
+teamRouter.post('/login', getTeamLogin);
+teamRouter.patch('/:id',  upload.fields([
+    { name: 'file1', maxCount: 1 },
+    { name: 'file2', maxCount: 1 },
+  ]), updateTeam);
 
-export default schoolRouter;
+export default teamRouter;
