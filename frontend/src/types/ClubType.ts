@@ -1,4 +1,4 @@
-export interface ICreatableTeam {
+export interface ICreatableClub {
     name: string;
     code: string;
     logo: string;
@@ -10,7 +10,6 @@ export interface ICreatableTeam {
         name:string;
     }
 }
-export interface ITeam extends ICreatableTeam {
+export interface IClub extends ICreatableClub {
     _id: string;
-    score?: number;
 }

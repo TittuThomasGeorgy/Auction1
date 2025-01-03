@@ -1,11 +1,11 @@
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { ITeam } from '../types/TeamType';
+import { IClub } from '../types/ClubType';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = (props: { children: ReactNode }) => {
-    const [team, setTeam] = useState<ITeam | null | false>(null);
-    const value = useMemo<AuthContextType>(() => ({ team, setTeam }), [team]);
+    const [club, setClub] = useState<IClub | null | false>(null);
+    const value = useMemo<AuthContextType>(() => ({ club, setClub }), [club]);
     return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
 };
 
@@ -18,6 +18,6 @@ export const useAuth = () => {
 };
 
 interface AuthContextType {
-    team: ITeam | null | false;
-    setTeam: React.Dispatch<React.SetStateAction<ITeam | null | false>>;
+    club: IClub | null | false;
+    setClub: React.Dispatch<React.SetStateAction<IClub | null | false>>;
 }

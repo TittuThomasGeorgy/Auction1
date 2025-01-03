@@ -3,15 +3,15 @@ import sendApiResponse from "../../../common/extras/sendApiResponse";
 import { NextFunction, Request, Response } from "express";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
-import { ITeam } from "../types/team";
+import { IClub } from "../types/club";
 import Events from "../../events/models/Events";
-import Team from "../models/Team";
+import club from "../models/club";
 
-export const getTeams = async (req: Request, res: Response, next: NextFunction) => {
+export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
         const searchKey = req.query.searchKey;
-        const _data = await Team.find({
+        const _data = await club.find({
             ...(searchKey
                 ? {
                     $or: [
@@ -33,57 +33,57 @@ export const getTeams = async (req: Request, res: Response, next: NextFunction) 
             .populate('logo')
             .populate('manager.img')
             .sort({ 'name': 1 });
-        const schoolScore = await calculateTeamScores();
+        const schoolScore = await calculateClubScores();
         // If your logo is being populated correctly, we need to handle it properly in the map function
-        const data: ITeam[] = _data.map((team) => {
-            const logoObj = (team.logo as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
-            const logoObj2 = (team.manager.img as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
-            delete team.password;
+        const data: IClub[] = _data.map((club) => {
+            const logoObj = (club.logo as unknown as IFileModel).downloadURL; // Ensure that club.logo is properly typed
+            const logoObj2 = (club.manager.img as unknown as IFileModel).downloadURL; // Ensure that club.logo is properly typed
+            delete club.password;
 
             return {
-                ...team.toObject(),  // Convert mongoose document to a plain object
+                ...club.toObject(),  // Convert mongoose document to a plain object
                 logo: logoObj ?? '',  // Use the downloadURL if it exists
                 manager: {
-                    ...team.toObject().manager,
+                    ...club.toObject().manager,
                     img: logoObj2 ?? "",
                 }
             };
         });
 
-        sendApiResponse(res, 'OK', data, 'Successfully fetched list of Teams');
+        sendApiResponse(res, 'OK', data, 'Successfully fetched list of Clubs');
     } catch (error) {
         next(error);
     }
 }
 // Updated controller function
-export const getTeamByIdReq = async (req: Request, res: Response, next: NextFunction) => {
+export const getClubByIdReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data: ITeam = await getTeamById(req.params.id);
-        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
+        const data: IClub = await getClubById(req.params.id);
+        sendApiResponse(res, 'OK', data, 'Successfully fetched club');
     } catch (error) {
-        if ((error as any).message === 'TeamNotFound') {
-            sendApiResponse(res, 'NOT FOUND', null, 'Team Not Found');
+        if ((error as any).message === 'ClubNotFound') {
+            sendApiResponse(res, 'NOT FOUND', null, 'club Not Found');
         } else {
             next(error); // Pass the error to the error-handling middleware for unexpected errors
         }
     }
 };
 
-// Service function to fetch the team data
-export const getTeamById = async (id: string | Types.ObjectId): Promise<ITeam> => {
-    const _data = await Team.findById(id)
+// Service function to fetch the club data
+export const getClubById = async (id: string | Types.ObjectId): Promise<IClub> => {
+    const _data = await club.findById(id)
         .populate('logo')
         .populate('manager.img')
         .sort({ 'name': 1 });
 
     if (!_data) {
-        throw new Error('TeamNotFound'); // Throw an error if the school is not found
+        throw new Error('ClubNotFound'); // Throw an error if the school is not found
     }
 
     const logoObj = (_data.logo as unknown as IFileModel).downloadURL;
-    const logoObj2 = (_data.manager.img as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
+    const logoObj2 = (_data.manager.img as unknown as IFileModel).downloadURL; // Ensure that club.logo is properly typed
 
-    const data: ITeam = {
+    const data: IClub = {
         ..._data.toObject(),
         logo: logoObj ?? '',
         manager: {
@@ -96,10 +96,10 @@ export const getTeamById = async (id: string | Types.ObjectId): Promise<ITeam> =
     return data; // Return the data to the controller function
 };
 const userNameExist = async (username: string) => {
-    const school = await Team.find({ username: username });
+    const school = await club.find({ username: username });
     return school;
 }
-export const createTeam = async (req: Request, res: Response, next: NextFunction) => {
+export const createClub = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -113,80 +113,80 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
         if (isUserNameExist.length > 0)
             return sendApiResponse(res, 'CONFLICT', null,
                 `Username Already Exist`);
-        const _file1 = await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '',);
+        const _file1 = await uploadFiles(req.body.name, file1, process.env.Club_FOLDER ?? '',);
         const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
-        const newTeam = new Team({ ...req.body, _id: new mongoose.Types.ObjectId() });
+        const newClub = new club({ ...req.body, _id: new mongoose.Types.ObjectId() });
         if (_file1 && _file2) {
-            newTeam.logo = _file1._id;
-            newTeam.manager.img = _file2._id;
+            newClub.logo = _file1._id;
+            newClub.manager.img = _file2._id;
         }
         else {
             return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
                 `File upload Failed`);
         }
-        newTeam.save();
-        if (!newTeam) {
-            return sendApiResponse(res, 'CONFLICT', null, 'Team Not Created');
+        newClub.save();
+        if (!newClub) {
+            return sendApiResponse(res, 'CONFLICT', null, 'club Not Created');
         }
-        delete newTeam.password;
+        delete newClub.password;
 
-        sendApiResponse(res, 'CREATED', newTeam,
-            `Added Team successfully`);
+        sendApiResponse(res, 'CREATED', newClub,
+            `Added club successfully`);
     } catch (error) {
         next(error);
     }
 }
-export const updateTeam = async (req: Request, res: Response, next: NextFunction) => {
+export const updateClub = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const _updatedTeam = req.body;
-        const prevTeam = await Team.findById(req.params.id).populate('logo').populate('manager.img');
-        if (!prevTeam) {
-            return sendApiResponse(res, 'NOT FOUND', null, 'Team Not Found');
+        const _updatedClub = req.body;
+        const prevClub = await club.findById(req.params.id).populate('logo').populate('manager.img');
+        if (!prevClub) {
+            return sendApiResponse(res, 'NOT FOUND', null, 'club Not Found');
         }
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-        const prevTeamLogo = (prevTeam?.logo as unknown as IFileModel);
-        const isSameLogo = prevTeamLogo.downloadURL === _updatedTeam.logo;
+        const prevClubLogo = (prevClub?.logo as unknown as IFileModel);
+        const isSameLogo = prevClubLogo.downloadURL === _updatedClub.logo;
         let _file: IFileModel | null = null;
         const file1 = files?.file1?.[0];
         if (!isSameLogo && file1) {
-            _file = (await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '', prevTeamLogo.fileId));
-            _updatedTeam.logo = _file?._id
+            _file = (await uploadFiles(req.body.name, file1, process.env.Club_FOLDER ?? '', prevClubLogo.fileId));
+            _updatedClub.logo = _file?._id
         }
         else {
-            _updatedTeam.logo = prevTeam?.logo
+            _updatedClub.logo = prevClub?.logo
         }
-        const prevManImg = (prevTeam?.manager.img as unknown as IFileModel);
-        const isSameManImg = prevManImg.downloadURL === _updatedTeam.manager.img;
+        const prevManImg = (prevClub?.manager.img as unknown as IFileModel);
+        const isSameManImg = prevManImg.downloadURL === _updatedClub.manager.img;
         const file2 = files?.file2?.[0];
         if (!isSameManImg && file2) {
             _file = (await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '', prevManImg.fileId));
-            _updatedTeam.manager.img = _file?._id
+            _updatedClub.manager.img = _file?._id
         }
         else {
-            _updatedTeam.manager.img = prevTeam?.manager.img
+            _updatedClub.manager.img = prevClub?.manager.img
         }
         if (req.body.password === '')
-            _updatedTeam.password = prevTeam?.password
-        const updatedTeam = await Team.findByIdAndUpdate(req.params.id, _updatedTeam);
-        if (!updatedTeam) {
-            return sendApiResponse(res, 'CONFLICT', null, 'Team Not Updated');
+            _updatedClub.password = prevClub?.password
+        const updatedClub = await club.findByIdAndUpdate(req.params.id, _updatedClub);
+        if (!updatedClub) {
+            return sendApiResponse(res, 'CONFLICT', null, 'club Not Updated');
         }
-        delete _updatedTeam.password;
+        delete _updatedClub.password;
 
-        sendApiResponse(res, 'OK', _updatedTeam,
-            `Team updated successfully`);
+        sendApiResponse(res, 'OK', _updatedClub,
+            `club updated successfully`);
     } catch (error) {
         next(error);
     }
 }
 
 // Define the type for the score result
-interface TeamScore {
-    _id: Types.ObjectId;       // Team ID
+interface ClubScore {
+    _id: Types.ObjectId;       // club ID
     totalPoints: number;       // Total points earned by the school
 }
-export const calculateTeamScores: () => Promise<TeamScore[]> = async () => {
+export const calculateClubScores: () => Promise<ClubScore[]> = async () => {
     const events = await Events.aggregate([
         // Lookup students for first, second, and third place in all events
         {
@@ -217,9 +217,9 @@ export const calculateTeamScores: () => Promise<TeamScore[]> = async () => {
         // Project school IDs for each placement
         {
             $project: {
-                firstTeamIds: { $map: { input: "$firstPlaceStudents", as: "student", in: "$$student.school" } },
-                secondTeamIds: { $map: { input: "$secondPlaceStudents", as: "student", in: "$$student.school" } },
-                thirdTeamIds: { $map: { input: "$thirdPlaceStudents", as: "student", in: "$$student.school" } },
+                firstClubIds: { $map: { input: "$firstPlaceStudents", as: "student", in: "$$student.school" } },
+                secondClubIds: { $map: { input: "$secondPlaceStudents", as: "student", in: "$$student.school" } },
+                thirdClubIds: { $map: { input: "$thirdPlaceStudents", as: "student", in: "$$student.school" } },
             },
         },
     ]);
@@ -230,17 +230,17 @@ export const calculateTeamScores: () => Promise<TeamScore[]> = async () => {
     // Iterate through all events and calculate scores
     events.forEach(event => {
         // Add 5 points for each school in the first place
-        event.firstTeamIds.forEach((schoolId: Types.ObjectId) => {
+        event.firstClubIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 5;
         });
 
         // Add 3 points for each school in the second place
-        event.secondTeamIds.forEach((schoolId: Types.ObjectId) => {
+        event.secondClubIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 3;
         });
 
         // Add 1 point for each school in the third place
-        event.thirdTeamIds.forEach((schoolId: Types.ObjectId) => {
+        event.thirdClubIds.forEach((schoolId: Types.ObjectId) => {
             schoolScores[schoolId.toString()] = (schoolScores[schoolId.toString()] || 0) + 1;
         });
     });
@@ -257,11 +257,11 @@ export const calculateTeamScores: () => Promise<TeamScore[]> = async () => {
     return result;
 }
 
-export const getTeamLogin = async (req: Request, res: Response, next: NextFunction) => {
+export const getClubLogin = async (req: Request, res: Response, next: NextFunction) => {
     const { username, password } = req.body;
     console.log({ username, password }, req.body);
     try {
-        const _data = await Team.findOne({ username: username, password: password })
+        const _data = await club.findOne({ username: username, password: password })
             .populate('logo')
             .sort({ 'name': 1 });
         if (!_data) {
@@ -269,27 +269,27 @@ export const getTeamLogin = async (req: Request, res: Response, next: NextFuncti
         }
         const logoObj = (_data.logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
         // If your logo is being populated correctly, we need to handle it properly in the map function
-        const schoolScore = await calculateTeamScores();
+        const schoolScore = await calculateClubScores();
 
-        const data: ITeam = {
+        const data: IClub = {
             ..._data.toObject(),  // Convert mongoose document to a plain object
             logo: logoObj ?? '', // Use the downloadURL if it exists
             score: schoolScore.find(sclScr => sclScr._id.equals(req.params.id))?.totalPoints ?? 0
 
         };
         delete data.password;
-        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
+        sendApiResponse(res, 'OK', data, 'Successfully fetched club');
     } catch (error) {
         next(error);
     }
 }
 
-export const loggedTeam = async (req: Request, res: Response, next: NextFunction) => {
+export const loggedClub = async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log('hle');
 
-        const data: ITeam = res.locals.school;
-        sendApiResponse(res, 'OK', data, 'Successfully fetched Team');
+        const data: IClub = res.locals.school;
+        sendApiResponse(res, 'OK', data, 'Successfully fetched club');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }

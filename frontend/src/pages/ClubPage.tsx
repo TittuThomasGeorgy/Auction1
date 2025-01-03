@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Box, Container, Typography, Divider, Grid2 as Grid } from '@mui/material';
-import { Add as AddIcon, LocalPolice as TeamIcon, Groups as GroupsIcon } from '@mui/icons-material';
+import { Add as AddIcon, LocalPolice as ClubIcon, Groups as GroupsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
-import AddTeamDialog from '../components/AddTeamDialog';
-import useTeam from '../services/TeamService';
-import { ITeam } from '../types/TeamType';
-import TeamCard from '../components/TeamCard';
+import useClub from '../services/ClubService';
+import { IClub } from '../types/ClubType';
+import AddClubDialog from '../components/AddClubDialog';
+import ClubCard from '../components/ClubCard';
 
-const defTeam = {
+const defClub = {
     _id: '',
     name: '',
     address: '',
@@ -23,13 +23,13 @@ const defTeam = {
     }
 }
 
-const TeamPage = () => {
-    const teamServ = useTeam();
+const ClubPage = () => {
+    const ClubServ = useClub();
     const [open, setOpen] = useState(false);
-    const [teams, setTeams] = useState<ITeam[]>([])
+    const [Clubs, setClubs] = useState<IClub[]>([])
     useEffect(() => {
-        teamServ.getAll()
-            .then((res) => setTeams(res.data))
+        ClubServ.getAll()
+            .then((res) => setClubs(res.data))
     }, []);
 
     return (
@@ -38,13 +38,13 @@ const TeamPage = () => {
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.26)' }}>
                 <br />
-                <Typography variant="h5" color="initial">Teams</Typography>
+                <Typography variant="h5" color="initial">Clubs</Typography>
                 <Divider />
                 <br /> 
                 <Grid container spacing={2}>
-                {teams.map(team =>
-                  <Grid size={{md:3,xs:12}} key={team._id}>
-                      <TeamCard team={team}  />
+                {Clubs.map(club =>
+                  <Grid size={{md:3,xs:12}} key={club._id}>
+                      <ClubCard club={club}  />
                   </Grid>
                 )}
                 </Grid> 
@@ -59,16 +59,16 @@ const TeamPage = () => {
                     },
                 },
             ]} />
-            <AddTeamDialog open={open} onClose={() => setOpen(false)}
+            <AddClubDialog open={open} onClose={() => setOpen(false)}
                 action='add'
                 onSubmit={(newValue) =>
                     // console.log(newValue)
-                    setTeams((teams) => [...teams, newValue])
+                    setClubs((Clubs) => [...Clubs, newValue])
                 }
-                value={defTeam}
+                value={defClub}
             />
         </>
     );
 };
 
-export default TeamPage;
+export default ClubPage;

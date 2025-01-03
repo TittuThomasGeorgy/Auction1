@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface ITeam {
+export interface IClub {
     _id: Types.ObjectId;
     name: string;
     code: string;

@@ -1,12 +1,12 @@
 import sendApiResponse from "../common/extras/sendApiResponse";
 import { Router, Request, Response, NextFunction } from 'express';
-import teamRouter from "./team/apis";
+import ClubRouter from "./club/apis";
 
 
 
 const router = Router();
 
-router.use('/team', teamRouter);
+router.use('/club', ClubRouter);
 // router.use('/events', eventRouter);
 // router.use('/participant', participantRouter);
 

@@ -1,9 +1,9 @@
 import HomePage from "../pages/HomePage";
 import { createBrowserRouter,  RouteObject, RouterProvider } from 'react-router-dom';
-import TeamPage from "../pages/TeamPage";
+import ClubPage from "../pages/ClubPage";
 import AuctionPage from "../pages/AuctionPage";
 import PlayerPage from "../pages/PlayerPage";
-import TeamView from "../pages/TeamView";
+import ClubView from "../pages/ClubView";
 
 export const allModuleRoutes = [
   {
@@ -12,14 +12,14 @@ export const allModuleRoutes = [
     element: <HomePage />,
   },
   {
-    title: 'Team',
-    path: '/team',
-    element: <TeamPage />,
+    title: 'club',
+    path: '/club',
+    element: <ClubPage />,
   },
   {
-    title: 'Team',
-    path: '/team/:id',
-    element: <TeamView />,
+    title: 'club',
+    path: '/club/:id',
+    element: <ClubView />,
   },
   {
     title: 'Auction',

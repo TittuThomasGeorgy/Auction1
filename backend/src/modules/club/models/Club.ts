@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { ITeam } from '../types/team';
+import { IClub } from '../types/club';
 
-export const TeamSchema = new Schema<ITeam>({
+export const ClubSchema = new Schema<IClub>({
   _id: { type: Schema.Types.ObjectId, required: true },
   name: { type: String, required: true },
   code: { type: String, required: true },
@@ -16,6 +16,6 @@ export const TeamSchema = new Schema<ITeam>({
 }, {
   timestamps: true,
 });
-const Team = model<ITeam>('teams', TeamSchema);
+const club = model<IClub>('Clubs', ClubSchema);
 
-export default Team;
+export default club;

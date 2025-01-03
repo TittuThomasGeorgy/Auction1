@@ -11,12 +11,12 @@ import {
     Button,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { ITeam } from '../types/TeamType';
-import useTeam from '../services/TeamService';
+import { IClub } from '../types/ClubType';
+import useClub from '../services/ClubService';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
-import AddTeamDialog from '../components/AddTeamDialog';
+import AddClubDialog from '../components/AddClubDialog';
 
-const defTeam = {
+const defClub = {
     _id: '',
     name: '',
     address: '',
@@ -30,14 +30,14 @@ const defTeam = {
         name: '',
     }
 }
-const TeamView = () => {
+const ClubView = () => {
     const { id } = useParams();
-    const teamServ = useTeam();
-    const [team, setTeam] = useState<ITeam>(defTeam);
+    const ClubServ = useClub();
+    const [club, setClub] = useState<IClub>(defClub);
     const [open, setOpen] = useState(false);
     const getData = async (_id: string) => {
-        const res = await teamServ.getById(_id);
-        setTeam(res.data);
+        const res = await ClubServ.getById(_id);
+        setClub(res.data);
     }
     useEffect(() => {
         if (id)
@@ -56,7 +56,7 @@ const TeamView = () => {
                     // bgcolor: '#f0f4ff',
                 }}
             >
-                {/* Team Logo */}
+                {/* club Logo */}
                 <Card
                     sx={{
                         maxWidth: 600,
@@ -68,8 +68,8 @@ const TeamView = () => {
                 >
                     <CardMedia
                         component="img"
-                        image={team.logo}
-                        alt={`${team.name} logo`}
+                        image={club.logo}
+                        alt={`${club.name} logo`}
                         sx={{
                             height: 150,
                             objectFit: 'contain',
@@ -77,27 +77,27 @@ const TeamView = () => {
                         }}
                     />
                     <CardContent>
-                        {/* Team Header */}
+                        {/* club Header */}
                         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
                             <Typography
                                 variant="h4"
                                 component="div"
                                 sx={{ fontWeight: 'bold', color: '#1e88e5' }}
                             >
-                                {team.name}
+                                {club.name}
                             </Typography>
                             <Typography variant="body2" sx={{ color: '#757575' }}>
-                                {`(${team.code})`}
+                                {`(${club.code})`}
                             </Typography>
                         </Stack>
 
                         <Divider sx={{ my: 2 }} />
 
-                        {/* Team Manager */}
+                        {/* club Manager */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                             <Avatar
-                                src={team.manager.img}
-                                alt={team.manager.name}
+                                src={club.manager.img}
+                                alt={club.manager.name}
                                 sx={{
                                     width: 80,
                                     height: 80,
@@ -110,16 +110,16 @@ const TeamView = () => {
                                     variant="h6"
                                     sx={{ fontWeight: 'bold', color: '#1e88e5', mb: 0.5 }}
                                 >
-                                    Manager: {team.manager.name}
+                                    Manager: {club.manager.name}
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: '#757575' }}>
-                                    Username: {team.username}
+                                    Username: {club.username}
                                 </Typography>
                             </Box>
                         </Box>
 
                         {/* Admin Badge */}
-                        {team.isAdmin && (
+                        {club.isAdmin && (
                             <Typography
                                 variant="body2"
                                 sx={{
@@ -152,16 +152,16 @@ const TeamView = () => {
                     </CardContent>
                 </Card>
             </Box>
-            <AddTeamDialog open={open} onClose={() => setOpen(false)}
+            <AddClubDialog open={open} onClose={() => setOpen(false)}
                 action='edit'
                 onSubmit={(newValue) =>
                     // console.log(newValue)
-                   setTeam(newValue)
+                   setClub(newValue)
                 }
-                value={team}
+                value={club}
             />
         </>
     );
 };
 
-export default TeamView;
+export default ClubView;

@@ -2,10 +2,10 @@ import { Dialog, DialogTitle, DialogContent, Container, TextField, DialogActions
 import { enqueueSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react'
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
-import { ITeam } from '../types/TeamType';
-import useTeam from '../services/TeamService';
+import { IClub } from '../types/ClubType';
+import useClub from '../services/ClubService';
 import ImageUploader from './ImageUploader';
-const defTeam = {
+const defClub = {
     _id: '',
     name: '',
     address: '',
@@ -19,9 +19,9 @@ const defTeam = {
         name: '',
     }
 }
-const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: ITeam) => void; action: 'add' | 'edit'; value: ITeam }) => {
-    const teamServ = useTeam();
-    const [creatableTeam, setCreatableTeam] = useState<ITeam>(defTeam);
+const AddClubDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: IClub) => void; action: 'add' | 'edit'; value: IClub }) => {
+    const ClubServ = useClub();
+    const [creatableClub, setCreatableClub] = useState<IClub>(defClub);
     const [file1, setFile1] = useState<File>();
     const [file2, setFile2] = useState<File>();
     const [showPassword, setShowPassword] = useState(false);
@@ -51,15 +51,15 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
 
     useEffect(() => {
         if (props.value)
-            setCreatableTeam(props.value)
+            setCreatableClub(props.value)
     }, [props.value])
 
     return (
         <Dialog open={props.open} onClose={() => props.onClose()}>
             <form onSubmit={(e) => {
                 e.preventDefault();
-                const userError = validateUsername(creatableTeam.username);
-                const passError = validatePassword(creatableTeam.password);
+                const userError = validateUsername(creatableClub.username);
+                const passError = validatePassword(creatableClub.password);
                 if (userError) {
                     setUsernameError(userError);
                     return;
@@ -83,10 +83,10 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                     return;
                 }
                 props.action === 'edit' ?
-                    teamServ.update(creatableTeam, file1, file2).then((res) => {
+                    ClubServ.update(creatableClub, file1, file2).then((res) => {
                         if (res.success) {
-                            // setTeams((teams) => teams.map(scl => scl._id === creatableTeam._id ? creatableTeam : scl))
-                            props.onSubmit({ ...creatableTeam })
+                            // setClubs((Clubs) => Clubs.map(scl => scl._id === creatableClub._id ? creatableClub : scl))
+                            props.onSubmit({ ...creatableClub })
                             enqueueSnackbar({
                                 variant: "success",
                                 message: res.message
@@ -98,14 +98,14 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 message: `Editing Failed`
                             })
                     }) :
-                    teamServ.create(creatableTeam, file1, file2).then((res) => {
+                    ClubServ.create(creatableClub, file1, file2).then((res) => {
                         if (res.success) {
-                            props.onSubmit({ ...creatableTeam, score: 0 })
+                            props.onSubmit({ ...creatableClub })
                             enqueueSnackbar({
                                 variant: "success",
                                 message: res.message
                             })
-                            setCreatableTeam(defTeam);
+                            setCreatableClub(defClub);
                         }
                         else
                             enqueueSnackbar({
@@ -113,16 +113,16 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 message: `Adding Failed`
                             })
                     });
-                    
+
                 props.onClose();
             }}>
-                <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'Team'}</DialogTitle>
+                <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'club'}</DialogTitle>
                 <DialogContent>
                     <Container>
                         <Grid container spacing={0}>
                             <Grid size={12}>
-                                <ImageUploader value={creatableTeam.logo} onChange={(newVal) => {
-                                    setCreatableTeam(team => ({ ...team, logo: newVal }))
+                                <ImageUploader value={creatableClub.logo} onChange={(newVal) => {
+                                    setCreatableClub(club => ({ ...club, logo: newVal }))
                                 }}
                                     onFileUpload={(fil) => {
                                         setFile1(fil)
@@ -132,9 +132,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 &ensp;
                                 <TextField
                                     label="Name"
-                                    value={creatableTeam.name}
+                                    value={creatableClub.name}
                                     onChange={(e) => {
-                                        setCreatableTeam(team => ({ ...team, name: e.target.value }))
+                                        setCreatableClub(club => ({ ...club, name: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -144,9 +144,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 &ensp;
                                 <TextField
                                     label="Code"
-                                    value={creatableTeam.code}
+                                    value={creatableClub.code}
                                     onChange={(e) => {
-                                        setCreatableTeam(team => ({ ...team, code: e.target.value }))
+                                        setCreatableClub(club => ({ ...club, code: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -156,9 +156,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 &ensp;
                                 <TextField
                                     label="Username"
-                                    value={creatableTeam.username}
+                                    value={creatableClub.username}
                                     onChange={(e) => {
-                                        setCreatableTeam(team => ({ ...team, username: e.target.value }))
+                                        setCreatableClub(club => ({ ...club, username: e.target.value }))
                                     }}
                                     fullWidth
                                     required
@@ -172,9 +172,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 <TextField
                                     label="Password"
                                     type={showPassword ? 'text' : 'password'}
-                                    value={creatableTeam.password}
+                                    value={creatableClub.password}
                                     onChange={(e) => {
-                                        setCreatableTeam(team => ({ ...team, password: e.target.value }));
+                                        setCreatableClub(club => ({ ...club, password: e.target.value }));
                                     }}
                                     fullWidth
                                     required={props.action != 'edit'}
@@ -198,8 +198,8 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 />
                             </Grid>
                             <Grid size={2}>
-                                <ImageUploader value={creatableTeam.manager.img} onChange={(newVal) => {
-                                    setCreatableTeam(team => ({ ...team, manager: { ...team.manager, img: newVal } }))
+                                <ImageUploader value={creatableClub.manager.img} onChange={(newVal) => {
+                                    setCreatableClub(club => ({ ...club, manager: { ...club.manager, img: newVal } }))
 
                                 }}
                                     onFileUpload={(fil) => {
@@ -213,9 +213,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 &ensp;
                                 <TextField
                                     label="Manager"
-                                    value={creatableTeam.manager.name}
+                                    value={creatableClub.manager.name}
                                     onChange={(e) => {
-                                        setCreatableTeam(team => ({ ...team, manager: { ...team.manager, name: e.target.value } }))
+                                        setCreatableClub(club => ({ ...club, manager: { ...club.manager, name: e.target.value } }))
                                     }}
                                     fullWidth
                                     required
@@ -233,4 +233,4 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
     )
 }
 
-export default AddTeamDialog
+export default AddClubDialog
