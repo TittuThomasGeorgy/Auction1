@@ -9,7 +9,6 @@ import Team from "../models/Team";
 
 export const getTeams = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log('Hi');
 
         const searchKey = req.query.searchKey;
         const _data = await Team.find({

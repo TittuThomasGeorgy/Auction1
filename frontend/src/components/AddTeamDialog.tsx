@@ -37,7 +37,6 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
     };
 
     const validatePassword = (password: string) => {
-        console.log('1');
 
         if (props.action === 'edit' && !password) return '';
         // Example: Password should have at least 8 characters, including letters and numbers
@@ -75,7 +74,6 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                 else {
                     setPasswordError('')
                 }
-                console.log(2);
 
                 if (props.action === 'add' && !file1 && !file2) {
                     enqueueSnackbar({
@@ -115,7 +113,6 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 message: `Adding Failed`
                             })
                     });
-                    console.log(3);
                     
                 props.onClose();
             }}>
