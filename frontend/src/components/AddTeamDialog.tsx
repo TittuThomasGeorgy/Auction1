@@ -37,6 +37,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
     };
 
     const validatePassword = (password: string) => {
+        console.log('1');
+
+        if (props.action === 'edit' && !password) return '';
         // Example: Password should have at least 8 characters, including letters and numbers
         if (password.length < 8) {
             return "Password must be at least 8 characters long";
@@ -72,8 +75,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                 else {
                     setPasswordError('')
                 }
+                console.log(2);
 
-                if (props.action === 'add' && !file1) {
+                if (props.action === 'add' && !file1 && !file2) {
                     enqueueSnackbar({
                         variant: "error",
                         message: `File missing`
@@ -84,7 +88,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                     teamServ.update(creatableTeam, file1, file2).then((res) => {
                         if (res.success) {
                             // setTeams((teams) => teams.map(scl => scl._id === creatableTeam._id ? creatableTeam : scl))
-                            props.onSubmit({ ...creatableTeam, score: 0 })
+                            props.onSubmit({ ...creatableTeam })
                             enqueueSnackbar({
                                 variant: "success",
                                 message: res.message
@@ -103,6 +107,7 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 variant: "success",
                                 message: res.message
                             })
+                            setCreatableTeam(defTeam);
                         }
                         else
                             enqueueSnackbar({
@@ -110,6 +115,8 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                 message: `Adding Failed`
                             })
                     });
+                    console.log(3);
+                    
                 props.onClose();
             }}>
                 <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'Team'}</DialogTitle>
@@ -201,9 +208,9 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                                     onFileUpload={(fil) => {
                                         setFile2(fil)
                                     }}
-                                    sx={{ height: 50, width: 50 ,mt:3}} 
+                                    sx={{ height: 50, width: 50, mt: 3 }}
                                     variant='circular'
-                                    id='manager'/>
+                                    id='manager' />
                             </Grid>
                             <Grid size={10}>
                                 &ensp;
@@ -221,8 +228,8 @@ const AddTeamDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
                     </Container>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => props.onClose()}>Cancel</Button>
-                    <Button type="submit"> {props.action === 'edit' ? 'Edit' : 'Add'}</Button>
+                    <Button variant='outlined' onClick={() => props.onClose()}>Cancel</Button>
+                    <Button type="submit" variant='contained'> {props.action === 'edit' ? 'Edit' : 'Add'}</Button>
                 </DialogActions>
             </form>
         </Dialog>

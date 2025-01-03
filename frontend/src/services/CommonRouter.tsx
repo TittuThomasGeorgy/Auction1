@@ -3,6 +3,7 @@ import { createBrowserRouter,  RouteObject, RouterProvider } from 'react-router-
 import TeamPage from "../pages/TeamPage";
 import AuctionPage from "../pages/AuctionPage";
 import PlayerPage from "../pages/PlayerPage";
+import TeamView from "../pages/TeamView";
 
 export const allModuleRoutes = [
   {
@@ -14,6 +15,11 @@ export const allModuleRoutes = [
     title: 'Team',
     path: '/team',
     element: <TeamPage />,
+  },
+  {
+    title: 'Team',
+    path: '/team/:id',
+    element: <TeamView />,
   },
   {
     title: 'Auction',

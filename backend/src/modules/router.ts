@@ -1,6 +1,6 @@
 import sendApiResponse from "../common/extras/sendApiResponse";
 import { Router, Request, Response, NextFunction } from 'express';
-import teamRouter from "./school/apis";
+import teamRouter from "./team/apis";
 
 
 

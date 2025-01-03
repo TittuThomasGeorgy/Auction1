@@ -9,6 +9,8 @@ import Team from "../models/Team";
 
 export const getTeams = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log('Hi');
+
         const searchKey = req.query.searchKey;
         const _data = await Team.find({
             ...(searchKey
@@ -21,11 +23,6 @@ export const getTeams = async (req: Request, res: Response, next: NextFunction) 
                             },
                         },
                         {
-                            address: {
-                                $regex: searchKey as string,
-                            },
-                        },
-                        {
                             code: {
                                 $regex: searchKey as string,
                             },
@@ -35,17 +32,22 @@ export const getTeams = async (req: Request, res: Response, next: NextFunction) 
                 : {})
         })
             .populate('logo')
+            .populate('manager.img')
             .sort({ 'name': 1 });
         const schoolScore = await calculateTeamScores();
         // If your logo is being populated correctly, we need to handle it properly in the map function
-        const data: ITeam[] = _data.map((scl) => {
-            const logoObj = (scl.logo as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
-            delete scl.password;
+        const data: ITeam[] = _data.map((team) => {
+            const logoObj = (team.logo as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
+            const logoObj2 = (team.manager.img as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
+            delete team.password;
 
             return {
-                ...scl.toObject(),  // Convert mongoose document to a plain object
+                ...team.toObject(),  // Convert mongoose document to a plain object
                 logo: logoObj ?? '',  // Use the downloadURL if it exists
-                score: schoolScore.find(sclScr => sclScr._id.equals(scl._id))?.totalPoints ?? 0
+                manager: {
+                    ...team.toObject().manager,
+                    img: logoObj2 ?? "",
+                }
             };
         });
 
@@ -68,10 +70,11 @@ export const getTeamByIdReq = async (req: Request, res: Response, next: NextFunc
     }
 };
 
-// Service function to fetch the school data
+// Service function to fetch the team data
 export const getTeamById = async (id: string | Types.ObjectId): Promise<ITeam> => {
     const _data = await Team.findById(id)
         .populate('logo')
+        .populate('manager.img')
         .sort({ 'name': 1 });
 
     if (!_data) {
@@ -79,12 +82,15 @@ export const getTeamById = async (id: string | Types.ObjectId): Promise<ITeam> =
     }
 
     const logoObj = (_data.logo as unknown as IFileModel).downloadURL;
-    const schoolScore = await calculateTeamScores();
+    const logoObj2 = (_data.manager.img as unknown as IFileModel).downloadURL; // Ensure that team.logo is properly typed
 
     const data: ITeam = {
         ..._data.toObject(),
         logo: logoObj ?? '',
-        score: schoolScore.find(sclScr => sclScr._id.equals(id))?.totalPoints ?? 0
+        manager: {
+            ..._data.toObject().manager,
+            img: logoObj2 ?? "",
+        }
     };
 
     delete data.password;
@@ -111,7 +117,7 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
         const _file1 = await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '',);
         const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
         const newTeam = new Team({ ...req.body, _id: new mongoose.Types.ObjectId() });
-        if (_file1&&_file2) {
+        if (_file1 && _file2) {
             newTeam.logo = _file1._id;
             newTeam.manager.img = _file2._id;
         }
@@ -123,6 +129,8 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
         if (!newTeam) {
             return sendApiResponse(res, 'CONFLICT', null, 'Team Not Created');
         }
+        delete newTeam.password;
+
         sendApiResponse(res, 'CREATED', newTeam,
             `Added Team successfully`);
     } catch (error) {
@@ -132,22 +140,16 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
 export const updateTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const _updatedTeam = req.body;
-        const prevTeam = await Team.findById(req.params.id).populate('logo');
+        const prevTeam = await Team.findById(req.params.id).populate('logo').populate('manager.img');
         if (!prevTeam) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Team Not Found');
         }
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
         const prevTeamLogo = (prevTeam?.logo as unknown as IFileModel);
         const isSameLogo = prevTeamLogo.downloadURL === _updatedTeam.logo;
         let _file: IFileModel | null = null;
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-
         const file1 = files?.file1?.[0];
-        const file2 = files?.file2?.[0];
-        if (!file1 || !file2) {
-            return sendApiResponse(res, 'NOT FOUND', null,
-                `File Not Found`);
-        }
         if (!isSameLogo && file1) {
             _file = (await uploadFiles(req.body.name, file1, process.env.TEAM_FOLDER ?? '', prevTeamLogo.fileId));
             _updatedTeam.logo = _file?._id
@@ -155,12 +157,25 @@ export const updateTeam = async (req: Request, res: Response, next: NextFunction
         else {
             _updatedTeam.logo = prevTeam?.logo
         }
-
-        const updatedTeam = await Team.findByIdAndUpdate(req.params.id, { ...req.body, });
+        const prevManImg = (prevTeam?.manager.img as unknown as IFileModel);
+        const isSameManImg = prevManImg.downloadURL === _updatedTeam.manager.img;
+        const file2 = files?.file2?.[0];
+        if (!isSameManImg && file2) {
+            _file = (await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '', prevManImg.fileId));
+            _updatedTeam.manager.img = _file?._id
+        }
+        else {
+            _updatedTeam.manager.img = prevTeam?.manager.img
+        }
+        if (req.body.password === '')
+            _updatedTeam.password = prevTeam?.password
+        const updatedTeam = await Team.findByIdAndUpdate(req.params.id, _updatedTeam);
         if (!updatedTeam) {
             return sendApiResponse(res, 'CONFLICT', null, 'Team Not Updated');
         }
-        sendApiResponse(res, 'OK', updatedTeam,
+        delete _updatedTeam.password;
+
+        sendApiResponse(res, 'OK', _updatedTeam,
             `Team updated successfully`);
     } catch (error) {
         next(error);

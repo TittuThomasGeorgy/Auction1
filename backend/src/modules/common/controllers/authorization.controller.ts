@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { getSchoolById } from "../../school/controllers/team.controller";
-import { ITeam } from "../../school/types/team";
+import { getSchoolById } from "../../team/controllers/team.controller";
+import { ITeam } from "../../team/types/team";
 import sendApiResponse from "../../../common/extras/sendApiResponse";
 
 export const authCheck = async (req, res, next) => {

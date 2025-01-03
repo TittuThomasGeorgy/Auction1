@@ -4,7 +4,7 @@ import { Gavel as GavelIcon, LocalPolice as TeamIcon, Groups as GroupsIcon } fro
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     return (
         <Box
             display="flex"
@@ -14,20 +14,23 @@ const HomePage = () => {
             flexDirection="column"
         >
             <Button variant="contained"
-                startIcon={<GavelIcon />} sx={{width:'120px'}}
-            onClick={()=>navigate('/auction')}>
-                
+                size='large'
+                startIcon={<GavelIcon />} sx={{ width: '120px' }}
+                onClick={() => navigate('/auction')}>
+
                 Auction
             </Button>
             <Button variant="contained"
-                startIcon={<TeamIcon />} sx={{width:'120px'}}
-            onClick={()=>navigate('/team')}>
+                size='large'
+                startIcon={<TeamIcon />} sx={{ width: '120px' }}
+                onClick={() => navigate('/team')}>
                 Team
             </Button>
             <Button variant="contained"
-                startIcon={<GroupsIcon />} sx={{width:'120px'}}
-            onClick={()=>navigate('/player')}>
-                
+                size='large'
+                startIcon={<GroupsIcon />} sx={{ width: '120px' }}
+                onClick={() => navigate('/player')}>
+
                 Player
             </Button>
         </Box>

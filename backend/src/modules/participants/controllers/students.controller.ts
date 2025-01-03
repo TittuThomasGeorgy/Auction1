@@ -5,7 +5,7 @@ import Student from "../models/Student";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
 import { IStudent } from "../types/student";
-import { ITeam } from "../../school/types/team";
+import { ITeam } from "../../team/types/team";
 import Participant from "../../events/models/Participate";
 import Events from "../../events/models/Events";
 
