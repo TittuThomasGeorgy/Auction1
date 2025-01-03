@@ -18,20 +18,20 @@ const HomePage = () => {
                 startIcon={<GavelIcon />} sx={{ width: '120px' }}
                 onClick={() => navigate('/auction')}>
 
-                Auction
+                AUCTION
             </Button>
             <Button variant="contained"
                 size='large'
                 startIcon={<ClubIcon />} sx={{ width: '120px' }}
                 onClick={() => navigate('/club')}>
-                club
+                  CLUB
             </Button>
             <Button variant="contained"
                 size='large'
                 startIcon={<GroupsIcon />} sx={{ width: '120px' }}
                 onClick={() => navigate('/player')}>
 
-                Player
+                PLAYER
             </Button>
         </Box>
     );
