@@ -5,20 +5,8 @@ import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from
 import { IClub } from '../types/ClubType';
 import useClub from '../services/ClubService';
 import ImageUploader from './ImageUploader';
-const defClub = {
-    _id: '',
-    name: '',
-    address: '',
-    code: '',
-    logo: '',
-    username: '',
-    password: '',
-    isAdmin: false,
-    manager: {
-        img: '',
-        name: '',
-    }
-}
+import { defClub } from '../services/DefaultValues';
+
 const AddClubDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: IClub) => void; action: 'add' | 'edit'; value: IClub }) => {
     const ClubServ = useClub();
     const [creatableClub, setCreatableClub] = useState<IClub>(defClub);

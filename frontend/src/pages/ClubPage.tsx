@@ -7,26 +7,13 @@ import useClub from '../services/ClubService';
 import { IClub } from '../types/ClubType';
 import AddClubDialog from '../components/AddClubDialog';
 import ClubCard from '../components/ClubCard';
+import { defClub } from '../services/DefaultValues';
 
-const defClub = {
-    _id: '',
-    name: '',
-    address: '',
-    code: '',
-    logo: '',
-    username: '',
-    password: '',
-    isAdmin: false,
-    manager: {
-        img: '',
-        name: '',
-    }
-}
 
 const ClubPage = () => {
     const ClubServ = useClub();
     const [open, setOpen] = useState(false);
-    const [Clubs, setClubs] = useState<IClub[]>([])
+    const [clubs, setClubs] = useState<IClub[]>([])
     useEffect(() => {
         ClubServ.getAll()
             .then((res) => setClubs(res.data))
@@ -42,7 +29,7 @@ const ClubPage = () => {
                 <Divider />
                 <br /> 
                 <Grid container spacing={2}>
-                {Clubs.map(club =>
+                {clubs.map(club =>
                   <Grid size={{md:3,xs:12}} key={club._id}>
                       <ClubCard club={club}  />
                   </Grid>

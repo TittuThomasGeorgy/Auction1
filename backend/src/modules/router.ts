@@ -1,14 +1,15 @@
 import sendApiResponse from "../common/extras/sendApiResponse";
 import { Router, Request, Response, NextFunction } from 'express';
 import ClubRouter from "./club/apis";
+import playerRouter from "./player/apis";
 
 
 
 const router = Router();
 
 router.use('/club', ClubRouter);
+router.use('/player', playerRouter);
 // router.use('/events', eventRouter);
-// router.use('/participant', participantRouter);
 
 router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     console.info('Caught error by the error handler!!!');

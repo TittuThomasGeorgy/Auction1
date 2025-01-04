@@ -8,7 +8,6 @@ import morgan from 'morgan';
 import cors from 'cors';
 import router from './modules/router';
 import { sendStandardResponse } from './common/extras/helpers';
-import Events from './modules/events/models/Events';
 import WebSocket from 'ws';
 import Google from './extras/google';
 
@@ -49,7 +48,6 @@ console.log('Trying to connect to mongodb'.yellow);
 mongoose.connect('mongodb://127.0.0.1:27017/auction')
     .then(async () => {
         console.log('Connected to mongodb'.bgGreen);
-        await Events.updateMany({}, { type: 'IND' })
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 

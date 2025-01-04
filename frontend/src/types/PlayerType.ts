@@ -1,8 +1,10 @@
-export interface ICreatablePlayer {
+export interface IPlayer {
+    _id:string;
     name: string;
     image: string;
-    position: 'ST' | 'CM' | 'DF' | 'GK',
+    position: PlayerPosition;   
     basePrice:number;
     bid?:string;
     club?:string;
 }
+export type PlayerPosition='ST' | 'CM' | 'DF' | 'GK';

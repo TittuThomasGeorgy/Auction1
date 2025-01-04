@@ -1,18 +1,18 @@
 const classNames = ["KG", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
 const categories = ['Nursery', 'Juniors', 'CAT I', 'CAT II', 'CAT III', 'CAT IV']
 
-export const getCategory = (studentClass: number): number => {
-    if (studentClass < 0) return -1;
-    if (studentClass === 0) return 0;
-    if (studentClass < 3) return 1;
-    if (studentClass < 6) return 2;
-    if (studentClass < 9) return 3;
-    if (studentClass < 11) return 4;
-    if (studentClass < 13) return 5;
+export const getCategory = (playerClass: number): number => {
+    if (playerClass < 0) return -1;
+    if (playerClass === 0) return 0;
+    if (playerClass < 3) return 1;
+    if (playerClass < 6) return 2;
+    if (playerClass < 9) return 3;
+    if (playerClass < 11) return 4;
+    if (playerClass < 13) return 5;
     return -1;
 };
-export const getCategoryName = (studentClass: number): string | null => {
-    const _cat = getCategory(studentClass)
+export const getCategoryName = (playerClass: number): string | null => {
+    const _cat = getCategory(playerClass)
     if (_cat === -1) return null
     else return categories[_cat];
 };
