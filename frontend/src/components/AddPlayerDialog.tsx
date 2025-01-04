@@ -80,7 +80,8 @@ const AddPlayerDialog = (props: { open: boolean; onClose: () => void; onSubmit: 
                                 }}
                                     onFileUpload={(fil) => {
                                         setFile(fil)
-                                    }} />
+                                    }}
+                                    sx={{ background: 'linear-gradient(135deg, #0f3a67, #1c5c94)',}} />
                             </Grid>
                             <Grid size={12}>
                                 {/* &ensp; */}

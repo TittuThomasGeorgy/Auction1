@@ -1,9 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Avatar, Stack } from '@mui/material';
+import { Box, Typography, Avatar } from '@mui/material';
 import { IClub } from '../types/ClubType';
 import { useNavigate } from 'react-router-dom';
-
-
 
 interface ClubCardProps {
     club: IClub;
@@ -11,77 +9,109 @@ interface ClubCardProps {
 
 const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     const navigate = useNavigate();
+
     return (
-        <Card
+        <Box
             sx={{
-                maxWidth: 300,
-                bgcolor: '#f0f4ff',
-                borderRadius: 4,
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                width: 240,
+                height: 320,
+                background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', // Dark blue to complementary blue gradient
+                borderRadius: '20px',
+                position: 'relative',
                 overflow: 'hidden',
-                textAlign: 'center',
-                transition: 'transform 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.4)',
+                padding: '10px 15px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 '&:hover': { transform: 'scale(1.05)' },
+                cursor: 'pointer',
             }}
             onClick={() => navigate(`/club/${club._id}`)}
         >
-            {/* Club Logo */}
-            <CardMedia
-                component="img"
-                image={club.logo}
-                alt={`${club.name} logo`}
+            {/* Decorative Background Element */}
+            <Box
                 sx={{
-                    height: 150,
-                    objectFit: 'contain',
-                    bgcolor: '#e3f2fd',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0, 0, 0, 0.2)',
+                    clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0 100%)',
+                    zIndex: 1,
                 }}
             />
-            {/* Club Details */}
-            <CardContent>
-                <Stack
-                    direction="row"
-                    alignItems="center"
-                    textAlign="center"
-                    justifyContent="center"
-                    spacing={1} // Adds spacing between the items
-                    sx={{ mb: 1 }} // Adds bottom margin to the Stack
-                >
-                    <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{ fontWeight: 'bold', color: '#1e88e5' }}
-                    >
-                        {club.name}
-                    </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{ color: '#757575' }}
-                    >
-                        {`(${club.code})`}
-                    </Typography>
-                </Stack>
 
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    gap={2}
-                    sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 2 }}
-                >
-                    <Avatar
-                        src={club.manager.img}
-                        alt={club.manager.name}
-                        sx={{ width: 56, height: 56, boxShadow: '0px 2px 8px rgba(0,0,0,0.3)' }}
-                    />
-                    <Box>
-                        <Typography variant="body1" sx={{ fontWeight: '500', color: '#1e88e5' }}>
-                            {club.manager.name}
-                        </Typography>
-                    </Box>
-                </Box>
+            {/* Club Logo */}
+            <Box
+                component="img"
+                src={club.logo}
+                alt={`${club.name} logo`}
+                sx={{
+                    width: 80,
+                    height: 80,
+                    objectFit: 'contain',
+                    position: 'absolute',
+                    top: 20,
+                    zIndex: 2,
+                }}
+            />
 
-            </CardContent>
-        </Card>
+            {/* Club Name */}
+            <Typography
+                sx={{
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    position: 'absolute',
+                    top: 110,
+                    left: 15,
+                    right: 15,
+                    textAlign: 'center',
+                    zIndex: 2,
+                }}
+            >
+                {club.name}
+            </Typography>
+
+            {/* Manager Info */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: 40,
+                    left: 0,
+                    right: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    textAlign: 'center',
+                    zIndex: 2,
+                }}
+            >
+                <Avatar
+                    src={club.manager.img}
+                    alt={club.manager.name}
+                    sx={{
+                        width: 50,
+                        height: 50,
+                        boxShadow: '0px 2px 8px rgba(0,0,0,0.3)',
+                    }}
+                />
+                <Typography
+                    sx={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        marginTop: '10px',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                    }}
+                >
+                    {club.manager.name}
+                </Typography>
+            </Box>
+        </Box>
     );
 };
 

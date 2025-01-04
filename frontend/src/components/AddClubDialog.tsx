@@ -104,7 +104,7 @@ const AddClubDialog = (props: { open: boolean; onClose: () => void; onSubmit: (v
 
                 props.onClose();
             }}>
-                <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'club'}</DialogTitle>
+                <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'Club'}</DialogTitle>
                 <DialogContent>
                     <Container>
                         <Grid container spacing={0}>

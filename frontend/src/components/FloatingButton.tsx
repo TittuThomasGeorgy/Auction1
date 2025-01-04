@@ -1,12 +1,10 @@
 import React, { ReactNode, useState } from "react";
 import { Fab, SvgIconTypeMap } from "@mui/material";
 import {
-  Add as AddIcon,
-  Games as EventIcon,
-  PersonAddAlt1 as PlayerIcon,
+  KeyboardArrowUp as UpIcon,
+  KeyboardArrowDown as DownIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import { OverridableComponent } from "@mui/material/OverridableComponent";
 
 const FloatingButton = (props: {
   actions: {
@@ -34,7 +32,7 @@ const FloatingButton = (props: {
         // onMouseOut={() => setExtendedFab(-1)}
         >
           {/* {extendedFab === 0 && "Add "} */}
-          <AddIcon />
+          <UpIcon />
         </Fab>
       ) : (
         <>
@@ -69,8 +67,8 @@ const FloatingButton = (props: {
             onMouseOver={() => setExtendedFab(0)}
             onMouseOut={() => setExtendedFab(-1)}
           >
-            {extendedFab === 0 && "Close "}
-            <CloseIcon />
+            {/* {extendedFab === 0 && "Close "} */}
+            <DownIcon />
           </Fab>
         </>
       )

@@ -19,7 +19,7 @@ const PlayerCard = (props: { player: IPlayer, club: IClub | null, onClick?: () =
     return (
         <Box
             sx={{
-                width: 240,
+                width: 220,
                 height: 320,
                 background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', // Dark blue to complementary blue gradient
                 borderRadius: '20px',
@@ -43,7 +43,7 @@ const PlayerCard = (props: { player: IPlayer, club: IClub | null, onClick?: () =
                     fontWeight: 'bold',
                     color: 'rgba(255, 255, 255, 0.9)',
                     position: 'absolute',
-                    // top: 10,
+                    top: 20,
                     left: 10,
                 }}
             >
@@ -59,7 +59,7 @@ const PlayerCard = (props: { player: IPlayer, club: IClub | null, onClick?: () =
                     width: 50,
                     height: 50,
                     left: 10,
-                    top: 60,
+                    top: 70,
                     position: 'absolute'
                 }}
 
@@ -75,7 +75,7 @@ const PlayerCard = (props: { player: IPlayer, club: IClub | null, onClick?: () =
                     objectFit: 'contain',
                     position: 'absolute',
                     top: '30%',
-                    right: -10,
+                    right: -25,
                     transform: 'translateY(-50%)',
                     zIndex: 2,
                 }}

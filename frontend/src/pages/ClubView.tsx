@@ -15,6 +15,7 @@ import { IClub } from '../types/ClubType';
 import useClub from '../services/ClubService';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import AddClubDialog from '../components/AddClubDialog';
+import BackButton from '../components/BackButton';
 
 const defClub = {
     _id: '',
@@ -45,6 +46,7 @@ const ClubView = () => {
     }, [id])
     return (
         <>
+            <BackButton />
             <Box
                 sx={{
                     display: 'flex',
@@ -143,11 +145,11 @@ const ClubView = () => {
                                 color="primary"
                                 sx={{ textTransform: 'none' }}
                                 startIcon={<EditIcon />}
-                                onClick={()=>setOpen(true)}
+                                onClick={() => setOpen(true)}
                             >
                                 Edit
                             </Button>
-                           
+
                         </Stack>
                     </CardContent>
                 </Card>
@@ -156,7 +158,7 @@ const ClubView = () => {
                 action='edit'
                 onSubmit={(newValue) =>
                     // console.log(newValue)
-                   setClub(newValue)
+                    setClub(newValue)
                 }
                 value={club}
             />

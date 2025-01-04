@@ -8,6 +8,7 @@ import { IClub } from '../types/ClubType';
 import AddClubDialog from '../components/AddClubDialog';
 import ClubCard from '../components/ClubCard';
 import { defClub } from '../services/DefaultValues';
+import BackButton from '../components/BackButton';
 
 
 const ClubPage = () => {
@@ -21,20 +22,29 @@ const ClubPage = () => {
 
     return (
         <>
+            <BackButton />
+
             <br />
             <br />
-            <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.26)' }}>
+            <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)' }}>
                 <br />
-                <Typography variant="h5" color="initial">Clubs</Typography>
+                <Typography variant="h4" color="initial" >
+                    <ClubIcon sx={{ mr: 1 }} fontSize="large" />
+                    CLUBS</Typography>
                 <Divider />
-                <br /> 
-                <Grid container spacing={2}>
-                {clubs.map(club =>
-                  <Grid size={{md:3,xs:12}} key={club._id}>
-                      <ClubCard club={club}  />
-                  </Grid>
-                )}
-                </Grid> 
+                <br />
+                <Box
+                    sx={{
+                        display: 'flex', // Flexbox layout
+                        flexWrap: 'wrap', // Allow wrapping if cards exceed container width
+                        gap: '16px', // Controls the space between cards
+                        justifyContent: 'center', // Center-align cards
+                    }}
+                >
+                    {clubs.map(club =>
+                        <ClubCard club={club} key={club._id} />
+                    )}
+                </Box>
                 <br />
             </Container>
             <FloatingButton actions={[

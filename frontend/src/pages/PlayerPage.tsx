@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Box, Container, Divider, Grid2 as Grid, Typography } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, Groups as GroupsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
 import AddPlayerDialog from '../components/AddPlayerDialog';
@@ -11,6 +11,7 @@ import ClubCard from '../components/ClubCard';
 import PlayerCard from '../components/PlayerCard';
 import useClub from '../services/ClubService';
 import { IClub } from '../types/ClubType';
+import BackButton from '../components/BackButton';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -34,11 +35,15 @@ const PlayerPage = () => {
     }, []);
     return (
         <>
+            <BackButton />
+
             <br />
             <br />
-            <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.26)' }}>
+            <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)' }}>
                 <br />
-                <Typography variant="h3" color="initial" >Players</Typography>
+                <Typography variant="h4" color="initial" >
+                    <GroupsIcon sx={{ mr: 1 }} fontSize="large" />
+                    PLAYERS</Typography>
                 <Divider />
                 <br />
                 <Box
