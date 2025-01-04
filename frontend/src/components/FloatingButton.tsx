@@ -6,13 +6,14 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 
-const FloatingButton = (props: {
+interface FloatingButtonProps {
   actions: {
     name: string;
     icon: ReactNode;
     onChange: () => void;
   }[]
-}) => {
+}
+const FloatingButton = (props: FloatingButtonProps) => {
   const [open, setOpen] = useState(false);
   const [extendedFab, setExtendedFab] = useState(-1);
   return (

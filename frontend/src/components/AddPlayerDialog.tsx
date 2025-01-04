@@ -9,7 +9,14 @@ import { defPlayer, positions } from '../services/DefaultValues';
 import { IClub } from '../types/ClubType';
 
 
-const AddPlayerDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: IPlayer) => void; action: 'add' | 'edit'; value: IPlayer, clubs: IClub[] }) => {
+interface AddPlayerDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (value: IPlayer) => void;
+    action: 'add' | 'edit';
+    value: IPlayer, clubs: IClub[]
+}
+const AddPlayerDialog = (props: AddPlayerDialogProps) => {
     const PlayerServ = usePlayer();
     const [creatablePlayer, setCreatablePlayer] = useState<IPlayer>(defPlayer);
     const [file, setFile] = useState<File>();
@@ -81,7 +88,7 @@ const AddPlayerDialog = (props: { open: boolean; onClose: () => void; onSubmit: 
                                     onFileUpload={(fil) => {
                                         setFile(fil)
                                     }}
-                                    sx={{ background: 'linear-gradient(135deg, #0f3a67, #1c5c94)',}} />
+                                    sx={{ background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', }} />
                             </Grid>
                             <Grid size={12}>
                                 {/* &ensp; */}

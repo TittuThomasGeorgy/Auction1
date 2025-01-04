@@ -4,7 +4,7 @@ import { Button, IconButton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const BackButton: React.FC = () => {
+const BackButton= () => {
     const navigate = useNavigate();
 
     // Navigate to the previous page

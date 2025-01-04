@@ -3,7 +3,15 @@ import React from 'react'
 import { Delete as DeleteIcon, Image as ImageIcon } from '@mui/icons-material';
 import { Theme } from '@emotion/react';
 
-const ImageUploader = (props: { id?: string, value: string, onChange: (newVal: string) => void, onFileUpload: (file: File) => void, sx?: SxProps<Theme>, variant?: "rounded" | "circular" | "square" }) => {
+interface ImageUploaderProps {
+    id?: string;
+    value: string;
+    onChange: (newVal: string) => void;
+    onFileUpload: (file: File) => void;
+    sx?: SxProps<Theme>;
+    variant?: "rounded" | "circular" | "square"
+}
+const ImageUploader = (props: ImageUploaderProps) => {
     return (
         <>
             <label htmlFor={props.id ?? "imagePicker"}>

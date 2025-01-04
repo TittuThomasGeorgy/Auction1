@@ -7,7 +7,7 @@ interface ClubCardProps {
     club: IClub;
 }
 
-const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
+const ClubCard= (props:ClubCardProps) => {
     const navigate = useNavigate();
 
     return (
@@ -28,7 +28,7 @@ const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                 '&:hover': { transform: 'scale(1.05)' },
                 cursor: 'pointer',
             }}
-            onClick={() => navigate(`/club/${club._id}`)}
+            onClick={() => navigate(`/club/${props.club._id}`)}
         >
             {/* Decorative Background Element */}
             <Box
@@ -47,8 +47,8 @@ const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
             {/* Club Logo */}
             <Box
                 component="img"
-                src={club.logo}
-                alt={`${club.name} logo`}
+                src={props.club.logo}
+                alt={`${props.club.name} logo`}
                 sx={{
                     width: 80,
                     height: 80,
@@ -73,7 +73,7 @@ const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                     zIndex: 2,
                 }}
             >
-                {club.name}
+                {props.club.name}
             </Typography>
 
             {/* Manager Info */}
@@ -92,8 +92,8 @@ const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                 }}
             >
                 <Avatar
-                    src={club.manager.img}
-                    alt={club.manager.name}
+                    src={props.club.manager.img}
+                    alt={props.club.manager.name}
                     sx={{
                         width: 50,
                         height: 50,
@@ -108,7 +108,7 @@ const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                         color: 'rgba(255, 255, 255, 0.9)',
                     }}
                 >
-                    {club.manager.name}
+                    {props.club.manager.name}
                 </Typography>
             </Box>
         </Box>

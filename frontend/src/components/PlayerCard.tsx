@@ -1,21 +1,14 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { IClub } from '../types/ClubType';
+import { IPlayer } from '../types/PlayerType';
 
-export interface IPlayer {
-    _id: string;
-    name: string;
-    image: string; // Player image (transparent PNG)
-    position: PlayerPosition; // Position (e.g., ST, CM)
-    basePrice: number; // Base price
-    bid?: string; // Optional bid
-    club?: string; // Optional club
+interface PlayerCardProps {
+    player: IPlayer;
+    club: IClub | null;
+    onClick?: () => void
 }
-
-export type PlayerPosition = 'ST' | 'CM' | 'DF' | 'GK';
-
-
-const PlayerCard = (props: { player: IPlayer, club: IClub | null, onClick?: () => void }) => {
+const PlayerCard = (props: PlayerCardProps) => {
     return (
         <Box
             sx={{

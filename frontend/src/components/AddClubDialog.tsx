@@ -7,7 +7,14 @@ import useClub from '../services/ClubService';
 import ImageUploader from './ImageUploader';
 import { defClub } from '../services/DefaultValues';
 
-const AddClubDialog = (props: { open: boolean; onClose: () => void; onSubmit: (value: IClub) => void; action: 'add' | 'edit'; value: IClub }) => {
+interface AddClubDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (value: IClub) => void;
+    action: 'add' | 'edit';
+    value: IClub
+}
+const AddClubDialog = (props: AddClubDialogProps) => {
     const ClubServ = useClub();
     const [creatableClub, setCreatableClub] = useState<IClub>(defClub);
     const [file1, setFile1] = useState<File>();
