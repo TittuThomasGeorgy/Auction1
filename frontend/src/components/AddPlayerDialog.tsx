@@ -138,7 +138,7 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     )}
                                     getOptionLabel={(option) => option.name}
                                     onChange={(e, newValue) => {
-                                        if (newValue)
+                                        // if (newValue)
                                             setCreatablePlayer(player => ({ ...player, club: newValue?._id }))
                                     }}
                                     fullWidth

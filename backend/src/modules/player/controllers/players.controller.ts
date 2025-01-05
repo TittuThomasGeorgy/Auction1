@@ -118,12 +118,13 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         else {
             _updatedPlayer.image = prevPlayer?.image
         }
-
-        const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, { ...req.body, });
+        
+        if (!req.body.club) _updatedPlayer.club = null;
+        const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, _updatedPlayer);
         if (!updatedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Updated');
         }
-        sendApiResponse(res, 'OK', updatedPlayer,
+        sendApiResponse(res, 'OK', _updatedPlayer,
             `Player updated successfully`);
     } catch (error) {
         next(error);

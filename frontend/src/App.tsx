@@ -52,7 +52,7 @@ const App: React.FC = () => {
           MuiCssBaseline: {
             styleOverrides: {
               body: {
-                backgroundImage: 'url(/bg.jpg)', // Add your image URL
+                backgroundImage: 'url(/bg3.jpg)', // Add your image URL
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
                 backgroundAttachment: 'fixed', // Optional for fixed background

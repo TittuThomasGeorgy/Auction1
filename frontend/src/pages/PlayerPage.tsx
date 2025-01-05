@@ -79,20 +79,23 @@ const PlayerPage = () => {
             <AddPlayerDialog open={open} onClose={() => setOpen(false)}
                 action={action}
                 onSubmit={(newValue) =>
-                    setPlayers((prevPlayers) => [
-                        ...prevPlayers,
-                        newValue
-                    ].sort((a: IPlayer, b: IPlayer) => {
-                        // First, sort by position
-                        const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+                    action === 'edit' ?
+                        setPlayers((prevPlayers) =>
+                            prevPlayers.map(prev => prev._id === newValue._id ? newValue : prev)) :
+                        setPlayers((prevPlayers) => [
+                            ...prevPlayers,
+                            newValue
+                        ].sort((a: IPlayer, b: IPlayer) => {
+                            // First, sort by position
+                            const positionComparison = positionOrder[a.position] - positionOrder[b.position];
 
-                        // If positions are the same, sort by name alphabetically
-                        if (positionComparison === 0) {
-                            return a.name.localeCompare(b.name); // Sort by name in ascending order
-                        }
+                            // If positions are the same, sort by name alphabetically
+                            if (positionComparison === 0) {
+                                return a.name.localeCompare(b.name); // Sort by name in ascending order
+                            }
 
-                        return positionComparison; // If positions differ, prioritize position sorting
-                    }))
+                            return positionComparison; // If positions differ, prioritize position sorting
+                        }))
                 }
                 value={player}
                 clubs={clubs}

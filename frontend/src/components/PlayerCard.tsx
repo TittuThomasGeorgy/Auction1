@@ -79,7 +79,7 @@ const PlayerCard = (props: PlayerCardProps) => {
                 sx={{
                     position: 'absolute',
                     bottom: 25,
-                    left: 15,
+                    // left: 15,
                     textAlign: 'center',
                     color: '#fffff',
                     width: '100%'
