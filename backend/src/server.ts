@@ -10,6 +10,7 @@ import router from './modules/router';
 import { sendStandardResponse } from './common/extras/helpers';
 import WebSocket from 'ws';
 import Google from './extras/google';
+import { createSettings, isSettingExist } from './modules/settings/controllers/settings.controller';
 
 dotenv.config();
 
@@ -48,6 +49,8 @@ console.log('Trying to connect to mongodb'.yellow);
 mongoose.connect('mongodb://127.0.0.1:27017/auction')
     .then(async () => {
         console.log('Connected to mongodb'.bgGreen);
+        const settings = await isSettingExist();
+        if (!settings) await createSettings();
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 
@@ -58,13 +61,13 @@ Google.Drive.initialize(Google.Auth.getAuth()); // GoogleMail
 const wbServer = new WebSocket.Server({ port: 8006 });
 
 wbServer.on('connection', (socket) => {
-  console.log('Client connected');
-  socket.send('Hello from WebSocket server!');
+    console.log('Client connected');
+    socket.send('Hello from WebSocket server!');
 
-  socket.on('message', (message) => {
-    console.log(`Received: ${message}`);
-    socket.send(`Echo: ${message}`);
-  });
+    socket.on('message', (message) => {
+        console.log(`Received: ${message}`);
+        socket.send(`Echo: ${message}`);
+    });
 
-  socket.on('close', () => console.log('Client disconnected'));
+    socket.on('close', () => console.log('Client disconnected'));
 });

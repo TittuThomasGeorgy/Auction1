@@ -4,6 +4,7 @@ import ClubPage from "../pages/ClubPage";
 import AuctionPage from "../pages/AuctionPage";
 import PlayerPage from "../pages/PlayerPage";
 import ClubView from "../pages/ClubView";
+import SettingsPage from "../pages/SettingsPage";
 
 export const allModuleRoutes = [
   {
@@ -30,6 +31,11 @@ export const allModuleRoutes = [
     title: 'Player',
     path: '/player',
     element: <PlayerPage />,
+  },
+  {
+    title: 'Settings',
+    path: '/settings',
+    element: <SettingsPage />,
   },
 
 ];
