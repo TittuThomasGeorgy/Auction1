@@ -16,21 +16,9 @@ import useClub from '../services/ClubService';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
+import { defClub } from '../services/DefaultValues';
 
-const defClub = {
-    _id: '',
-    name: '',
-    address: '',
-    code: '',
-    logo: '',
-    username: '',
-    password: '',
-    isAdmin: false,
-    manager: {
-        img: '',
-        name: '',
-    }
-}
+
 const ClubView = () => {
     const { id } = useParams();
     const ClubServ = useClub();
@@ -116,6 +104,9 @@ const ClubView = () => {
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: '#757575' }}>
                                     Username: {club.username}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#757575' }}>
+                                    Balance:{ `$ ${club.balance.toLocaleString()} M`}
                                 </Typography>
                             </Box>
                         </Box>

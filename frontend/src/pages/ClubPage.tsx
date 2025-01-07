@@ -9,15 +9,28 @@ import AddClubDialog from '../components/AddClubDialog';
 import ClubCard from '../components/ClubCard';
 import { defClub } from '../services/DefaultValues';
 import BackButton from '../components/BackButton';
+import useSettings from '../services/SettingsService';
+import { ISettings } from '../types/SettingsType';
 
 
 const ClubPage = () => {
     const ClubServ = useClub();
+    const SettingsServ = useSettings();
     const [open, setOpen] = useState(false);
-    const [clubs, setClubs] = useState<IClub[]>([])
+    const [clubs, setClubs] = useState<IClub[]>([]);
+    const [settings, setSettings] = useState<ISettings>({
+        _id: '',
+        bidTime: 0,
+        initialBalance: 0,
+        playersPerClub: 0,
+    });
+
     useEffect(() => {
         ClubServ.getAll()
-            .then((res) => setClubs(res.data))
+            .then((res) => setClubs(res.data));
+        SettingsServ.get()
+            .then((res) => setSettings(res.data))
+            .catch((err) => console.error(err));
     }, []);
 
     return (
@@ -62,7 +75,7 @@ const ClubPage = () => {
                     // console.log(newValue)
                     setClubs((Clubs) => [...Clubs, newValue])
                 }
-                value={defClub}
+                value={{ ...defClub, balance: settings.initialBalance }}
             />
         </>
     );

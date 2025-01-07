@@ -192,6 +192,26 @@ const AddClubDialog = (props: AddClubDialogProps) => {
 
                                 />
                             </Grid>
+                            <Grid size={12}>
+                                &ensp; 
+                                <TextField
+                                    label="Balance"
+                                    fullWidth
+                                    type="number"
+                                    variant="outlined"
+                                    value={creatableClub.balance}
+                                    onChange={(e) => {
+                                        setCreatableClub(club => ({ ...club, balance: +e.target.value }));
+                                    }}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                                            inputProps: { min: 0 },
+                                        }
+                                    }}
+                                />
+                            </Grid>
                             <Grid size={2}>
                                 <ImageUploader value={creatableClub.manager.img} onChange={(newVal) => {
                                     setCreatableClub(club => ({ ...club, manager: { ...club.manager, img: newVal } }))

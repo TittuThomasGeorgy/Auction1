@@ -9,6 +9,7 @@ export interface ICreatableClub {
         img:string;
         name:string;
     }
+    balance:number;
 }
 export interface IClub extends ICreatableClub {
     _id: string;

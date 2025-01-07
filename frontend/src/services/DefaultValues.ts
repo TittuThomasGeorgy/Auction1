@@ -21,7 +21,8 @@ export const defClub = {
     manager: {
         img: '',
         name: '',
-    }
+    },
+    balance: 0,
 }
 
 export const positions: PlayerPosition[] = ['ST', 'CM', 'DF', 'GK']

@@ -11,6 +11,7 @@ import { sendStandardResponse } from './common/extras/helpers';
 import WebSocket from 'ws';
 import Google from './extras/google';
 import { createSettings, isSettingExist } from './modules/settings/controllers/settings.controller';
+import Club from './modules/club/models/Club';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/auction')
         console.log('Connected to mongodb'.bgGreen);
         const settings = await isSettingExist();
         if (!settings) await createSettings();
+        await Club.updateMany({},{balance:6000})
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 

@@ -12,7 +12,8 @@ export const ClubSchema = new Schema<IClub>({
   manager: {
     name: { type: String, required: true },
     img: { type: Schema.Types.ObjectId, ref: 'files' },
-  }
+  },
+  balance: { type: Number, required: true },
 }, {
   timestamps: true,
 });

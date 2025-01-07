@@ -8,9 +8,10 @@ export interface IClub {
     score?: number;
     username?: string;
     password?: string;
-    isAdmin:boolean;
-    manager:{
-        img:Types.ObjectId | string;
-        name:string;
-    }
+    isAdmin: boolean;
+    manager: {
+        img: Types.ObjectId | string;
+        name: string;
+    },
+    balance: number;
 }
