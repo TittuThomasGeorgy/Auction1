@@ -1,9 +1,10 @@
-import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid, Divider } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import BackButton from '../components/BackButton';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { enqueueSnackbar } from 'notistack';
+import { Settings as SettingsIcon } from '@mui/icons-material';
 
 const SettingsPage = () => {
     const settingsServ = useSettings();
@@ -47,11 +48,14 @@ const SettingsPage = () => {
     return (
         <>
             <BackButton />
-            <Container maxWidth="sm" sx={{ mt: 4 }}>
+            <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Paper elevation={4} sx={{ p: 3, bgcolor: 'rgba(24, 24, 24, 0.75)', color: 'white' }}>
-                    <Typography variant="h4" align="center" gutterBottom>
+                    <Typography variant="h4">
+                        <SettingsIcon sx={{ mr: 1 }} fontSize="large" />
                         Settings
                     </Typography>
+                    <Divider />
+
                     <Box component="form" noValidate autoComplete="off" sx={{ mt: 2 }}>
                         <Grid container spacing={2}>
                             <Grid size={4}>
@@ -65,10 +69,12 @@ const SettingsPage = () => {
                                     value={settings.initialBalance}
                                     onChange={(e) => handleInputChange('initialBalance', +e.target.value)}
                                     disabled={!isEditing}
-                                    InputProps={{
-                                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                                        endAdornment: <InputAdornment position="end">M</InputAdornment>,
-                                        inputProps: { min: 0 },
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                                            inputProps: { min: 0 },
+                                        }
                                     }}
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
@@ -84,10 +90,12 @@ const SettingsPage = () => {
                                     value={settings.playersPerClub}
                                     onChange={(e) => handleInputChange('playersPerClub', +e.target.value)}
                                     disabled={!isEditing}
-                                    InputProps={{
-                                        startAdornment: <InputAdornment position="start">👥</InputAdornment>,
-                                        endAdornment: <InputAdornment position="end">Players</InputAdornment>,
-                                        inputProps: { min: 1 },
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start">👥</InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">Players</InputAdornment>,
+                                            inputProps: { min: 1 },
+                                        }
                                     }}
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
@@ -103,10 +111,12 @@ const SettingsPage = () => {
                                     value={settings.bidTime}
                                     onChange={(e) => handleInputChange('bidTime', +e.target.value)}
                                     disabled={!isEditing}
-                                    InputProps={{
-                                        startAdornment: <InputAdornment position="start">⏱</InputAdornment>,
-                                        endAdornment: <InputAdornment position="end">Seconds</InputAdornment>,
-                                        inputProps: { min: 1 },
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start">⏱</InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">Seconds</InputAdornment>,
+                                            inputProps: { min: 1 },
+                                        }
                                     }}
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
@@ -128,7 +138,7 @@ const SettingsPage = () => {
                                         variant="contained"
                                         color="success"
                                         onClick={handleSave}
-                                        sx={{ minWidth: 120,mr:.5 }}
+                                        sx={{ minWidth: 120, mr: .5 }}
                                     >
                                         Save
                                     </Button>
