@@ -10,22 +10,29 @@ import { IPlayer } from "../types/player";
 export const getPlayers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Check if the searchKey matches any playerClass element with regex
-        let searchKey = req.query.searchKey as string;
+        const filter = req.query.filter as string;
+        const searchKey = req.query.searchKey as string; // Assuming you're handling a search key query parameter
 
+        // Construct filter-specific query conditions
+        const filterCondition = (() => {
+            if (filter === 'sold') {
+                return { club: { $ne: null } }; // Players with a non-null club
+            }
+            if (filter === 'unsold') {
+                return { club: null }; // Players with a null club
+            }
+            return {}; // Default case for 'all'
+        })();
+
+        // Fetch players with combined conditions
         const _data = await Player.find({
+            ...filterCondition, // Apply filter-specific conditions
             ...(searchKey
                 ? {
-                    // $or: [
-                    // {
                     name: {
                         $regex: searchKey,
                         $options: 'i',
                     },
-                    // },
-                    //     ...(classIndexes.length > 0
-                    //         ? [{ playerClass: { $in: classIndexes } }] // Use $in operator to match any of the indexes
-                    //         : []),
-                    // ],
                 }
                 : {}),
         })
@@ -41,6 +48,8 @@ export const getPlayers = async (req: Request, res: Response, next: NextFunction
                 image: logoObj ?? '',  // Use the downloadURL if it exists
             };
         }));
+        if (!(data.length > 0))
+            sendApiResponse(res, 'NOT FOUND', [], 'Players Not Found');
 
         sendApiResponse(res, 'OK', data, 'Successfully fetched list of Players');
     } catch (error) {
@@ -118,7 +127,7 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         else {
             _updatedPlayer.image = prevPlayer?.image
         }
-        
+
         if (!req.body.club) _updatedPlayer.club = null;
         const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, _updatedPlayer);
         if (!updatedPlayer) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Box, Container, Divider, Grid2 as Grid, Typography } from '@mui/material';
-import { Add as AddIcon, Groups as GroupsIcon } from '@mui/icons-material';
+import { Button, Box, Container, Divider, Grid2 as Grid, Typography, TextField, InputAdornment } from '@mui/material';
+import { Add as AddIcon, Groups as GroupsIcon, Search as SearchIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
 import AddPlayerDialog from '../components/AddPlayerDialog';
@@ -12,6 +12,7 @@ import PlayerCard from '../components/PlayerCard';
 import useClub from '../services/ClubService';
 import { IClub } from '../types/ClubType';
 import BackButton from '../components/BackButton';
+import PlayerFilter from '../components/PlayerFilter';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -26,34 +27,57 @@ const PlayerPage = () => {
     const [players, setPlayers] = useState<IPlayer[]>([])
     const [player, setPlayer] = useState<IPlayer>(defPlayer)
     const [clubs, setClubs] = useState<IClub[]>([])
-    const [action, setAction] = useState<'add' | 'edit'>('add')
+    const [action, setAction] = useState<'add' | 'edit'>('add');
+    const [searchKey, setSearchKey] = useState('');
+    const [filter, setFilter] = useState<'all' | 'sold' | 'unsold'>('all')
     useEffect(() => {
         ClubServ.getAll()
             .then((res) => setClubs(res.data))
-        PlayerServ.getAll()
-            .then((res) => setPlayers(res.data))
     }, []);
+    useEffect(() => {
+        PlayerServ.getAll(searchKey, filter)
+            .then((res) => setPlayers(res.data))
+    }, [searchKey, filter]);
     return (
         <>
             <BackButton />
 
             <br />
             <br />
-            <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)' }}>
+            <Container sx={{
+                bgcolor: 'rgba(24, 24, 24, 0.75)'
+            }}>
                 <br />
+                <TextField
+                    variant="standard"
+                    value={searchKey}
+                    onChange={(e) => setSearchKey(e.target.value)}
+                    slotProps={{
+                        input: {
+                            startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+                            // endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                            inputProps: { min: 0 },
+                        }
+                    }}
+                    sx={{ float: 'right', bgcolor: 'grey' }}
+                />
                 <Typography variant="h4" color="initial" >
                     <GroupsIcon sx={{ mr: 1 }} fontSize="large" />
                     PLAYERS</Typography>
                 <Divider />
+                <PlayerFilter filter={filter} onChange={(newFilter) => setFilter(newFilter)} />
                 <br />
                 <Box
                     sx={{
                         display: 'flex', // Flexbox layout
                         flexWrap: 'wrap', // Allow wrapping if cards exceed container width
                         gap: '16px', // Controls the space between cards
-                        justifyContent: 'center', // Center-align cards
-                    }}
-                >
+                        justifyContent: 'center', // Center-align cards,
+                        maxHeight: '70vh', // Set the maximum height for the container
+                        overflowY: 'auto', // Enable vertical scrolling
+                        padding: '16px',   // Add some padding for aesthetics
+                    }}>
+
                     {players.sort((a: IPlayer, b: IPlayer) => {
                         return positionOrder[a.position] - positionOrder[b.position];
                     }).map(_player =>
