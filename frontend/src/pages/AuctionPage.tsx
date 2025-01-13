@@ -8,6 +8,7 @@ import { IClub } from '../types/ClubType';
 import { IPlayer } from '../types/PlayerType';
 import PlayerCard from '../components/PlayerCard';
 import AuctionClubCard from '../components/AuctionClubCard';
+import AuctionControls from '../components/AuctionControls';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -91,6 +92,17 @@ const AuctionPage = () => {
                         <ArrowRightIcon />
                     </IconButton>
                 </Box>
+                <AuctionControls onPlay={function (): void {
+                    throw new Error('Function not implemented.');
+                } } onPause={function (): void {
+                    throw new Error('Function not implemented.');
+                } } onAddTime={function (): void {
+                    throw new Error('Function not implemented.');
+                } } onSell={function (): void {
+                    throw new Error('Function not implemented.');
+                } } onUndo={function (): void {
+                    throw new Error('Function not implemented.');
+                } } />
                 <br />
                 <Box
                     sx={{
@@ -101,7 +113,7 @@ const AuctionPage = () => {
                     }}
                 >
                     {clubs.map(club =>
-                        <AuctionClubCard club={club} key={club._id} disabled={club.code!="FCB"} />
+                        <AuctionClubCard club={club} key={club._id} disabled={club.code != "FCB"} />
                     )}
                 </Box>
             </Container>
