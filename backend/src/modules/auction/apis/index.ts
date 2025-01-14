@@ -1,9 +1,10 @@
 import { Router } from "express";
+import { placeBid } from "../controllers/auction.controller";
 
-const AuctionRouter = Router();
+const auctionRouter = Router();
 
 // AuctionRouter.get('/', getAuction);
-// AuctionRouter.post('/start',  createAuction);
+auctionRouter.post('/',  placeBid);
 // AuctionRouter.post('/stop',  createAuction);
 // AuctionRouter.post('/pause',  createAuction);
 // AuctionRouter.post('/play',  createAuction);
@@ -12,4 +13,4 @@ const AuctionRouter = Router();
 // AuctionRouter.post('/sell',  createAuction);
 
 
-export default AuctionRouter;
+export default auctionRouter;

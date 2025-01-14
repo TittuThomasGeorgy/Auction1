@@ -1,9 +1,30 @@
-// import mongoose, { ObjectId, Types } from "mongoose";
-// import sendApiResponse from "../../../common/extras/sendApiResponse";
-// import { NextFunction, Request, Response } from "express";
-// import { uploadFiles } from "../../common/controllers/files.controller";
-// import { IFileModel } from "../../common/types/fileModel";
-// import Club from "../models/Auction";
+import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
+import sendApiResponse from "../../../common/extras/sendApiResponse";
+import Club from "../../club/models/Club";
+import { uploadFiles } from "../../common/controllers/files.controller";
+import Bid from "../models/Bid";
+
+export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // const isUserNameExist = await userNameExist(req.body.username);
+        // if (isUserNameExist.length > 0)
+        //     return sendApiResponse(res, 'CONFLICT', null,
+        //         `Username Already Exist`);
+       
+        const newBid = new Bid({ ...req.body, _id: new mongoose.Types.ObjectId() });
+        newBid.save();
+        if (!newBid) {
+            return sendApiResponse(res, 'CONFLICT', null, 'club Not Created');
+        }
+
+        sendApiResponse(res, 'CREATED', newBid,
+            `Bid Placed successfully`);
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 // export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
 //     try {

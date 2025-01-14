@@ -9,6 +9,6 @@ export const BidSchema = new Schema<IBid>({
 }, {
   timestamps: true,
 });
-const Bid = model<IBid>('auction', BidSchema);
+const Bid = model<IBid>('bids', BidSchema);
 
 export default Bid;

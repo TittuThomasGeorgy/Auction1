@@ -1,15 +1,16 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { IClub } from '../types/ClubType';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 interface ClubCardProps {
     club: IClub;
     disabled?: boolean; // Optional property to disable the card
+    onClick: () => void
 }
 
 const AuctionClubCard = (props: ClubCardProps) => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     return (
         <Box
@@ -38,7 +39,8 @@ const AuctionClubCard = (props: ClubCardProps) => {
             }}
             onClick={() => {
                 if (!props.disabled) {
-                    navigate(`/club/${props.club._id}`);
+                    // navigate(`/club/${props.club._id}`);
+                    props.onClick();
                 }
             }}
         >
@@ -106,7 +108,7 @@ const AuctionClubCard = (props: ClubCardProps) => {
                         color: 'rgba(255, 255, 255, 0.9)',
                     }}
                 >
-                     ${props.club.balance.toLocaleString()} M
+                    ${props.club.balance.toLocaleString()} M
                 </Typography>
             </Box>
 
