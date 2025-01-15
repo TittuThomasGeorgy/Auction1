@@ -3,7 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import clubRouter from "./club/apis";
 import playerRouter from "./player/apis";
 import settingsRouter from "./settings/apis";
-import auctionRouter from "./auction/apis";
+import { auctionRouter } from "./auction/apis";
 
 
 

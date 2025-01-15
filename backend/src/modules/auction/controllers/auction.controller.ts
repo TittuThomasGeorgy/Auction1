@@ -4,6 +4,62 @@ import sendApiResponse from "../../../common/extras/sendApiResponse";
 import Club from "../../club/models/Club";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import Bid from "../models/Bid";
+import { io } from "../../../server";
+import { data } from "react-router-dom";
+import Auction from "../models/Auction";
+import { IAuction } from "../types/auction";
+
+
+const isAuctionExist = async () => {
+    const data = await Auction.findOne({});
+    return data
+}
+
+
+export const createAuction = async () => {
+    try {
+
+        const auction = await isAuctionExist();
+        if (auction) {
+            // console.log('Auction Exists'.bgGreen.black);
+            return;
+        }
+        const newAuction = new Auction({
+            _id: new mongoose.Types.ObjectId(),
+            status: 'stopped'
+        });
+
+        newAuction.save();
+        console.log('Auction Created'.bgGreen.black);
+
+        return;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const startAuction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist();
+        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live' }, { new: true })
+        sendApiResponse(res, 'OK', data, 'Successfully started Auction');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
+export const stopAuction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist();
+        const data = await Auction.findByIdAndUpdate(auction?._id, {
+            status: 'stopped', player: null, // Nullify the player field
+            bid: null // Nullify the bid field
+        },
+            { new: true }) // Optionally return the updated document
+        sendApiResponse(res, 'OK', data, 'Successfully Stopped auction');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
 
 export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -11,15 +67,13 @@ export const placeBid = async (req: Request, res: Response, next: NextFunction) 
         // if (isUserNameExist.length > 0)
         //     return sendApiResponse(res, 'CONFLICT', null,
         //         `Username Already Exist`);
-       
+
         const newBid = new Bid({ ...req.body, _id: new mongoose.Types.ObjectId() });
         newBid.save();
         if (!newBid) {
             return sendApiResponse(res, 'CONFLICT', null, 'club Not Created');
         }
-
-        sendApiResponse(res, 'CREATED', newBid,
-            `Bid Placed successfully`);
+        io.emit('BidPlaced', { data: newBid, message: `Bid Placed successfully` })
     } catch (error) {
         next(error);
     }

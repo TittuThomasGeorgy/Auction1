@@ -18,6 +18,8 @@ interface ControlProps {
     onAddTime: () => void;
     onSell: () => void;
     onUndo: () => void;
+    onStart: () => Promise<boolean>;
+    onStop: () => Promise<boolean>;
 }
 
 const AuctionControls = (props: ControlProps) => {
@@ -28,8 +30,9 @@ const AuctionControls = (props: ControlProps) => {
         action: string | null;
     }>({ open: false, action: null });
 
-    const handleStart = () => {
-        setIsStarted(true);
+    const handleStart = async () => {
+        const res = await props.onStart()
+        setIsStarted(res);
     };
 
     const handlePlayPause = () => {
@@ -42,9 +45,12 @@ const AuctionControls = (props: ControlProps) => {
         setConfirmation({ open: true, action });
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async() => {
         if (confirmation.action === 'play/pause') handlePlayPause();
-        if (confirmation.action === 'stop') setIsStarted(false);
+        if (confirmation.action === 'stop') {
+            const res = await props.onStop()
+            setIsStarted(!res);
+        }
         if (confirmation.action === 'undo') props.onUndo();
         if (confirmation.action === 'addTime') props.onAddTime();
         if (confirmation.action === 'sell') props.onSell();

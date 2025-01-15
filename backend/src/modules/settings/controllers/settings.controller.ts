@@ -5,6 +5,7 @@ import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
 import { ISettings } from "../types/setting";
 import Settings from "../models/Settings";
+import Auction from "../../auction/models/Auction";
 
 export const isSettingExist = async () => {
     const data = await Settings.findOne({});
@@ -27,7 +28,7 @@ export const createSettings = async () => {
 
         const settings = await isSettingExist();
         if (settings) {
-            console.log('Settings Exists'.bgGreen.black);
+            // console.log('Settings Exists'.bgGreen.black);
             return;
         }
         const newSettings = new Settings({

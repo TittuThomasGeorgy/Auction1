@@ -1,16 +1,15 @@
 import { Router } from "express";
-import { placeBid } from "../controllers/auction.controller";
+import { io } from "../../../server";
+import { placeBid, startAuction, stopAuction } from "../controllers/auction.controller";
+
+const auctionEvents = () => {
+    io.on('placeBid', placeBid)
+}
 
 const auctionRouter = Router();
 
-// AuctionRouter.get('/', getAuction);
-auctionRouter.post('/',  placeBid);
-// AuctionRouter.post('/stop',  createAuction);
-// AuctionRouter.post('/pause',  createAuction);
-// AuctionRouter.post('/play',  createAuction);
-// AuctionRouter.post('/bid',  createAuction);
-// AuctionRouter.post('/addTime',  createAuction);
-// AuctionRouter.post('/sell',  createAuction);
+auctionRouter.post('/start', startAuction);
+auctionRouter.post('/stop', stopAuction);
 
+export { auctionRouter, auctionEvents };
 
-export default auctionRouter;

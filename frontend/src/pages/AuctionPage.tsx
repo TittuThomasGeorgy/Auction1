@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Container, IconButton, Typography } from '@mui/material';
-import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon } from '@mui/icons-material';
+import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon, Margin } from '@mui/icons-material';
 import BackButton from '../components/BackButton';
 import usePlayer from '../services/PlayerService';
 import useClub from '../services/ClubService';
@@ -71,13 +71,16 @@ const AuctionPage = () => {
             <br />
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)', padding: '20px' }}>
+                {/* <br /> */}
                 <Box
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                     width="100%"
+                    height="50%"
                     flexWrap="wrap" /* Enables wrapping for smaller screens */
                     gap={0} /* Adjusts spacing between sections */
+                // sx={{mt:.5}}
                 >
                     {/* Current Bid Section */}
                     <Box
@@ -183,7 +186,14 @@ const AuctionPage = () => {
                     throw new Error('Function not implemented.');
                 }} onUndo={function (): void {
                     throw new Error('Function not implemented.');
-                }} />
+                }} onStart={async () => {
+                    const res = await AuctionServ.start(); // A default synchronous return if needed
+                    return !!res.success;
+                }} onStop={async() => {
+                    const res = await AuctionServ.stop(); // A default synchronous return if needed
+                    return !!res.success;
+                }}
+                />
                 <br />
                 <Box
                     sx={{

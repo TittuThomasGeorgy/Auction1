@@ -65,7 +65,7 @@ const PlayerCard = (props: PlayerCardProps) => {
                 sx={{
                     width: 200,
                     height: 200,
-                    objectFit: 'contain',
+                    objectFit: 'cover',
                     position: 'absolute',
                     top: '30%',
                     right: -25,

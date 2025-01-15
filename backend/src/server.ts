@@ -12,6 +12,9 @@ import WebSocket from 'ws';
 import Google from './extras/google';
 import { createSettings, isSettingExist } from './modules/settings/controllers/settings.controller';
 import Club from './modules/club/models/Club';
+import { Server } from 'socket.io';
+import { auctionEvents } from './modules/auction/apis';
+import { createAuction } from './modules/auction/controllers/auction.controller';
 
 dotenv.config();
 
@@ -50,9 +53,9 @@ console.log('Trying to connect to mongodb'.yellow);
 mongoose.connect('mongodb://127.0.0.1:27017/auction')
     .then(async () => {
         console.log('Connected to mongodb'.bgGreen);
-        const settings = await isSettingExist();
-        if (!settings) await createSettings();
-        await Club.updateMany({},{balance:6000})
+        await createSettings();
+        await createAuction();
+        // await Club.updateMany({},{balance:6000})
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 
@@ -60,16 +63,26 @@ app.listen(PORT, () => console.log(`Server running: http://localhost:${PORT}`.bg
     .on('error', (error) => console.log('Received an error event!'.bgRed, error));
 
 Google.Drive.initialize(Google.Auth.getAuth()); // GoogleMail
-const wbServer = new WebSocket.Server({ port: 8006 });
 
-wbServer.on('connection', (socket) => {
-    console.log('Client connected');
-    socket.send('Hello from WebSocket server!');
-
-    socket.on('message', (message) => {
-        console.log(`Received: ${message}`);
-        socket.send(`Echo: ${message}`);
-    });
-
-    socket.on('close', () => console.log('Client disconnected'));
+const io = new Server(server, {
+    cors: { origin: '*' }, // Allow frontend to connect
 });
+
+// Attach event listeners for the connection
+io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+    auctionEvents();
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+// Start the server
+
+server.listen(process.env.SOCKET_PORT, () => {
+    console.log(`Socket Server running on http://localhost:${process.env.SOCKET_PORT}`);
+});
+
+// Export io for use in other files
+export { io };
+
