@@ -7,47 +7,57 @@ import Player from "../models/Player";
 import { IPlayer } from "../types/player";
 
 
-export const getPlayers = async (req: Request, res: Response, next: NextFunction) => {
+
+export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string) => {
+    // Check if the searchKey matches any playerClass element with regex
+
+    // Construct filter-specific query conditions
+    const filterCondition = (() => {
+        if (filter === 'sold') {
+            return { club: { $ne: null } }; // Players with a non-null club
+        }
+        if (filter === 'unsold') {
+            return { club: null }; // Players with a null club
+        }
+        return {}; // Default case for 'all'
+    })();
+
+    // Fetch players with combined conditions
+    const _data = await Player.find({
+        ...filterCondition, // Apply filter-specific conditions
+        ...(searchKey
+            ? {
+                name: {
+                    $regex: searchKey,
+                    $options: 'i',
+                },
+            }
+            : {}),
+    })
+        .populate('image')
+    const positionOrder: { [key: string]: number } = {
+        ST: 1,
+        CM: 2,
+        DF: 3,
+        GK: 4,
+    };
+    const sortedData = _data.sort((a, b) => {
+        return positionOrder[a.position] - positionOrder[b.position] || a.name.localeCompare(b.name);
+    });
+    // If your logo is being populated correctly, we need to handle it properly in the map function
+    const data: IPlayer[] = await Promise.all(sortedData.map(async (player) => {
+        const logoObj = (player.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
+
+        return {
+            ...player.toObject(),  // Convert mongoose document to a plain object
+            image: logoObj ?? '',  // Use the downloadURL if it exists
+        };
+    }));
+    return data
+}
+export const getPlayersReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Check if the searchKey matches any playerClass element with regex
-        const filter = req.query.filter as string;
-        const searchKey = req.query.searchKey as string; // Assuming you're handling a search key query parameter
-
-        // Construct filter-specific query conditions
-        const filterCondition = (() => {
-            if (filter === 'sold') {
-                return { club: { $ne: null } }; // Players with a non-null club
-            }
-            if (filter === 'unsold') {
-                return { club: null }; // Players with a null club
-            }
-            return {}; // Default case for 'all'
-        })();
-
-        // Fetch players with combined conditions
-        const _data = await Player.find({
-            ...filterCondition, // Apply filter-specific conditions
-            ...(searchKey
-                ? {
-                    name: {
-                        $regex: searchKey,
-                        $options: 'i',
-                    },
-                }
-                : {}),
-        })
-            .populate('image')
-            .sort({ 'position': 1, 'name': 1 });
-
-        // If your logo is being populated correctly, we need to handle it properly in the map function
-        const data: IPlayer[] = await Promise.all(_data.map(async (player) => {
-            const logoObj = (player.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
-
-            return {
-                ...player.toObject(),  // Convert mongoose document to a plain object
-                image: logoObj ?? '',  // Use the downloadURL if it exists
-            };
-        }));
+        const data = await getPlayers(req.query.filter as 'sold' | 'unsold', req.query.searchKey as string)
         if (!(data.length > 0))
             sendApiResponse(res, 'NOT FOUND', [], 'Players Not Found');
 

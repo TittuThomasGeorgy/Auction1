@@ -8,12 +8,18 @@ import { io } from "../../../server";
 import { data } from "react-router-dom";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
+import { bidPlaced, startAuction } from "../events/auctionEvents";
+import { IBid } from "../types/bid";
 
+export const isAuctionExist = async (populateBid?: boolean) => {
+    let query = Auction.findOne({});
+    if (populateBid) {
+        query = query.populate('bid');
+    }
+    const data = await query.exec();
+    return data?.toJSON();
+};
 
-const isAuctionExist = async () => {
-    const data = await Auction.findOne({});
-    return data
-}
 
 
 export const createAuction = async () => {
@@ -38,10 +44,11 @@ export const createAuction = async () => {
     }
 }
 
-export const startAuction = async (req: Request, res: Response, next: NextFunction) => {
+export const startAuctionReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
-        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live' }, { new: true })
+        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player }, { new: true });
+        startAuction();
         sendApiResponse(res, 'OK', data, 'Successfully started Auction');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
@@ -60,26 +67,60 @@ export const stopAuction = async (req: Request, res: Response, next: NextFunctio
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
 };
+export const nextPlayer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist();
+        const data = await Auction.findByIdAndUpdate(auction?._id, {
+            player: req.body.player, // Nullify the player field
+            bid: null // Nullify the bid field
+        },
+            { new: true }) // Optionally return the updated document
+        sendApiResponse(res, 'OK', data, 'Next Player updated');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
 
 export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // const isUserNameExist = await userNameExist(req.body.username);
-        // if (isUserNameExist.length > 0)
-        //     return sendApiResponse(res, 'CONFLICT', null,
-        //         `Username Already Exist`);
+        if (!(await isBidValid(req.body)))
+            return sendApiResponse(res, 'CONFLICT', null, 'Bid Not exist');
+        const bidId = new mongoose.Types.ObjectId();
+        const newBid = new Bid({ ...req.body, _id: bidId }).save();
+        const auction = await isAuctionExist();
+        await Auction.findByIdAndUpdate(auction?._id, { bid: bidId });
 
-        const newBid = new Bid({ ...req.body, _id: new mongoose.Types.ObjectId() });
-        newBid.save();
         if (!newBid) {
-            return sendApiResponse(res, 'CONFLICT', null, 'club Not Created');
+            return sendApiResponse(res, 'CONFLICT', null, 'Bid Not Placed');
         }
-        io.emit('BidPlaced', { data: newBid, message: `Bid Placed successfully` })
+        sendApiResponse(res, 'OK', newBid, 'Bid Placed')
+        // io.emit('BidPlaced', { data: newBid, message: `Bid Placed successfully` })
     } catch (error) {
         next(error);
     }
 }
 
+const isBidValid = async (_bid: IBid) => {
+    const auction = await isAuctionExist(true);
+    const bid = (auction?.bid as unknown as IBid)?.bid ?? 0;
+    // Ensure both are strings before comparison
+    const auctionPlayer = auction?.player?.toString();
+    const bidPlayer = _bid.player?.toString();
 
+    console.log('Auction Player:', auctionPlayer);
+    console.log('Bid Player:', bidPlayer);
+
+    // Compare player IDs
+    if (auctionPlayer !== bidPlayer) {
+        console.log('Player not Matching'.red, auctionPlayer, bidPlayer);
+        return false;
+    }
+    if (bid > _bid.bid) {
+        console.log('Higher bid Exist');
+        return false;
+    }
+    return true;
+}
 // export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 

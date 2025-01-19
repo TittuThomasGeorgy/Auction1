@@ -7,6 +7,7 @@ import CommonServices from "./services/CommonServices";
 import { useLoader } from "./hooks/Loader";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import Router from "./services/CommonRouter";
+import { AuctionProvider } from "./hooks/AuctionProvider";
 
 // Initialize Ionic
 setupIonicReact();
@@ -59,7 +60,7 @@ const App: React.FC = () => {
                 backgroundPosition: 'center',
                 color: '#fff', // Default text color set to white
               }, // No changes for light mode
-              
+
             },
           },
           MuiDrawer: {
@@ -168,30 +169,23 @@ const App: React.FC = () => {
             },
           },
         },
-      
+
       }),
-    [] );
+    []);
 
 
 
-  // WebSocket setup
-  useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8006"); // Example WebSocket server
 
-    socket.onopen = () => console.log("WebSocket connected");
-    socket.onerror = (error) => console.error("WebSocket error:", error);
-    socket.onclose = () => console.log("WebSocket disconnected");
-
-    // Clean up the WebSocket connection on unmount
-    return () => socket.close();
-  }, []);
 
   return (
     <IonApp>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider>
-          <Router />
+          <AuctionProvider>
+
+            <Router />
+          </AuctionProvider>
           {/* <div>hi</div> */}
         </SnackbarProvider>
       </ThemeProvider>

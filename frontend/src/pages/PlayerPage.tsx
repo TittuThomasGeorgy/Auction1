@@ -78,9 +78,7 @@ const PlayerPage = () => {
                         padding: '16px',   // Add some padding for aesthetics
                     }}>
 
-                    {players.sort((a: IPlayer, b: IPlayer) => {
-                        return positionOrder[a.position] - positionOrder[b.position];
-                    }).map(_player =>
+                    {players.map(_player =>
                         <PlayerCard key={_player._id} player={_player} club={clubs.find(clb => clb._id === _player.club) ?? null} onClick={() => {
                             setAction('edit');
                             setPlayer(_player)

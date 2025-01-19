@@ -12,18 +12,20 @@ import AuctionControls from '../components/AuctionControls';
 import BidDialog from '../components/BidDialog';
 import useAuction from '../services/AuctionService';
 import { enqueueSnackbar } from 'notistack';
+import { useLiveAuction } from '../hooks/AuctionProvider';
 
-const positionOrder: { [key: string]: number } = {
-    ST: 1,
-    CM: 2,
-    DF: 3,
-    GK: 4
-};
+// const positionOrder: { [key: string]: number } = {
+//     ST: 1,
+//     CM: 2,
+//     DF: 3,
+//     GK: 4
+// };
 
 const AuctionPage = () => {
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
     const AuctionServ = useAuction();
+    const liveAuction = useLiveAuction();
     const [players, setPlayers] = useState<IPlayer[]>([]);
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -33,21 +35,22 @@ const AuctionPage = () => {
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
-            setPlayers(
-                res.data.sort(
-                    (a: IPlayer, b: IPlayer) => positionOrder[a.position] - positionOrder[b.position]
-                )
-            )
+            setPlayers(res.data)
         );
     }, []);
 
-    const handleNextPlayer = () => {
-        setCurrentPlayerIndex((prev) => (prev + 1) % players.length);
+    const handleNextPlayer = async () => {
+        const currentIdx = (currentPlayerIndex + 1) % players.length
+        setCurrentPlayerIndex(currentIdx);
+        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
     };
 
-    const handlePreviousPlayer = () => {
-        setCurrentPlayerIndex((prev) => (prev - 1 + players.length) % players.length);
+    const handlePreviousPlayer = async () => {
+        const currentIdx = (currentPlayerIndex - 1) % players.length
+        setCurrentPlayerIndex(currentIdx);
+        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
     };
+
 
     // Add keyboard navigation
     useEffect(() => {
@@ -187,9 +190,9 @@ const AuctionPage = () => {
                 }} onUndo={function (): void {
                     throw new Error('Function not implemented.');
                 }} onStart={async () => {
-                    const res = await AuctionServ.start(); // A default synchronous return if needed
+                    const res = await AuctionServ.start(players[currentPlayerIndex]._id); // A default synchronous return if needed
                     return !!res.success;
-                }} onStop={async() => {
+                }} onStop={async () => {
                     const res = await AuctionServ.stop(); // A default synchronous return if needed
                     return !!res.success;
                 }}

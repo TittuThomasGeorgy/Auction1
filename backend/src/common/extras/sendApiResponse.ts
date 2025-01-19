@@ -23,7 +23,7 @@ const sendApiResponse = <T>(
     const response: ApiResponse<T> = {
         success: HTTP[statusCode] >= 200 && HTTP[statusCode] < 300,
         message,
-        data,
+        data,   
     };
 
     res.status(HTTP[statusCode]).json(response);
