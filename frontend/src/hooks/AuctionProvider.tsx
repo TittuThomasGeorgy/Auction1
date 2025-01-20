@@ -1,6 +1,9 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { IAuction } from '../types/AuctionType';
+import { IBid } from '../types/BidType';
+import { enqueueSnackbar } from 'notistack';
+import useAuction from '../services/AuctionService';
 
 const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL); // Replace with your backend URL
 
@@ -9,36 +12,34 @@ const AuctionContext = createContext<AuctionContextType | null>(null);
 
 // Auction Provider Component
 export const AuctionProvider = (props: { children: ReactNode }) => {
+    const auctionServ = useAuction();
     const [auction, setAuction] = useState<IAuction | null>(null);
-    const [timeRemaining, setTimeRemaining] = useState(0);
 
     useEffect(() => {
         // Listen for the start of a new auction
         socket.on('auctionStarted', (auctionData: IAuction) => {
             setAuction(auctionData);
-            console.log(auctionData);
-
-            // setTimeRemaining(auctionData.timeRemaining);
+            enqueueSnackbar({ variant: 'success', message: "Auction Started" });
+        });
+        socket.on('auctionPaused', (data: { status: 'pause' | 'live' }) => {
+            setAuction(auction => auction && ({ ...auction, status: data.status }))
+            if (data.status == 'live')
+                enqueueSnackbar({ variant: 'info', message: "Auction Resumed" });
+            else
+                enqueueSnackbar({ variant: 'info', message: "Auction Paused" });
         });
 
-        // // Listen for time updates
-        // socket.on('auctionTimeUpdate', (data) => {
-        //     if (auction && auction.auctionId === data.auctionId) {
-        //         setTimeRemaining(data.timeRemaining);
-        //     }
-        // });
+        socket.on('auctionTimeUpdate', (data: { timeRemaining: number }) => {
+            setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
+        })
+        socket.on('bidPlaced', (res: { data: IBid, message: string }) => {
+            setAuction(auction => auction && ({ ...auction, bid: res.data }))
+        })
 
-        // // Listen for bid updates
-        // socket.on('bidUpdate', (data) => {
-        //     if (auction && auction.auctionId === data.auctionId) {
-        //         setAuction((prevAuction) => ({
-        //             ...prevAuction,
-        //             currentBid: data.currentBid,
-        //             highestBidder: data.highestBidder,
-        //         }));
-        //     }
-        // });
-
+        socket.on('auctionStopped', () => {
+            setAuction(null);
+            enqueueSnackbar({ variant: 'success', message: "Auction Stopped" });
+        })
         // // Listen for auction end
         // socket.on('endAuction', (data) => {
         //     if (auction && auction.auctionId === data.auctionId) {
@@ -46,26 +47,32 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         //         alert('Auction ended');
         //     }
         // });
+        console.log(auction);
 
         return () => {
-            socket.off('startAuction');
-            // socket.off('auctionTimeUpdate');
-            // socket.off('bidUpdate');
+            socket.off('auctionStarted');
+            socket.off('auctionTimeUpdate');
+            socket.off('bidPlaced');
+            socket.off('auctionStopped');
+            socket.off('auctionPaused');
             // socket.off('endAuction');
         };
-    }, [auction]);
+    }, []);
 
-    // // Function to place a bid
-    // const placeBid = (bidAmount, bidderId) => {
-    //     if (auction && bidAmount > auction.currentBid) {
-    //         socket.emit('newBid', { auctionId: auction.auctionId, bidderId, bidAmount });
-    //     } else {
-    //         alert('Your bid must be higher than the current bid.');
-    //     }
-    // };
+
+    useEffect(() => {
+        const getData = async () => {
+            const res = await auctionServ.getAuction();
+            if (res.data.status != 'stopped')
+                setAuction(res.data)
+        }
+        getData();
+    }, [])
+
+
 
     return (
-        <AuctionContext.Provider value={{ auction, time: timeRemaining }}>
+        <AuctionContext.Provider value={{ auction }}>
             {props.children}
         </AuctionContext.Provider>
     );
@@ -83,5 +90,4 @@ export const useLiveAuction = () => {
 
 interface AuctionContextType {
     auction: IAuction | null;
-    time: number;
 }

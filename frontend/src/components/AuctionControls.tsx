@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
@@ -11,6 +11,7 @@ import {
     Stop as StopIcon,
 } from '@mui/icons-material';
 import ConfirmationDialog from './ConfirmationDialog';
+import { useLiveAuction } from '../hooks/AuctionProvider';
 
 interface ControlProps {
     onPlay: () => void;
@@ -18,11 +19,13 @@ interface ControlProps {
     onAddTime: () => void;
     onSell: () => void;
     onUndo: () => void;
-    onStart: () => Promise<boolean>;
-    onStop: () => Promise<boolean>;
+    onStart: () => void;
+    onStop: () => void;
 }
 
 const AuctionControls = (props: ControlProps) => {
+    const liveAuction = useLiveAuction();
+
     const [isStarted, setIsStarted] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [confirmation, setConfirmation] = useState<{
@@ -30,9 +33,9 @@ const AuctionControls = (props: ControlProps) => {
         action: string | null;
     }>({ open: false, action: null });
 
-    const handleStart = async () => {
-        const res = await props.onStart()
-        setIsStarted(res);
+    const handleStart = () => {
+        props.onStart()
+        // setIsStarted(res);
     };
 
     const handlePlayPause = () => {
@@ -45,11 +48,11 @@ const AuctionControls = (props: ControlProps) => {
         setConfirmation({ open: true, action });
     };
 
-    const handleConfirm = async() => {
+    const handleConfirm = async () => {
         if (confirmation.action === 'play/pause') handlePlayPause();
         if (confirmation.action === 'stop') {
-            const res = await props.onStop()
-            setIsStarted(!res);
+            props.onStop()
+            // setIsStarted(!res);
         }
         if (confirmation.action === 'undo') props.onUndo();
         if (confirmation.action === 'addTime') props.onAddTime();
@@ -61,6 +64,19 @@ const AuctionControls = (props: ControlProps) => {
     const handleCancel = () => {
         setConfirmation({ open: false, action: null });
     };
+
+    useEffect(() => {
+        if (!liveAuction.auction) {
+            setIsStarted(false);
+            setIsPlaying(false);
+            return;
+        }
+
+        const status = liveAuction.auction.status;
+
+        setIsStarted(status !== 'stopped');
+        setIsPlaying(status === 'live');
+    }, [liveAuction.auction]);
 
     return (
         <>

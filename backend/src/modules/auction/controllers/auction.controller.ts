@@ -8,7 +8,7 @@ import { io } from "../../../server";
 import { data } from "react-router-dom";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
-import { bidPlaced, startAuction } from "../events/auctionEvents";
+import { bidPlaced, playPauseLiveAuction, resetTime, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
 import { IBid } from "../types/bid";
 
 export const isAuctionExist = async (populateBid?: boolean) => {
@@ -19,8 +19,14 @@ export const isAuctionExist = async (populateBid?: boolean) => {
     const data = await query.exec();
     return data?.toJSON();
 };
-
-
+export const getAuction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await isAuctionExist();
+        sendApiResponse(res, 'OK', data, 'Successfully fetched Auction');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
 
 export const createAuction = async () => {
     try {
@@ -47,8 +53,8 @@ export const createAuction = async () => {
 export const startAuctionReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
-        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player }, { new: true });
-        startAuction();
+        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player, bid: null }, { new: true });
+        startLiveAuction();
         sendApiResponse(res, 'OK', data, 'Successfully started Auction');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
@@ -58,11 +64,24 @@ export const stopAuction = async (req: Request, res: Response, next: NextFunctio
     try {
         const auction = await isAuctionExist();
         const data = await Auction.findByIdAndUpdate(auction?._id, {
-            status: 'stopped', player: null, // Nullify the player field
+            status: 'stopped',
+            player: null, // Nullify the player field
             bid: null // Nullify the bid field
-        },
-            { new: true }) // Optionally return the updated document
+        }, { new: true }) // Optionally return the updated document
+        stopLiveAuction();
         sendApiResponse(res, 'OK', data, 'Successfully Stopped auction');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
+export const playPauseAuction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist();
+        const data = await Auction.findByIdAndUpdate(auction?._id, {
+            status: auction?.status == 'pause' ? 'live' : 'pause',
+        }, { new: true }) // Optionally return the updated document
+        playPauseLiveAuction();
+        sendApiResponse(res, 'OK', data, 'Successfully Paused auction');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
@@ -83,18 +102,22 @@ export const nextPlayer = async (req: Request, res: Response, next: NextFunction
 
 export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!(await isBidValid(req.body)))
-            return sendApiResponse(res, 'CONFLICT', null, 'Bid Not exist');
+        const _isBidValid = await isBidValid(req.body);
+        if (_isBidValid == 1)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player Not matching');
+        else if (_isBidValid == 2)
+            return sendApiResponse(res, 'CONFLICT', null, 'Higher bid Exist');
         const bidId = new mongoose.Types.ObjectId();
-        const newBid = new Bid({ ...req.body, _id: bidId }).save();
+        const newBid = await new Bid({ ...req.body, _id: bidId }).save();
+        // (await newBid).save();
         const auction = await isAuctionExist();
         await Auction.findByIdAndUpdate(auction?._id, { bid: bidId });
-
+        resetTime();
         if (!newBid) {
             return sendApiResponse(res, 'CONFLICT', null, 'Bid Not Placed');
         }
         sendApiResponse(res, 'OK', newBid, 'Bid Placed')
-        // io.emit('BidPlaced', { data: newBid, message: `Bid Placed successfully` })
+        io.emit('bidPlaced', { data: newBid, message: `Bid Placed successfully` })
     } catch (error) {
         next(error);
     }
@@ -113,13 +136,13 @@ const isBidValid = async (_bid: IBid) => {
     // Compare player IDs
     if (auctionPlayer !== bidPlayer) {
         console.log('Player not Matching'.red, auctionPlayer, bidPlayer);
-        return false;
+        return 1;
     }
     if (bid > _bid.bid) {
         console.log('Higher bid Exist');
-        return false;
+        return 2;
     }
-    return true;
+    return 0;
 }
 // export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
 //     try {

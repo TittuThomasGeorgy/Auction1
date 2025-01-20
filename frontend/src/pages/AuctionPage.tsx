@@ -31,7 +31,7 @@ const AuctionPage = () => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [placeBidClub, setPlaceBidClub] = useState<IClub | null>(null);
     const [currentBid, setCurrentBid] = useState(100);
-
+    const [timeRemaining, setTimeRemaining] = useState(0);
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
@@ -68,6 +68,13 @@ const AuctionPage = () => {
         };
     }, [players]); // Add players as a dependency to ensure the effect updates correctly
 
+    useEffect(() => {
+        if (liveAuction.auction && liveAuction.auction.status === 'live') {
+            (liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining == 0) && setTimeRemaining(liveAuction.auction?.timeRemaining);
+            liveAuction.auction.bid && setCurrentBid(liveAuction.auction.bid?.bid)
+        }
+    }, [liveAuction.auction])
+
     return (
         <>
             <BackButton />
@@ -92,13 +99,36 @@ const AuctionPage = () => {
                         alignItems="center"
                         flex={{ xs: '1 1 100%', md: '1 1 25%' }} /* Full width on small, fixed on large */
                     >
-                        <Typography variant="h6" color="success" fontWeight="bold">
-                            CURRENT BID
-                        </Typography>
-                        <Typography variant="h4" color="error" fontWeight="bold">
-                            ${currentBid}M
-                        </Typography>
+                        {liveAuction.auction?.bid && (() => {
+                            const club = clubs.find(club => liveAuction.auction?.bid?.club === club._id);
+                            return (
+                                <>
+                                    <Typography variant="h6" color="success" fontWeight="bold">
+                                        CURRENT BID
+                                    </Typography>
+                                    <Typography variant="h4" color="error" fontWeight="bold">
+                                        ${currentBid}M
+                                    </Typography>
+                                    {club && (
+                                        <Box
+                                            component="img"
+                                            src={club.logo}
+                                            alt={`${club.name} logo`}
+                                            sx={{
+                                                // width: 80,
+                                                height: 80,
+                                                // objectFit: 'contain',
+                                                // position: 'absolute',
+                                                // top: 20,
+                                                zIndex: 2,
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            );
+                        })()}
                     </Box>
+
 
                     {/* Player Navigation Section */}
                     <Box
@@ -167,35 +197,38 @@ const AuctionPage = () => {
                         alignItems="center"
                         flex={{ xs: '1 1 100%', md: '1 1 25%' }} /* Full width on small, fixed on large */
                     >
-                        <Typography variant="h6" color="secondary" fontWeight="bold">
-                            TIME LEFT
-                        </Typography>
-                        <Typography variant="h5" color="primary" fontWeight="bold">
-                            10s
-                        </Typography>
+                        {liveAuction.auction?.timeRemaining && liveAuction.auction?.timeRemaining > 0 ? (<>
+                            <Typography variant="h6" color="secondary" fontWeight="bold">
+                                TIME LEFT
+                            </Typography>
+                            <Typography variant="h5" color="primary" fontWeight="bold">
+                                {liveAuction.auction?.timeRemaining}
+                            </Typography>
+                        </>) : null}
+
                     </Box>
                 </Box>
 
 
 
 
-                <AuctionControls onPlay={function (): void {
-                    throw new Error('Function not implemented.');
-                }} onPause={function (): void {
-                    throw new Error('Function not implemented.');
-                }} onAddTime={function (): void {
-                    throw new Error('Function not implemented.');
-                }} onSell={function (): void {
-                    throw new Error('Function not implemented.');
-                }} onUndo={function (): void {
-                    throw new Error('Function not implemented.');
-                }} onStart={async () => {
-                    const res = await AuctionServ.start(players[currentPlayerIndex]._id); // A default synchronous return if needed
-                    return !!res.success;
-                }} onStop={async () => {
-                    const res = await AuctionServ.stop(); // A default synchronous return if needed
-                    return !!res.success;
-                }}
+                <AuctionControls
+                    onPlay={async () => {
+                        await AuctionServ.playPause(); // A default synchronous return if needed
+                    }} onPause={async () => {
+                        await AuctionServ.playPause(); // A default synchronous return if needed
+                    }} onAddTime={function (): void {
+                        throw new Error('Function not implemented.');
+                    }} onSell={function (): void {
+                        throw new Error('Function not implemented.');
+                    }} onUndo={function (): void {
+                        throw new Error('Function not implemented.');
+                    }} onStart={async () => {
+                        await AuctionServ.start(players[currentPlayerIndex]._id); // A default synchronous return if needed
+                    }} onStop={async () => {
+                        await AuctionServ.stop(); // A default synchronous return if needed
+
+                    }}
                 />
                 <br />
                 <Box
@@ -213,7 +246,7 @@ const AuctionPage = () => {
                         currentBid={currentBid} onSubmit={async (bid) => {
                             const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]._id, bid);
                             if (res.success) {
-                                setCurrentBid(res.data.bid);
+                                // setCurrentBid(res.data.bid);
                                 setPlaceBidClub(null)
                             }
                             enqueueSnackbar({

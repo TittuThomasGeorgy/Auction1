@@ -68,9 +68,13 @@ const io = new Server(server, {
     cors: { origin: '*' }, // Allow frontend to connect
 });
 
+let clientNum = 0;
+let client: { id: string, no: number }[] = [];
 // Attach event listeners for the connection
 io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+    client = [...client, { id: socket.id, no: clientNum }]
+    clientNum++;
+    console.log('New client connected:', client);
     auctionEvents();
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
