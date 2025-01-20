@@ -14,13 +14,11 @@ let auction: IAuction | null = null;
 const startLiveAuction = async () => {
     auction = (await isAuctionExist()) ?? null;
     if (!auction || auction.status === 'stopped') return
-    const player = auction?.player;
     resetTime();
     // Notify all users about the new auction
     io.emit('auctionStarted', {
-        auctionId: auction._id,
-        player,
-        timeRemaining,
+        auction: auction,
+        
     });
     // runAuction();
 }
@@ -53,34 +51,32 @@ const bidPlaced = async (bid: IBid) => {
 }
 const resetTime = async () => {
     auction = (await isAuctionExist()) ?? null;
-    clearInterval(auctionTimer);
+    if (auctionTimer) clearInterval(auctionTimer);
     const setting = await isSettingExist();
     timeRemaining = setting?.bidTime ?? 0;
     console.log(timeRemaining, 'resetter');
     runAuction();
 }
 const stopLiveAuction = async () => {
-    auction = (await isAuctionExist()) ?? null;
-    clearInterval(auctionTimer);
-    timeRemaining = 0;
+    if (auctionTimer) clearInterval(auctionTimer);
+    timeRemaining = -1;
     auction = null;
     currentBid = null;
     io.emit('auctionStopped', {})
 }
 const playPauseLiveAuction = async () => {
     auction = (await isAuctionExist()) ?? null;
+    // console.log(auction);
     if (auction && auction?.status != "stopped") {
         if (auction.status == 'live') {
             io.emit('auctionPaused', { status: 'live' });
-            clearInterval(auctionTimer);
+            // if (auctionTimer) clearInterval(auctionTimer);
             if (timeRemaining == -1) resetTime();
+            else runAuction()
         }
         else {
-            auction.status = 'pause';
             io.emit('auctionPaused', { status: 'pause' });
-            if (timeRemaining == -1) resetTime();
-            else
-                runAuction();
+            if (auctionTimer) clearInterval(auctionTimer);
         }
     }
 }

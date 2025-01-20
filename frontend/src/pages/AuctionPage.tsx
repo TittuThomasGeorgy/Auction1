@@ -240,7 +240,7 @@ const AuctionPage = () => {
                     }}
                 >
                     {clubs.map(club =>
-                        <AuctionClubCard club={club} key={club._id} disabled={Boolean(placeBidClub && (club._id != placeBidClub?._id))} onClick={() => setPlaceBidClub(club)} />
+                        <AuctionClubCard club={club} key={club._id} disabled={liveAuction.auction?.status != 'live'} onClick={() => setPlaceBidClub(club)} />   
                     )}
                     {placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
                         currentBid={currentBid} onSubmit={async (bid) => {

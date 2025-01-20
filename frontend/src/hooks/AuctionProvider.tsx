@@ -17,8 +17,10 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
 
     useEffect(() => {
         // Listen for the start of a new auction
-        socket.on('auctionStarted', (auctionData: IAuction) => {
-            setAuction(auctionData);
+        socket.on('auctionStarted', (data: { auction: IAuction }) => {
+            setAuction(data.auction);
+            console.log(data.auction);
+
             enqueueSnackbar({ variant: 'success', message: "Auction Started" });
         });
         socket.on('auctionPaused', (data: { status: 'pause' | 'live' }) => {
