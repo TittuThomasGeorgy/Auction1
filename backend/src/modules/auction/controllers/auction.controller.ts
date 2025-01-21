@@ -21,7 +21,7 @@ export const isAuctionExist = async (populateBid?: boolean) => {
 };
 export const getAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await isAuctionExist();
+        const data = await isAuctionExist(true);
         sendApiResponse(res, 'OK', data, 'Successfully fetched Auction');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors

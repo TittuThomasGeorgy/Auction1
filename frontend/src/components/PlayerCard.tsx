@@ -6,100 +6,146 @@ import { IPlayer } from '../types/PlayerType';
 interface PlayerCardProps {
     player: IPlayer;
     club: IClub | null;
-    onClick?: () => void
+    onClick?: () => void;
 }
+
 const PlayerCard = (props: PlayerCardProps) => {
     return (
         <Box
             sx={{
-                width: 220,
-                height: 320,
-                background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', // Dark blue to complementary blue gradient
-                borderRadius: '20px',
+                width: 260,
+                height: 380,
+                background: 'linear-gradient(145deg, #12263f, #1c4a7d)', // Strong blue gradient
+                borderRadius: '16px',
                 position: 'relative',
                 overflow: 'hidden',
+                boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.5)',
+                padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.4)',
-                padding: '10px 15px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                // backdropFilter: 'blur(3px)', // Glassy effect
-                '&:hover': { transform: 'scale(1.05)' },
+                transition: 'transform 0.3s ease-in-out',
+                '&:hover': props.onClick ? { transform: 'scale(1.03)' } : undefined,
+                cursor: props.onClick ? 'pointer' : undefined,
             }}
-            onClick={() => { props.onClick && props.onClick() }}
+            onClick={() => {
+                props.onClick && props.onClick();
+            }}
         >
-            {/* Top Section: Position */}
+            {/* Player Position (Top Left) */}
             <Typography
                 sx={{
-                    fontSize: '30px',
-                    fontWeight: 'bold',
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '24px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    textTransform: 'uppercase',
                     position: 'absolute',
                     top: 20,
-                    left: 10,
+                    left: 20,
+                    zIndex: 3,
+                    textShadow: '0px 3px 6px rgba(0, 0, 0, 0.8)',
                 }}
             >
                 {props.player.position}
             </Typography>
 
-            {/* Club Image */}
-            {props.player.club && (<Box
-                component="img"
-                src={props.club?.logo}
-                alt={props.player.name}
-                sx={{
-                    width: 50,
-                    height: 50,
-                    left: 10,
-                    top: 70,
-                    position: 'absolute'
-                }}
+            {/* Club Logo (Below Position, Left Side) */}
+            {props.player.club && (
+                <Box
+                    component="img"
+                    src={props.club?.logo}
+                    alt={props.club?.name}
+                    sx={{
+                        width: 60,
+                        height: 60,
+                        position: 'absolute',
+                        top: 60,
+                        left: 20,
+                        zIndex: 3,
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Slight transparent background to match the design
+                        borderRadius: '50%',
+                    }}
+                />
+            )}
 
-            />)}
-            {/* Player Image */}
+            {/* Decorative Background Element */}
             <Box
-                component="img"
-                src={props.player.image}
-                alt={props.player.name}
                 sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
                     width: 200,
                     height: 200,
-                    objectFit: 'cover',
-                    position: 'absolute',
-                    top: '30%',
-                    right: -25,
-                    transform: 'translateY(-50%)',
-                    zIndex: 2,
+                    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent)',
+                    transform: 'translate(-50%, -50%)',
+                    borderRadius: '50%',
+                    zIndex: 1,
                 }}
             />
 
-            {/* Player Details */}
+            {/* Player Image (Right Side) */}
+            <Box
+                sx={{
+                    width: 200,
+                    // height: 200,
+                    objectFit: 'contain',
+                    position: 'absolute',
+                    top: '40%',
+                    right: -10,
+                    transform: 'translateY(-50%)',
+                    zIndex: 2,
+                }}
+            >
+                <Box
+                    component="img"
+                    src={props.player.image}
+                    alt={props.player.name}
+                    sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                    }}
+                />
+            </Box>
+
+            {/* Player Name */}
             <Box
                 sx={{
                     position: 'absolute',
-                    bottom: 25,
-                    // left: 15,
+                    bottom: 90,
+                    width: '100%',
                     textAlign: 'center',
-                    color: '#fffff',
-                    width: '100%'
+                    zIndex: 3,
                 }}
-
             >
                 <Typography
                     sx={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
+                        fontSize: '22px',
+                        fontWeight: 700,
                         textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        textShadow: '0px 4px 8px rgba(0, 0, 0, 0.8)',
                     }}
-
                 >
                     {props.player.name}
                 </Typography>
+            </Box>
+
+            {/* Price and Bid Section */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: 20,
+                    width: '100%',
+                    textAlign: 'center',
+                    zIndex: 3,
+                }}
+            >
                 <Typography
                     sx={{
-                        fontSize: '16px',
-                        marginTop: '4px',
+                        fontSize: '18px',
+                        fontWeight: 600,
+                        color: '#86c5ff',
                     }}
                 >
                     Base Price: ${props.player.basePrice}M
@@ -107,33 +153,31 @@ const PlayerCard = (props: PlayerCardProps) => {
                 {props.player.bid && (
                     <Typography
                         sx={{
-                            fontSize: '14px',
+                            fontSize: '16px',
+                            fontWeight: 500,
+                            color: '#a3ffb3',
                             marginTop: '4px',
                         }}
                     >
                         Bid: ${props.player.bid}M
                     </Typography>
                 )}
-
             </Box>
 
-            {/* Decorative Background Element */}
-            {/* Decorative Background Element */}
+            {/* Bottom Gradient Decoration */}
             <Box
                 sx={{
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
                     width: '100%',
-                    height: '50%',
-                    background: 'rgba(0, 0, 0, 0.2)',
-                    clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0 100%)',
+                    height: '20%',
+                    background: 'linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.6))',
+                    zIndex: 1,
                 }}
             />
         </Box>
-
     );
 };
 
 export default PlayerCard;
-
