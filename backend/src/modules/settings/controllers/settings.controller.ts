@@ -1,11 +1,7 @@
 import mongoose, { ObjectId, Types } from "mongoose";
 import sendApiResponse from "../../../common/extras/sendApiResponse";
 import { NextFunction, Request, Response } from "express";
-import { uploadFiles } from "../../common/controllers/files.controller";
-import { IFileModel } from "../../common/types/fileModel";
-import { ISettings } from "../types/setting";
 import Settings from "../models/Settings";
-import Auction from "../../auction/models/Auction";
 
 export const isSettingExist = async () => {
     const data = await Settings.findOne({});

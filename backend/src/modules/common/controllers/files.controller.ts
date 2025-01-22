@@ -4,10 +4,8 @@ import multer from 'multer';
 import { FileModel } from '../models/FileModel';
 import { IFileModel } from '../types/fileModel';
 import mongoose from 'mongoose';
-import { Response } from 'express';
-import sendApiResponse from '../../../common/extras/sendApiResponse';
 
-export const uploadFiles = async (res: Response, filename: string, file: Express.Multer.File, filePath: string, existingFileId?: string | null): Promise<IFileModel | null> => {
+export const uploadFiles = async (filename: string, file: Express.Multer.File, filePath: string, existingFileId?: string | null): Promise<IFileModel | null> => {
     try {
         const fileID = await GoogleDrive.uploadFile({
             name: filename,
@@ -16,8 +14,8 @@ export const uploadFiles = async (res: Response, filename: string, file: Express
             makePublic: true,
             parents: [filePath],
         }).catch(err => {
-            console.log(err);
-            return sendApiResponse(res, 'CONFLICT', null, 'Image not Uploaded');
+            console.log("File Upload Error =>", err);
+            // return ;
         });
         if (!fileID) return null;
         const _file = new FileModel({
@@ -36,7 +34,7 @@ export const uploadFiles = async (res: Response, filename: string, file: Express
                 .then(() =>
                     console.log('deleted user image from Google Drive'.bgYellow)
                 ).catch((error) => {
-                    console.log(error, 'dltFile');
+                    console.log('File Delete Error =>', error);
                 });
         }
         console.log('Uploaded user image to Google Drive'.bgYellow);

@@ -249,7 +249,7 @@ const isBidValid = async (_bid: IBid) => {
 //         if (isUserNameExist.length > 0)
 //             return sendApiResponse(res, 'CONFLICT', null,
 //                 `Username Already Exist`);
-//         const _file1 = await uploadFiles(req.body.name, file1, process.env.Club_FOLDER ?? '',);
+//         const _file1 = await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '',);
 //         const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
 //         const newClub = new Club({ ...req.body, _id: new mongoose.Types.ObjectId() });
 //         if (_file1 && _file2) {

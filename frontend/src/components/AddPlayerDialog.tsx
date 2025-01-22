@@ -88,7 +88,16 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     onFileUpload={(fil) => {
                                         setFile(fil)
                                     }}
-                                    sx={{ background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', }} />
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', width: 200,
+                                        height: 200,
+                                        objectFit: 'contain',
+                                        // position: 'absolute',
+                                        // top: '40%',
+                                        right: -10,
+                                        // transform: 'translateY(-50%)',
+                                        zIndex: 2,
+                                    }} />
                             </Grid>
                             <Grid size={12}>
                                 {/* &ensp; */}
@@ -139,7 +148,7 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     getOptionLabel={(option) => option.name}
                                     onChange={(e, newValue) => {
                                         // if (newValue)
-                                            setCreatablePlayer(player => ({ ...player, club: newValue?._id }))
+                                        setCreatablePlayer(player => ({ ...player, club: newValue?._id }))
                                     }}
                                     fullWidth
                                     renderInput={(params) => <TextField {...params} label="Club" variant='outlined' />}

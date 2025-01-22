@@ -111,8 +111,8 @@ export const createClub = async (req: Request, res: Response, next: NextFunction
         if (isUserNameExist.length > 0)
             return sendApiResponse(res, 'CONFLICT', null,
                 `Username Already Exist`);
-        const _file1 = await uploadFiles(res, req.body.name, file1, process.env.Club_FOLDER ?? '',);
-        const _file2 = await uploadFiles(res, req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
+        const _file1 = await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '',);
+        const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
         const newClub = new Club({ ...req.body, _id: new mongoose.Types.ObjectId() });
         if (_file1 && _file2) {
             newClub.logo = _file1._id;
@@ -148,8 +148,14 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
         let _file: IFileModel | null = null;
         const file1 = files?.file1?.[0];
         if (!isSameLogo && file1) {
-            _file = (await uploadFiles(res, req.body.name, file1, process.env.Club_FOLDER ?? '', prevClubLogo.fileId));
-            _updatedClub.logo = _file?._id
+            _file = (await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '', prevClubLogo.fileId));
+            if (_file) {
+                _updatedClub.logo = _file?._id
+            }
+            else {
+                return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
+                    `File upload Failed`);
+            }
         }
         else {
             _updatedClub.logo = prevClub?.logo
@@ -159,8 +165,14 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
         const isSameManImg = prevManImg.downloadURL === _updatedClub.manager.img;
         const file2 = files?.file2?.[0];
         if (!isSameManImg && file2) {
-            _file = (await uploadFiles(res, req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '', prevManImg.fileId));
-            _updatedClub.manager.img = _file?._id
+            _file = (await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '', prevClubLogo.fileId));
+            if (_file) {
+                _updatedClub.manager.img = _file?._id
+            }
+            else {
+                return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
+                    `File upload Failed`);
+            }
         }
         else {
             _updatedClub.manager.img = prevClub?.manager.img

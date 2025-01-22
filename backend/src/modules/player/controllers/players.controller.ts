@@ -103,11 +103,15 @@ export const createPlayer = async (req: Request, res: Response, next: NextFuncti
                 `File Not Found`);
         }
 
-        const _file = await uploadFiles(res, req.body.name, req.file, process.env.PLAYERS_FOLDER ?? '',);
+        const _file = await uploadFiles(req.body.name, req.file, process.env.PLAYERS_FOLDER ?? '',);
 
         const newPlayer = new Player({ ...req.body, _id: new mongoose.Types.ObjectId() });
         if (_file) {
             newPlayer.image = _file._id;
+        }
+        else {
+            return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
+                `File upload Failed`);
         }
         newPlayer.save();
         if (!newPlayer) {
@@ -131,8 +135,14 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         const isSameLogo = prevPlayerLogo.downloadURL === _updatedPlayer.image;
         let _file: IFileModel | null = null;
         if (!isSameLogo && req.file) {
-            _file = (await uploadFiles(res, req.body.name, req.file, process.env.STUDENT_FOLDER ?? '', prevPlayerLogo.fileId));
-            _updatedPlayer.image = _file?._id
+            _file = (await uploadFiles(req.body.name, req.file, process.env.PLAYERS_FOLDER ?? '', prevPlayerLogo.fileId));
+            if (_file) {
+                _updatedPlayer.image = _file?._id
+            }
+            else {
+                return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
+                    `File upload Failed`);
+            }
         }
         else {
             _updatedPlayer.image = prevPlayer?.image
