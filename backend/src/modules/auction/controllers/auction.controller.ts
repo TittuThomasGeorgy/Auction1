@@ -5,10 +5,9 @@ import Club from "../../club/models/Club";
 import { uploadFiles } from "../../common/controllers/files.controller";
 import Bid from "../models/Bid";
 import { io } from "../../../server";
-import { data } from "react-router-dom";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
-import { bidPlaced, playPauseLiveAuction, resetTime, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
+import { bidPlaced, playerChange, playPauseLiveAuction, resetTime, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
 import { IBid } from "../types/bid";
 
 export const isAuctionExist = async (populateBid?: boolean) => {
@@ -53,7 +52,8 @@ export const createAuction = async () => {
 export const startAuctionReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
-        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player, bid: null }, { new: true });
+        const _lastBid = await lastBid(req.body.player);
+        const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player, bid: _lastBid }, { new: true });
         startLiveAuction();
         sendApiResponse(res, 'OK', data, 'Successfully started Auction');
     } catch (error) {
@@ -76,24 +76,26 @@ export const stopAuction = async (req: Request, res: Response, next: NextFunctio
 };
 export const playPauseAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const auction = await isAuctionExist();
-        const data = await Auction.findByIdAndUpdate(auction?._id, {
-            status: auction?.status == 'pause' ? 'live' : 'pause',
-        }, { new: true }) // Optionally return the updated document
-        playPauseLiveAuction();
+        const data = await playPauseLiveAuction(req.body.action);
         sendApiResponse(res, 'OK', data, 'Successfully Paused auction');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
 };
+const lastBid = async (playerId: string) => {
+    const result = await Bid.find({ player: playerId, state: 1 }).sort({ 'bid': -1 }).limit(1);
+    return result[0] || null; // Return the first result or null if no bids match  return data?.toJSON()
+}
 export const nextPlayer = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
+        const _lastBid = await lastBid(req.body.player);
         const data = await Auction.findByIdAndUpdate(auction?._id, {
             player: req.body.player, // Nullify the player field
-            bid: null // Nullify the bid field
+            bid: _lastBid?._id // Nullify the bid field
         },
-            { new: true }) // Optionally return the updated document
+            { new: true }) // Optionally return the updated document;
+        await playerChange(_lastBid ?? null, req.body.player)
         sendApiResponse(res, 'OK', data, 'Next Player updated');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
@@ -102,6 +104,9 @@ export const nextPlayer = async (req: Request, res: Response, next: NextFunction
 
 export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const auction = await isAuctionExist();
+        if (auction?.status != 'live')
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction paused. Bid not Placed.');
         const _isBidValid = await isBidValid(req.body);
         if (_isBidValid == 1)
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not matching');
@@ -110,14 +115,12 @@ export const placeBid = async (req: Request, res: Response, next: NextFunction) 
         const bidId = new mongoose.Types.ObjectId();
         const newBid = await new Bid({ ...req.body, _id: bidId }).save();
         // (await newBid).save();
-        const auction = await isAuctionExist();
         await Auction.findByIdAndUpdate(auction?._id, { bid: bidId });
-        resetTime();
         if (!newBid) {
             return sendApiResponse(res, 'CONFLICT', null, 'Bid Not Placed');
         }
+        bidPlaced(newBid);
         sendApiResponse(res, 'OK', newBid, 'Bid Placed')
-        io.emit('bidPlaced', { data: newBid, message: `Bid Placed successfully` })
     } catch (error) {
         next(error);
     }

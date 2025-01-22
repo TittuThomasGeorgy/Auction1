@@ -9,7 +9,7 @@ const useAuction = () => {
     update: (createAuction: IAuction) =>
       getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction })),
     getAuction: () => getStandardResponse<IAuction>(axios.get(`/auction/`)),
-    playPause: () => getStandardResponse<IAuction>(axios.post(`/auction/pause`, {})),
+    playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, {action})),
     start: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/start`, { player })),
     stop: () => getStandardResponse<IAuction>(axios.post(`/auction/stop`, {})),
     switchPlayer: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/nextPlayer`, { player })),

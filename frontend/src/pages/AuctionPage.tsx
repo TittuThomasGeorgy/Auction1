@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, Dialog, DialogActions, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
 import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon, Margin } from '@mui/icons-material';
 import BackButton from '../components/BackButton';
 import usePlayer from '../services/PlayerService';
@@ -13,6 +13,7 @@ import BidDialog from '../components/BidDialog';
 import useAuction from '../services/AuctionService';
 import { enqueueSnackbar } from 'notistack';
 import { useLiveAuction } from '../hooks/AuctionProvider';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 // const positionOrder: { [key: string]: number } = {
 //     ST: 1,
@@ -30,7 +31,11 @@ const AuctionPage = () => {
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [placeBidClub, setPlaceBidClub] = useState<IClub | null>(null);
-    const [currentBid, setCurrentBid] = useState(100);
+    const [confirmation, setConfirmation] = useState<{
+        open: boolean;
+        action: "next" | "previous" | null;
+    }>({ open: false, action: null });
+
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
@@ -38,13 +43,21 @@ const AuctionPage = () => {
         );
     }, []);
 
-    const handleNextPlayer = async () => {
+    const nextPlayer = async () => {
         const currentIdx = (currentPlayerIndex + 1) % players.length
         setCurrentPlayerIndex(currentIdx);
         liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
+    }
+    const handleNextPlayer = async (type: 'next' | 'previous') => {
+        if (liveAuction.auction?.bid && !players[currentPlayerIndex].club)
+            setConfirmation({ open: true, action: type })
+        else if (type == 'next')
+            nextPlayer();
+        else
+            previousPlayer();
     };
 
-    const handlePreviousPlayer = async () => {
+    const previousPlayer = async () => {
         const currentIdx = (currentPlayerIndex - 1) % players.length;
         setCurrentPlayerIndex(currentIdx < 0 ? players.length - 1 : currentIdx);
         liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
@@ -55,9 +68,9 @@ const AuctionPage = () => {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'ArrowRight') {
-                handleNextPlayer();
+                handleNextPlayer('next');
             } else if (event.key === 'ArrowLeft') {
-                handlePreviousPlayer();
+                handleNextPlayer('previous');
             }
         };
 
@@ -69,7 +82,9 @@ const AuctionPage = () => {
 
     useEffect(() => {
         if (liveAuction.auction) {
-            liveAuction.auction.bid && setCurrentBid(liveAuction.auction.bid?.bid)
+            // liveAuction.auction.bid && liveAuction.auction.bid.player === players[currentPlayerIndex]?._id && setCurrentBid();
+            const _player = liveAuction.auction.player;
+            _player && setCurrentPlayerIndex(players.findIndex(player => player._id === _player))
         }
     }, [liveAuction.auction])
 
@@ -105,7 +120,7 @@ const AuctionPage = () => {
                                         CURRENT BID
                                     </Typography>
                                     <Typography variant="h4" color="error" fontWeight="bold">
-                                        ${currentBid}M
+                                        ${liveAuction.auction.bid?.bid}M
                                     </Typography>
                                     {club && (
                                         <Box
@@ -140,15 +155,17 @@ const AuctionPage = () => {
                         style={{ scrollSnapType: 'x mandatory' }}
                     >
                         {/* Previous Player Button */}
-                        <IconButton
-                            onClick={handlePreviousPlayer}
-                            disabled={players.length === 0}
-                            color="primary"
-                            size="large"
-                            style={{ position: 'absolute', left: 0, zIndex: 10 }}
-                        >
-                            <ArrowLeftIcon />
-                        </IconButton>
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining > 0))) && (
+                            <IconButton
+                                onClick={() => handleNextPlayer('previous')}
+                                disabled={players.length === 0}
+                                color="primary"
+                                size="large"
+                                style={{ position: 'absolute', left: 0, zIndex: 10 }}
+                            >
+                                <ArrowLeftIcon />
+                            </IconButton>
+                        )}
 
                         {/* Player Cards */}
                         <Box
@@ -177,15 +194,16 @@ const AuctionPage = () => {
                         </Box>
 
                         {/* Next Player Button */}
-                        <IconButton
-                            onClick={handleNextPlayer}
-                            disabled={players.length === 0}
-                            color="primary"
-                            size="large"
-                            style={{ position: 'absolute', right: 0, zIndex: 10 }}
-                        >
-                            <ArrowRightIcon />
-                        </IconButton>
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining > 0))) && (
+                            <IconButton
+                                onClick={() => handleNextPlayer('next')}
+                                disabled={players.length === 0}
+                                color="primary"
+                                size="large"
+                                style={{ position: 'absolute', right: 0, zIndex: 10 }}
+                            >
+                                <ArrowRightIcon />
+                            </IconButton>)}
                     </Box>
 
                     {/* Time Left Section */}
@@ -195,7 +213,7 @@ const AuctionPage = () => {
                         alignItems="center"
                         flex={{ xs: '1 1 100%', md: '1 1 25%' }} /* Full width on small, fixed on large */
                     >
-                        {liveAuction.auction?.timeRemaining && liveAuction.auction?.timeRemaining > 0 ? (<>
+                        {(liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && (liveAuction.auction?.timeRemaining >= 0) ? (<>
                             <Typography variant="h6" color="secondary" fontWeight="bold">
                                 TIME LEFT
                             </Typography>
@@ -220,7 +238,7 @@ const AuctionPage = () => {
                                     <Stack direction={'row'}>
 
                                         <Typography variant="h4" color="error" fontWeight={900}>
-                                            ${currentBid}M
+                                            ${liveAuction.auction.bid?.bid}M
                                         </Typography>
                                         {club && (
                                             <Box
@@ -239,20 +257,23 @@ const AuctionPage = () => {
                                             />
                                         )}
                                     </Stack>
-
-                                    {liveAuction.auction?.timeRemaining && liveAuction.auction?.timeRemaining > 0 ? (<>
-                                        <Stack direction={'row'}>
-                                            <Typography variant="h6" color="secondary" fontWeight="bold">
-                                                TIME LEFT:
-                                            </Typography>&nbsp;
-                                            <Typography variant="h5" color="primary" fontWeight="bold">
-                                                {liveAuction.auction?.timeRemaining}
-                                            </Typography></Stack>
-                                    </>) : null}
                                 </>
-                            );
+
+                            )
                         })()}
+                        {(liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && (liveAuction.auction?.timeRemaining >= 0) ? (<>
+                            <Stack direction={'row'}>
+                                <Typography variant="h6" color="secondary" fontWeight="bold">
+                                    TIME LEFT:
+                                </Typography>&nbsp;
+                                <Typography variant="h5" color="primary" fontWeight="bold">
+                                    {liveAuction.auction?.timeRemaining}
+                                </Typography></Stack>
+                        </>) : null}
+
+
                     </Box>
+
                 </Box>
 
 
@@ -260,13 +281,14 @@ const AuctionPage = () => {
 
                 <AuctionControls
                     onPlay={async () => {
-                        await AuctionServ.playPause(); // A default synchronous return if needed
+                        await AuctionServ.playPause('resume'); // A default synchronous return if needed
                     }} onPause={async () => {
-                        await AuctionServ.playPause(); // A default synchronous return if needed
+                        await AuctionServ.playPause('pause'); // A default synchronous return if needed
                     }} onAddTime={function (): void {
                         throw new Error('Function not implemented.');
-                    }} onSell={function (): void {
-                        throw new Error('Function not implemented.');
+                    }} onSell={async () => {
+                        throw new Error('Function not implFemented.');
+                        // await AuctionServ.sell(players[currentPlayerIndex]._id); // A default synchronous return if needed
                     }} onUndo={function (): void {
                         throw new Error('Function not implemented.');
                     }} onStart={async () => {
@@ -288,8 +310,8 @@ const AuctionPage = () => {
                     {clubs.map(club =>
                         <AuctionClubCard club={club} key={club._id} disabled={liveAuction.auction?.status != 'live'} onClick={() => setPlaceBidClub(club)} />
                     )}
-                    {placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
-                        currentBid={currentBid} onSubmit={async (bid) => {
+                    {liveAuction.auction && placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
+                        currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
                             const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]._id, bid);
                             if (res.success) {
                                 // setCurrentBid(res.data.bid);
@@ -303,6 +325,26 @@ const AuctionPage = () => {
                         club={placeBidClub} />}
 
                 </Box>
+                <Dialog open={confirmation.open} onClose={() => setConfirmation({ open: false, action: null })}>
+                    <DialogTitle>
+                        {`Are you sure want to move to ${confirmation.action} Player as bid exists.`}
+                    </DialogTitle>
+                    <DialogActions>
+                        <Button onClick={() => setConfirmation({ open: false, action: null })} variant='outlined'>
+                            Cancel
+                        </Button>
+                        <Button onClick={() => {
+                            const action = confirmation.action;
+                            if (action == 'next')
+                                nextPlayer()
+                            else
+                                previousPlayer()
+                            setConfirmation({ open: false, action: null });
+                        }} variant='contained' color="primary">
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Container >
         </>
     );

@@ -5,4 +5,5 @@ export interface IBid {
     player: Types.ObjectId | string;
     club: Types.ObjectId | string;
     bid: number;
+    state: 0 | 1;
 }

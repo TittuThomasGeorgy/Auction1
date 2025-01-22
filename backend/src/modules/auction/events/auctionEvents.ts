@@ -12,13 +12,13 @@ let currentBid: IBid | null = null;
 let auction: IAuction | null = null;
 
 const startLiveAuction = async () => {
-    auction = (await isAuctionExist()) ?? null;
+    auction = (await isAuctionExist(true)) ?? null;
     if (!auction || auction.status === 'stopped') return
     resetTime();
     // Notify all users about the new auction
     io.emit('auctionStarted', {
         auction: auction,
-        
+
     });
     // runAuction();
 }
@@ -26,14 +26,14 @@ const runAuction = async () => {
     auction = (await isAuctionExist()) ?? null;
     // Timer for the auction
     auctionTimer = setInterval(async () => {
-        if (timeRemaining > 0 && auction?.status === 'live') {
-            timeRemaining -= 1;
+        if (timeRemaining >= 0 && auction?.status === 'live') {
             console.log("T:", timeRemaining, new Date());
             // Update frontend with the time remaining
             io.emit('auctionTimeUpdate', { timeRemaining });
+            timeRemaining -= 1;
         } else {
             // End the current auction
-            clearInterval(auctionTimer);
+            playPauseLiveAuction('pause')
             // auction.isLive = false;
             // auction.status = 'completed';
             // await auction.save();
@@ -48,6 +48,8 @@ const bidPlaced = async (bid: IBid) => {
     auction = (await isAuctionExist()) ?? null;
     currentBid = bid;
     resetTime();
+    io.emit('bidPlaced', { data: bid, message: `Bid Placed successfully` })
+
 }
 const resetTime = async () => {
     auction = (await isAuctionExist()) ?? null;
@@ -64,20 +66,31 @@ const stopLiveAuction = async () => {
     currentBid = null;
     io.emit('auctionStopped', {})
 }
-const playPauseLiveAuction = async () => {
+const playPauseLiveAuction = async (action: 'pause' | 'resume') => {
     auction = (await isAuctionExist()) ?? null;
-    // console.log(auction);
     if (auction && auction?.status != "stopped") {
-        if (auction.status == 'live') {
-            io.emit('auctionPaused', { status: 'live' });
+        const data = await Auction.findOneAndUpdate({}, {
+            status: action == 'resume' ? 'live' : 'pause',
+        }, { new: true }) // Optionally return the updated document
+        if (action == 'pause') {
+            auction.status = 'pause'
+            io.emit('auctionPaused', { status: 'pause' });
             // if (auctionTimer) clearInterval(auctionTimer);
+            if (auctionTimer) clearInterval(auctionTimer);
+        }
+        else {
+            auction.status = 'live'
+            io.emit('auctionPaused', { status: 'live' });
             if (timeRemaining == -1) resetTime();
             else runAuction()
         }
-        else {
-            io.emit('auctionPaused', { status: 'pause' });
-            if (auctionTimer) clearInterval(auctionTimer);
-        }
     }
+    return auction;
 }
-export { startLiveAuction, bidPlaced, resetTime, stopLiveAuction, playPauseLiveAuction }
+
+const playerChange = async (bid: IBid | null, player: string) => {
+    currentBid = bid;
+    io.emit('playerSwitched', { data: { bid, player }, message: 'Player Switched' });
+
+}
+export { startLiveAuction, bidPlaced, resetTime, stopLiveAuction, playPauseLiveAuction, playerChange }

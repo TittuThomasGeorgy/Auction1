@@ -19,8 +19,6 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         // Listen for the start of a new auction
         socket.on('auctionStarted', (data: { auction: IAuction }) => {
             setAuction(data.auction);
-            console.log(data.auction);
-
             enqueueSnackbar({ variant: 'success', message: "Auction Started" });
         });
         socket.on('auctionPaused', (data: { status: 'pause' | 'live' }) => {
@@ -35,7 +33,16 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
             setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
         })
         socket.on('bidPlaced', (res: { data: IBid, message: string }) => {
+            console.log(res,'bidPlaced');
+
             setAuction(auction => auction && ({ ...auction, bid: res.data }))
+            enqueueSnackbar({ variant: 'info', message: res.message });
+        })
+        socket.on('playerSwitched', (res: { data: { bid: IBid | null, player: string }, message: string }) => {
+            setAuction(auction => auction && ({ ...auction, bid: res.data.bid, player: res.data.player }))
+            // enqueueSnackbar({ variant: 'info', message: res.message });
+            console.log({ ...auction, bid: res.data.bid, player: res.data.player });
+
         })
 
         socket.on('auctionStopped', () => {
@@ -54,6 +61,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         return () => {
             socket.off('auctionStarted');
             socket.off('auctionTimeUpdate');
+            socket.off('playerSwitched');
             socket.off('bidPlaced');
             socket.off('auctionStopped');
             socket.off('auctionPaused');

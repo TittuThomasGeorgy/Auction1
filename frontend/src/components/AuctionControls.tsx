@@ -12,6 +12,7 @@ import {
 } from '@mui/icons-material';
 import ConfirmationDialog from './ConfirmationDialog';
 import { useLiveAuction } from '../hooks/AuctionProvider';
+import { IAuction } from '../types/AuctionType';
 
 interface ControlProps {
     onPlay: () => void;
@@ -24,10 +25,8 @@ interface ControlProps {
 }
 
 const AuctionControls = (props: ControlProps) => {
-    const liveAuction = useLiveAuction();
-
-    const [isStarted, setIsStarted] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const _liveAuction = useLiveAuction();
+    const [liveAuction, setLiveAuction] = useState<IAuction | null>(null)
     const [confirmation, setConfirmation] = useState<{
         open: boolean;
         action: string | null;
@@ -39,9 +38,8 @@ const AuctionControls = (props: ControlProps) => {
     };
 
     const handlePlayPause = () => {
-        const _isPlaying = isPlaying;
-        setIsPlaying(!_isPlaying);
-        _isPlaying ? props.onPause() : props.onPlay();
+
+        liveAuction?.status == 'live' ? props.onPause() : props.onPlay();
     };
 
     const handleAction = (action: string) => {
@@ -66,22 +64,13 @@ const AuctionControls = (props: ControlProps) => {
     };
 
     useEffect(() => {
-        if (!liveAuction.auction) {
-            setIsStarted(false);
-            setIsPlaying(false);
-            return;
-        }
-
-        const status = liveAuction.auction.status;
-
-        setIsStarted(status !== 'stopped');
-        setIsPlaying(status === 'live');
-    }, [liveAuction.auction]);
+        setLiveAuction(_liveAuction.auction)
+    }, [_liveAuction.auction]);
 
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginRight: '10px' }}>
-                {!isStarted ? (
+                {!liveAuction ? (
                     <Button
                         variant="contained"
                         color="primary"
@@ -91,14 +80,14 @@ const AuctionControls = (props: ControlProps) => {
                         Start Auction
                     </Button>
                 ) : <>
-                    <Tooltip title={isPlaying ? 'Pause' : 'Play'}>
+                    <Tooltip title={liveAuction?.status == 'live' ? 'Pause' : 'Play'}>
                         <IconButton
-                            aria-label={isPlaying ? 'pause' : 'play'}
+                            aria-label={liveAuction?.status == 'live' ? 'pause' : 'play'}
                             onClick={() => handleAction('play/pause')}
                             style={{ color: 'white', fontSize: '2rem' }}
-                            disabled={!isStarted}
+
                         >
-                            {isPlaying ? <PauseIcon style={{ fontSize: '2rem' }} /> : <PlayIcon style={{ fontSize: '2rem' }} />}
+                            {liveAuction?.status == 'live' ? <PauseIcon style={{ fontSize: '2rem' }} /> : <PlayIcon style={{ fontSize: '2rem' }} />}
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Undo">
@@ -106,7 +95,7 @@ const AuctionControls = (props: ControlProps) => {
                             aria-label="undo"
                             onClick={() => handleAction('undo')}
                             style={{ color: 'white', fontSize: '2rem' }}
-                            disabled={!isStarted}
+
                         >
                             <UndoIcon style={{ fontSize: '2rem' }} />
                         </IconButton>
@@ -116,7 +105,7 @@ const AuctionControls = (props: ControlProps) => {
                             aria-label="addTime"
                             onClick={() => handleAction('addTime')}
                             style={{ color: 'white', fontSize: '2rem' }}
-                            disabled={!isStarted}
+
                         >
                             <MoreTimeIcon style={{ fontSize: '2rem' }} />
                         </IconButton>
@@ -126,7 +115,7 @@ const AuctionControls = (props: ControlProps) => {
                             aria-label="sell"
                             onClick={() => handleAction('sell')}
                             style={{ color: 'white', fontSize: '2rem' }}
-                            disabled={!isStarted}
+
                         >
                             <SellIcon style={{ fontSize: '2rem' }} />
                         </IconButton>
@@ -136,7 +125,7 @@ const AuctionControls = (props: ControlProps) => {
                             aria-label="stop"
                             onClick={() => handleAction('stop')}
                             style={{ color: 'white', fontSize: '2rem' }}
-                            disabled={!isStarted}
+
                         >
                             <StopIcon style={{ fontSize: '2rem' }} />
                         </IconButton>
@@ -152,7 +141,7 @@ const AuctionControls = (props: ControlProps) => {
                 onConfirm={handleConfirm}
                 title={
                     confirmation.action === 'play/pause'
-                        ? `Are you sure you want to ${isPlaying ? 'pause' : 'play'} auction?`
+                        ? `Are you sure you want to ${liveAuction?.status == 'live' ? 'pause' : 'play'} auction?`
                         : confirmation.action === 'stop'
                             ? `Are you sure you want to stop auction?`
                             : confirmation.action === 'undo'

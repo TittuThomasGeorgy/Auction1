@@ -15,6 +15,7 @@ import Club from './modules/club/models/Club';
 import { Server } from 'socket.io';
 import { auctionEvents } from './modules/auction/apis';
 import { createAuction } from './modules/auction/controllers/auction.controller';
+import Bid from './modules/auction/models/Bid';
 
 dotenv.config();
 
@@ -55,7 +56,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/auction')
         console.log('Connected to mongodb'.bgGreen);
         await createSettings();
         await createAuction();
-        // await Club.updateMany({},{balance:6000})
+        // await Bid.updateMany({}, { state: 1 })
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 
