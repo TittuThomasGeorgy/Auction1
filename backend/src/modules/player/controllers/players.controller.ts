@@ -5,6 +5,7 @@ import { uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
 import Player from "../models/Player";
 import { IPlayer } from "../types/player";
+import { IBid } from "../../auction/types/bid";
 
 
 
@@ -34,7 +35,7 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string)
             }
             : {}),
     })
-        .populate('image')
+        .populate(['image', 'bid']);
     const positionOrder: { [key: string]: number } = {
         ST: 1,
         CM: 2,
@@ -47,10 +48,11 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string)
     // If your logo is being populated correctly, we need to handle it properly in the map function
     const data: IPlayer[] = await Promise.all(sortedData.map(async (player) => {
         const logoObj = (player.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
-
+        const bidAmount = (player.bid as unknown as IBid)?.bid.toString() ?? null;
         return {
             ...player.toObject(),  // Convert mongoose document to a plain object
             image: logoObj ?? '',  // Use the downloadURL if it exists
+            bid: bidAmount
         };
     }));
     return data

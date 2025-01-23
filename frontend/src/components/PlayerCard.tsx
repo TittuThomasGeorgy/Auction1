@@ -14,7 +14,7 @@ const PlayerCard = (props: PlayerCardProps) => {
         <Box
             sx={{
                 width: 260,
-                height: 380,
+                height: 360,
                 background: 'linear-gradient(145deg, #12263f, #1c4a7d)', // Strong blue gradient
                 borderRadius: '16px',
                 position: 'relative',
@@ -60,10 +60,9 @@ const PlayerCard = (props: PlayerCardProps) => {
                         height: 60,
                         position: 'absolute',
                         top: 60,
-                        left: 20,
+                        left: 10,
                         zIndex: 3,
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Slight transparent background to match the design
-                        borderRadius: '50%',
+                        // backgroundColor: 'rgba(255, 255, 255, 0.2)', // Slight transparent background to match the design
                     }}
                 />
             )}
@@ -112,7 +111,7 @@ const PlayerCard = (props: PlayerCardProps) => {
             <Box
                 sx={{
                     position: 'absolute',
-                    bottom: 90,
+                    bottom: 70,
                     width: '100%',
                     textAlign: 'center',
                     zIndex: 3,
@@ -135,33 +134,34 @@ const PlayerCard = (props: PlayerCardProps) => {
             <Box
                 sx={{
                     position: 'absolute',
-                    bottom: 20,
+                    bottom: 30,
                     width: '100%',
                     textAlign: 'center',
                     zIndex: 3,
                 }}
             >
-                <Typography
+
+                {props.player.bid ? (
+                    <Typography
+                        variant='h6'
+                        sx={{
+                            fontWeight: 700,
+                            color: '#a3ffb3',
+                            // marginTop: '4px',
+                        }}
+                    >
+                        BID AMOUNT: ${props.player.bid}M
+                    </Typography>
+                ) : <Typography
+                    variant='h6'
+
                     sx={{
-                        fontSize: '18px',
                         fontWeight: 600,
                         color: '#86c5ff',
                     }}
                 >
-                    Base Price: ${props.player.basePrice}M
-                </Typography>
-                {props.player.bid && (
-                    <Typography
-                        sx={{
-                            fontSize: '16px',
-                            fontWeight: 500,
-                            color: '#a3ffb3',
-                            marginTop: '4px',
-                        }}
-                    >
-                        Bid: ${props.player.bid}M
-                    </Typography>
-                )}
+                    BASE PRICE: ${props.player.basePrice}M
+                </Typography>}
             </Box>
 
             {/* Bottom Gradient Decoration */}
@@ -171,7 +171,7 @@ const PlayerCard = (props: PlayerCardProps) => {
                     bottom: 0,
                     left: 0,
                     width: '100%',
-                    height: '20%',
+                    height: '25%',
                     background: 'linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.6))',
                     zIndex: 1,
                 }}

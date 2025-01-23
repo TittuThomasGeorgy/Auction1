@@ -15,6 +15,8 @@ import { enqueueSnackbar } from 'notistack';
 import { useLiveAuction } from '../hooks/AuctionProvider';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import MenuButton from '../components/MenuButton';
+import { io } from 'socket.io-client';
+import { IBid } from '../types/BidType';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -50,7 +52,7 @@ const AuctionPage = () => {
         liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
     }
     const handleNextPlayer = async (type: 'next' | 'previous') => {
-        if (liveAuction.auction?.bid && !players[currentPlayerIndex].club)
+        if (liveAuction.auction?.bid && !players[currentPlayerIndex]?.club)
             setConfirmation({ open: true, action: type })
         else if (type == 'next')
             nextPlayer();
@@ -85,13 +87,16 @@ const AuctionPage = () => {
         if (liveAuction.auction) {
             // liveAuction.auction.bid && liveAuction.auction.bid.player === players[currentPlayerIndex]?._id && setCurrentBid();
             const _player = liveAuction.auction.player;
-            _player && setCurrentPlayerIndex(players.findIndex(player => player._id === _player))
+            if (_player) {
+                const currPlayerIdx = players.findIndex(player => player && player._id === _player);
+                setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
+            }
         }
     }, [liveAuction.auction])
 
     useEffect(() => {
         if (!(players.length > 0)) return
-        let currentPlayer = players[currentPlayerIndex]._id;
+        let currentPlayer = players[currentPlayerIndex]?._id;
         let _players = players;
         if (sortBy === 'Sort by Position') {
             _players = _players
@@ -99,14 +104,34 @@ const AuctionPage = () => {
         } else {
             _players = _players
                 .sort((a, b) => {
-                    const clubComparison = (b.club ? 1: 0) - (a.club ? 1 : 0);
+                    const clubComparison = (b.club ? 1 : 0) - (a.club ? 1 : 0);
                     return clubComparison || a.name.localeCompare(b.name);
                 })
         }
-        setCurrentPlayerIndex(_players.findIndex(player => player._id === currentPlayer))
+        const currPlayerIdx = _players.findIndex(player => player && player._id === currentPlayer);
+        setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
         setPlayers(_players)
     }, [sortBy, players]);
 
+    const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL); // Replace with your backend URL
+
+    useEffect(() => {
+        // Listen for the start of a new auction
+        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+            const bid = res.data.bid;
+            if (bid) {
+                const _players = players.map(player => player._id == bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player)
+                setPlayers(_players);
+                setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
+                enqueueSnackbar({ variant: 'success', message: res.message });
+            }
+
+        })
+        return () => {
+            socket.off('playerSold');
+
+        };
+    }, []);
 
     return (
         <>
@@ -312,12 +337,12 @@ const AuctionPage = () => {
                     }} onAddTime={function (): void {
                         throw new Error('Function not implemented.');
                     }} onSell={async () => {
-                        throw new Error('Function not implFemented.');
-                        // await AuctionServ.sell(players[currentPlayerIndex]._id); // A default synchronous return if needed
+                        // throw new Error('Function not implemented.');
+                        await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed
                     }} onUndo={function (): void {
                         throw new Error('Function not implemented.');
                     }} onStart={async () => {
-                        await AuctionServ.start(players[currentPlayerIndex]._id); // A default synchronous return if needed
+                        await AuctionServ.start(players[currentPlayerIndex]?._id); // A default synchronous return if needed
                     }} onStop={async () => {
                         await AuctionServ.stop(); // A default synchronous return if needed
 
@@ -337,7 +362,7 @@ const AuctionPage = () => {
                     )}
                     {liveAuction.auction && placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
                         currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
-                            const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]._id, bid);
+                            const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
                             if (res.success) {
                                 // setCurrentBid(res.data.bid);
                                 setPlaceBidClub(null)

@@ -2,10 +2,13 @@ import { log } from "console";
 import { io } from "../../../server";
 import { getPlayers } from "../../player/controllers/players.controller";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
-import { isAuctionExist, placeBid } from "../controllers/auction.controller";
+import { isAuctionExist, placeBid, validateSellPlayer } from "../controllers/auction.controller";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
 import { IBid } from "../types/bid";
+import { IPlayer } from "../../player/types/player";
+import Player from "../../player/models/Player";
+import Club from "../../club/models/Club";
 let auctionTimer: string | number | NodeJS.Timeout | undefined;
 let timeRemaining = -1;
 let currentBid: IBid | null = null;
@@ -14,7 +17,7 @@ let auction: IAuction | null = null;
 const startLiveAuction = async () => {
     auction = (await isAuctionExist(true)) ?? null;
     if (!auction || auction.status === 'stopped') return
-    resetTime();
+    restartTime();
     // Notify all users about the new auction
     io.emit('auctionStarted', {
         auction: auction,
@@ -33,7 +36,8 @@ const runAuction = async () => {
             timeRemaining -= 1;
         } else {
             // End the current auction
-            playPauseLiveAuction('pause')
+            playPauseLiveAuction('pause');
+            sellPlayer();
             // auction.isLive = false;
             // auction.status = 'completed';
             // await auction.save();
@@ -47,11 +51,11 @@ const runAuction = async () => {
 const bidPlaced = async (bid: IBid) => {
     auction = (await isAuctionExist()) ?? null;
     currentBid = bid;
-    resetTime();
+    restartTime();
     io.emit('bidPlaced', { data: bid, message: `Bid Placed successfully` })
 
 }
-const resetTime = async () => {
+const restartTime = async () => {
     auction = (await isAuctionExist()) ?? null;
     if (auctionTimer) clearInterval(auctionTimer);
     const setting = await isSettingExist();
@@ -81,7 +85,7 @@ const playPauseLiveAuction = async (action: 'pause' | 'resume') => {
         else {
             auction.status = 'live'
             io.emit('auctionPaused', { status: 'live' });
-            if (timeRemaining == -1) resetTime();
+            if (timeRemaining == -1) restartTime();
             else runAuction()
         }
     }
@@ -93,4 +97,22 @@ const playerChange = async (bid: IBid | null, player: string) => {
     io.emit('playerSwitched', { data: { bid, player }, message: 'Player Switched' });
 
 }
-export { startLiveAuction, bidPlaced, resetTime, stopLiveAuction, playPauseLiveAuction, playerChange }
+
+const playerSold = async (bid: IBid) => {
+    timeRemaining = 0
+    io.emit('playerSold', { data: { bid }, message: 'Player Sold' });
+}
+const sellPlayer = async () => {
+    if (auction?.player && currentBid) {
+        const isValid = await validateSellPlayer(auction?.player?.toString())
+        if (isValid != 0) return
+        await Player.findByIdAndUpdate(auction.player, { bid: currentBid._id, club: currentBid.club }, { new: true });
+        await Club.findByIdAndUpdate(
+            currentBid.club,
+            { $inc: { balance: -currentBid.bid } },
+            { new: true } // Optional: Returns the updated document
+        );
+        playerSold(currentBid);
+    }
+}
+export { startLiveAuction, bidPlaced, restartTime, stopLiveAuction, playPauseLiveAuction, playerChange, playerSold }

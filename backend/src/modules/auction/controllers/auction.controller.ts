@@ -7,16 +7,18 @@ import Bid from "../models/Bid";
 import { io } from "../../../server";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
-import { bidPlaced, playerChange, playPauseLiveAuction, resetTime, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
+import { bidPlaced, playerChange, playerSold, playPauseLiveAuction, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
 import { IBid } from "../types/bid";
+import Player from "../../player/models/Player";
+import { isSettingExist } from "../../settings/controllers/settings.controller";
 
-export const isAuctionExist = async (populateBid?: boolean) => {
+export const isAuctionExist = async (populateBid?: boolean): Promise<IAuction | null> => {
     let query = Auction.findOne({});
     if (populateBid) {
         query = query.populate('bid');
     }
     const data = await query.exec();
-    return data?.toJSON();
+    return data ? data.toJSON() : null;
 };
 export const getAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -104,14 +106,17 @@ export const nextPlayer = async (req: Request, res: Response, next: NextFunction
 
 export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const auction = await isAuctionExist();
+        const auction = await isAuctionExist(true);
         if (auction?.status != 'live')
             return sendApiResponse(res, 'CONFLICT', null, 'Auction paused. Bid not Placed.');
-        const _isBidValid = await isBidValid(req.body);
-        if (_isBidValid == 1)
-            return sendApiResponse(res, 'CONFLICT', null, 'Player Not matching');
-        else if (_isBidValid == 2)
-            return sendApiResponse(res, 'CONFLICT', null, 'Higher bid Exist');
+
+        if ((auction.bid as unknown as IBid)?.club == req.body.club) {
+            console.log("Your Bid is the highest.Bid not Placed.".red, auction.bid, req.body.club);
+            return sendApiResponse(res, 'CONFLICT', null, 'Your Bid is the highest.Bid not Placed.');
+        }
+        const _isBidValid = await validateBid(res, req.body);
+        if (_isBidValid != 0) return
+
         const bidId = new mongoose.Types.ObjectId();
         const newBid = await new Bid({ ...req.body, _id: bidId }).save();
         // (await newBid).save();
@@ -125,27 +130,113 @@ export const placeBid = async (req: Request, res: Response, next: NextFunction) 
         next(error);
     }
 }
+export const validateSellPlayer = async ( playerID: string) => {
+    const auction = await isAuctionExist();
 
+    if (!auction) {
+        console.log("Auction Not Started".red);
+        return 1;
+    }
+
+    const _player = await Player.findById(playerID);
+    if (!_player) {
+        console.log("Player Not Found".red);
+        return 2;
+    }
+    else if (!!_player?.club) {
+        console.log("Player already sold".red);
+        return 3
+    }
+    const _lastBid = await lastBid(playerID);
+    if (!_lastBid) {
+        console.log("No Bids Found".red);
+        return 4
+    }
+
+    if (!_lastBid._id.equals(auction?.bid)) {
+        console.log("Bids not matching".red, _lastBid._id, auction?.bid);
+        return 5
+    }
+    return 0
+
+}
+export const sellPlayer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const isValid = await validateSellPlayer(req.body.player);
+
+        if (isValid == 1)
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction Not Started');
+        else if (isValid == 2)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player Not Found');
+        else if (isValid == 3)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+        else if (isValid == 4)
+            return sendApiResponse(res, 'CONFLICT', null, 'No Bids Found');
+        else if (isValid == 5)
+            return sendApiResponse(res, 'CONFLICT', null, 'Bids not matching');
+
+        const _lastBid = await lastBid(req.body.player);
+        const _isBidValid = await validateBid(res, _lastBid);
+        if (_isBidValid != 0) return
+
+
+        const player = await Player.findByIdAndUpdate(req.body.player, { bid: _lastBid._id, club: _lastBid.club }, { new: true }).populate('bid');
+        if (!player) {
+            return sendApiResponse(res, 'CONFLICT', null, 'Player not Sold');
+        }
+        await Club.findByIdAndUpdate(
+            _lastBid.club,
+            { $inc: { balance: -_lastBid.bid } },
+            { new: true } // Optional: Returns the updated document
+        );
+        playerSold(_lastBid);
+        sendApiResponse(res, 'OK', player, 'Player Sold')
+    } catch (error) {
+        next(error);
+    }
+}
+
+const validateBid = async (res: Response, _bid: IBid) => {
+    const _isBidValid = await isBidValid(_bid);
+    if (_isBidValid == 1)
+        return sendApiResponse(res, 'CONFLICT', null, 'Player Not matching');
+    else if (_isBidValid == 2)
+        return sendApiResponse(res, 'CONFLICT', null, 'Not Enough balance');
+    else if (_isBidValid == 3)
+        return sendApiResponse(res, 'CONFLICT', null, 'Higher bid Exist');
+    return 0;
+}
 const isBidValid = async (_bid: IBid) => {
     const auction = await isAuctionExist(true);
+    const setting = await isSettingExist();
+    const club = (await Club.findById(_bid.club))?.toJSON();
     const bid = (auction?.bid as unknown as IBid)?.bid ?? 0;
     // Ensure both are strings before comparison
     const auctionPlayer = auction?.player?.toString();
     const bidPlayer = _bid.player?.toString();
 
-    console.log('Auction Player:', auctionPlayer);
-    console.log('Bid Player:', bidPlayer);
 
     // Compare player IDs
     if (auctionPlayer !== bidPlayer) {
         console.log('Player not Matching'.red, auctionPlayer, bidPlayer);
+
         return 1;
     }
-    if (bid > _bid.bid) {
-        console.log('Higher bid Exist');
+    else if (club && (club.balance < _bid.bid)) {
+        console.log('Not Enough Balance'.red, club?.balance, _bid.bid);
         return 2;
     }
+    else if (bid > _bid.bid) {
+        console.log('Higher bid Exist');
+        return 3;
+    }
+
+    // else if()
     return 0;
+}
+const getNoOfPlayers = async (clubId: string) => {
+    const data = await Player.find({ club: clubId })
+    return data.length ?? 0
 }
 // export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
 //     try {

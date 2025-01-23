@@ -7,7 +7,7 @@ export const PlayerSchema = new Schema<IPlayer>({
   image: { type: Schema.Types.ObjectId, ref: 'files' },
   position: { type: String, enum: ['ST', 'CM', 'DF', 'GK'], required: true },
   basePrice: { type: Number, default: 100 },
-  bid: { type: String, required: false },
+  bid: { type: Schema.Types.ObjectId, ref: 'bids'},
   club: { type: Schema.Types.ObjectId, ref: 'clubs', required: false },
 }, {
   timestamps: true,

@@ -33,7 +33,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
             setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
         })
         socket.on('bidPlaced', (res: { data: IBid, message: string }) => {
-            console.log(res,'bidPlaced');
+            console.log(res, 'bidPlaced');
 
             setAuction(auction => auction && ({ ...auction, bid: res.data }))
             enqueueSnackbar({ variant: 'info', message: res.message });
@@ -42,6 +42,10 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
             setAuction(auction => auction && ({ ...auction, bid: res.data.bid, player: res.data.player }))
             // enqueueSnackbar({ variant: 'info', message: res.message });
             console.log({ ...auction, bid: res.data.bid, player: res.data.player });
+
+        })
+        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+            enqueueSnackbar({ variant: 'success', message: res.message });
 
         })
 
@@ -56,7 +60,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         //         alert('Auction ended');
         //     }
         // });
-        console.log(auction);
+        // console.log(auction);
 
         return () => {
             socket.off('auctionStarted');
