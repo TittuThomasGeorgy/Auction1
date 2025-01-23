@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Container, Dialog, DialogActions, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
-import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon, Margin } from '@mui/icons-material';
+import { Box, Button, Container, Dialog, DialogActions, DialogTitle, IconButton, Stack, Typography, Tooltip } from '@mui/material';
+import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon, MoreVert as OptionIcon } from '@mui/icons-material';
 import BackButton from '../components/BackButton';
 import usePlayer from '../services/PlayerService';
 import useClub from '../services/ClubService';
@@ -14,13 +14,14 @@ import useAuction from '../services/AuctionService';
 import { enqueueSnackbar } from 'notistack';
 import { useLiveAuction } from '../hooks/AuctionProvider';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import MenuButton from '../components/MenuButton';
 
-// const positionOrder: { [key: string]: number } = {
-//     ST: 1,
-//     CM: 2,
-//     DF: 3,
-//     GK: 4
-// };
+const positionOrder: { [key: string]: number } = {
+    ST: 1,
+    CM: 2,
+    DF: 3,
+    GK: 4
+};
 
 const AuctionPage = () => {
     const PlayerServ = usePlayer();
@@ -35,7 +36,7 @@ const AuctionPage = () => {
         open: boolean;
         action: "next" | "previous" | null;
     }>({ open: false, action: null });
-
+    const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position')
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
@@ -88,12 +89,36 @@ const AuctionPage = () => {
         }
     }, [liveAuction.auction])
 
+    useEffect(() => {
+        if (!(players.length > 0)) return
+        let currentPlayer = players[currentPlayerIndex]._id;
+        let _players = players;
+        if (sortBy === 'Sort by Position') {
+            _players = _players
+                .sort((a, b) => positionOrder[a.position] - positionOrder[b.position] || a.name.localeCompare(b.name));
+        } else {
+            _players = _players
+                .sort((a, b) => {
+                    const clubComparison = (b.club ? 1: 0) - (a.club ? 1 : 0);
+                    return clubComparison || a.name.localeCompare(b.name);
+                })
+        }
+        setCurrentPlayerIndex(_players.findIndex(player => player._id === currentPlayer))
+        setPlayers(_players)
+    }, [sortBy, players]);
+
+
     return (
         <>
             <BackButton />
             <br />
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)', padding: '20px' }}>
+
+                <MenuButton menuItems={[
+                    { label: 'Sort by Position', onClick: () => setSortBy('Sort by Position') },
+                    { label: 'Sort by Status', onClick: () => setSortBy('Sort by Status') },
+                ]} sx={{ float: 'right' }} selected={sortBy} />
                 {/* <br /> */}
                 <Box
                     display="flex"
