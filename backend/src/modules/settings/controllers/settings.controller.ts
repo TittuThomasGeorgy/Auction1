@@ -4,6 +4,9 @@ import { NextFunction, Request, Response } from "express";
 import Settings from "../models/Settings";
 import Player from "../../player/models/Player";
 import Club from "../../club/models/Club";
+import { isAuctionExist } from "../../auction/controllers/auction.controller";
+import Auction from "../../auction/models/Auction";
+import Bid from "../../auction/models/Bid";
 
 export const isSettingExist = async () => {
     const data = await Settings.findOne({});
@@ -67,14 +70,20 @@ export const updateSettings = async (req: Request, res: Response, next: NextFunc
 export const resetSettings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const prevSettings = await isSettingExist();
+        const auction = await isAuctionExist();
         if (!prevSettings) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Settings Not Found');
+        }
+        if (auction?.status != 'stopped') {
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction Running');
         }
 
         if (prevSettings.resetPassword !== req.body.password)
             return sendApiResponse(res, 'CONFLICT', null, 'Password not matching');
         await Player.updateMany({}, { bid: null, club: null });
         await Club.updateMany({}, { balance: prevSettings.initialBalance });
+        await Auction.findByIdAndUpdate(auction._id, { bid: null, player: null })
+        await Bid.deleteMany({});
         sendApiResponse(res, 'OK', prevSettings,
             `Reset successfully`);
     } catch (error) {
