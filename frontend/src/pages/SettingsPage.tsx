@@ -1,10 +1,10 @@
-import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid, Divider } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import BackButton from '../components/BackButton';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { enqueueSnackbar } from 'notistack';
-import { Settings as SettingsIcon } from '@mui/icons-material';
+import { SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
 
 const SettingsPage = () => {
     const settingsServ = useSettings();
@@ -16,6 +16,9 @@ const SettingsPage = () => {
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
+    const [password, setPassword] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     // Fetch settings on component load
     useEffect(() => {
@@ -45,6 +48,20 @@ const SettingsPage = () => {
             .catch((err) => console.error(err));
     };
 
+    const handleReset =
+        () => {
+            settingsServ.reset(password)
+                .then((res) => {
+                    setConfirmReset(false);
+                    setPassword('');
+                    setShowPassword(false)
+                    enqueueSnackbar({
+                        variant: res.success ? "success" : 'error',
+                        message: res.message,
+                    });
+                })
+                .catch((err) => console.error(err));
+        }
     return (
         <>
             <BackButton />
@@ -121,6 +138,13 @@ const SettingsPage = () => {
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
                             </Grid>
+                            <Grid size={4}>
+                                <Button variant="contained" color="error" startIcon={<RestoreIcon />}
+                                    onClick={() => setConfirmReset(true)}>
+                                    Reset
+                                </Button>
+                            </Grid>
+
                         </Grid>
                         <Box mt={3} display="flex" justifyContent="flex-end">
                             {!isEditing ? (
@@ -156,6 +180,51 @@ const SettingsPage = () => {
                     </Box>
                 </Paper>
             </Container>
+            <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
+                <DialogContent>
+                    Are You sure want to reset? If yes, Enter Reset Password.
+                    <TextField
+                        // label="Password"
+                        variant="outlined"
+                        fullWidth
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }
+                        }}
+
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setConfirmReset(false)}
+                        color="primary"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleReset}
+                        sx={{ minWidth: 120 }}
+                    >
+                        Reset
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

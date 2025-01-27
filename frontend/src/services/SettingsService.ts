@@ -7,6 +7,7 @@ const useSettings = () => {
     update: (createSettings: ISettings) =>
       getStandardResponse<ISettings>(axios.patch(`/settings/${createSettings._id}`, createSettings)),
     get: () => getStandardResponse<ISettings>(axios.get('/settings/')),
+    reset: (password:string) => getStandardResponse<ISettings>(axios.post('/settings/reset',{password})),
 
   }
 };

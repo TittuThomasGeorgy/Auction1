@@ -227,7 +227,7 @@ const AuctionPage = () => {
                                 transition: 'transform 0.5s ease-in-out',
                             }}
                         >
-                            {players.map((player, index) => (
+                         {players.map((player) => (
                                 <Box
                                     key={player._id}
                                     flex="0 0 100%"

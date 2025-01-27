@@ -6,6 +6,7 @@ export const SettingsSchema = new Schema<ISettings>({
   initialBalance: { type: Number, required: true, default: 0 },
   playersPerClub: { type: Number, required: true, default: 0 },
   bidTime: { type: Number, required: true, unique: true, default: 0 },
+  resetPassword: { type: String, required: true },
 }, {
   timestamps: true,
 });
