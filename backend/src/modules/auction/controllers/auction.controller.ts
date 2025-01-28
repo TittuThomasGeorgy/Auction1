@@ -11,6 +11,7 @@ import { bidPlaced, playerChange, playerSold, playPauseLiveAuction, startLiveAuc
 import { IBid } from "../types/bid";
 import Player from "../../player/models/Player";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
+import { isPlayerSold } from "../../player/controllers/players.controller";
 
 export const isAuctionExist = async (populateBid?: boolean): Promise<IAuction | null> => {
     let query = Auction.findOne({});
@@ -54,6 +55,9 @@ export const createAuction = async () => {
 export const startAuctionReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
+        const playerSold = await isPlayerSold(req.body.player);
+        if (playerSold)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
         const _lastBid = await lastBid(req.body.player);
         const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player, bid: _lastBid }, { new: true });
         startLiveAuction();
@@ -78,6 +82,10 @@ export const stopAuction = async (req: Request, res: Response, next: NextFunctio
 };
 export const playPauseAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const auction = await isAuctionExist();
+        const playerSold = auction && await isPlayerSold(auction?.player.toString());
+        if (playerSold)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
         const data = await playPauseLiveAuction(req.body.action);
         sendApiResponse(res, 'OK', data, 'Successfully Paused auction');
     } catch (error) {
@@ -94,7 +102,7 @@ export const nextPlayer = async (req: Request, res: Response, next: NextFunction
         const _lastBid = await lastBid(req.body.player);
         const data = await Auction.findByIdAndUpdate(auction?._id, {
             player: req.body.player, // Nullify the player field
-            bid: _lastBid?._id // Nullify the bid field
+            bid: _lastBid?._id ?? null// Nullify the bid field
         },
             { new: true }) // Optionally return the updated document;
         await playerChange(_lastBid ?? null, req.body.player)
@@ -130,7 +138,7 @@ export const placeBid = async (req: Request, res: Response, next: NextFunction) 
         next(error);
     }
 }
-export const validateSellPlayer = async ( playerID: string) => {
+export const validateSellPlayer = async (playerID: string) => {
     const auction = await isAuctionExist();
 
     if (!auction) {

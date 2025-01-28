@@ -15,7 +15,7 @@ setupIonicReact();
 // Configure Axios
 const serverURL = import.meta.env.VITE_SERVER_URL || `http://192.168.1.7:8005`;
 axios.defaults.baseURL = serverURL;
-console.log("Server URL:", serverURL);
+// console.log("Server URL:", serverURL);
 
 const App: React.FC = () => {
   // Set up common services

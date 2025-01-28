@@ -6,10 +6,10 @@ import { LoaderProvider } from './hooks/Loader';
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
-  <React.StrictMode>
-    <LoaderProvider>
+  // <React.StrictMode>
+  <LoaderProvider>
 
-      <App />
-    </LoaderProvider>
-  </React.StrictMode>
+    <App />
+  </LoaderProvider>
+  // {/* </React.StrictMode> */ }
 );

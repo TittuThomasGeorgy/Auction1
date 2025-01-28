@@ -17,6 +17,7 @@ import ConfirmationDialog from '../components/ConfirmationDialog';
 import MenuButton from '../components/MenuButton';
 import { io } from 'socket.io-client';
 import { IBid } from '../types/BidType';
+import { initSocket } from '../services/SocketClient';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -38,6 +39,7 @@ const AuctionPage = () => {
         open: boolean;
         action: "next" | "previous" | null;
     }>({ open: false, action: null });
+    const [soldBid, setSoldBid] = useState<IBid | null>(null)
     const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position')
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
@@ -56,14 +58,14 @@ const AuctionPage = () => {
             setConfirmation({ open: true, action: type })
         else if (type == 'next')
             nextPlayer();
-        else
+        else if (type == 'previous')
             previousPlayer();
     };
 
     const previousPlayer = async () => {
         const currentIdx = (currentPlayerIndex - 1) % players.length;
         setCurrentPlayerIndex(currentIdx < 0 ? players.length - 1 : currentIdx);
-        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
+        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx < 0 ? players.length - 1 : currentIdx]._id)
     };
 
 
@@ -113,25 +115,32 @@ const AuctionPage = () => {
         setPlayers(_players)
     }, [sortBy, players]);
 
-    const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL); // Replace with your backend URL
 
     useEffect(() => {
+        const socket = initSocket();
+
         // Listen for the start of a new auction
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
             const bid = res.data.bid;
+            console.log(res.data);
+
             if (bid) {
-                const _players = players.map(player => player._id == bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player)
-                setPlayers(_players);
+
+                setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
                 setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
                 enqueueSnackbar({ variant: 'success', message: res.message });
+                // setSoldBid(bid);
             }
 
         })
         return () => {
             socket.off('playerSold');
-
         };
     }, []);
+    useEffect(() => {
+        console.log(players);
+    }, [players])
+
 
     return (
         <>
@@ -227,7 +236,7 @@ const AuctionPage = () => {
                                 transition: 'transform 0.5s ease-in-out',
                             }}
                         >
-                         {players.map((player) => (
+                            {players.map((player) => (
                                 <Box
                                     key={player._id}
                                     flex="0 0 100%"
@@ -394,7 +403,14 @@ const AuctionPage = () => {
                             Confirm
                         </Button>
                     </DialogActions>
-                </Dialog>
+                </Dialog>{
+                    // soldBid && players.find(player => soldBid?.player === player._id)
+                    // && clubs.find(club => soldBid?.club === club._id) && <PlayerSoldModal open={Boolean(soldBid)}
+                    //     onClose={() => setSoldBid(null)}
+                    //     player={players.find(player => soldBid?.player === player._id) as IPlayer}
+                    //     club={clubs.find(club => soldBid?.club === club._id) as IClub}
+                    // />
+                }
             </Container >
         </>
     );

@@ -4,8 +4,8 @@ import { IAuction } from '../types/AuctionType';
 import { IBid } from '../types/BidType';
 import { enqueueSnackbar } from 'notistack';
 import useAuction from '../services/AuctionService';
+import { initSocket } from '../services/SocketClient';
 
-const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL); // Replace with your backend URL
 
 // Auction context
 const AuctionContext = createContext<AuctionContextType | null>(null);
@@ -16,6 +16,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
     const [auction, setAuction] = useState<IAuction | null>(null);
 
     useEffect(() => {
+        const socket = initSocket();
         // Listen for the start of a new auction
         socket.on('auctionStarted', (data: { auction: IAuction }) => {
             setAuction(data.auction);
@@ -33,20 +34,17 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
             setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
         })
         socket.on('bidPlaced', (res: { data: IBid, message: string }) => {
-            console.log(res, 'bidPlaced');
 
             setAuction(auction => auction && ({ ...auction, bid: res.data }))
-            enqueueSnackbar({ variant: 'info', message: res.message });
+            // enqueueSnackbar({ variant: 'info', message: res.message });
         })
         socket.on('playerSwitched', (res: { data: { bid: IBid | null, player: string }, message: string }) => {
             setAuction(auction => auction && ({ ...auction, bid: res.data.bid, player: res.data.player }))
             // enqueueSnackbar({ variant: 'info', message: res.message });
-            console.log({ ...auction, bid: res.data.bid, player: res.data.player });
 
         })
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-            enqueueSnackbar({ variant: 'success', message: res.message });
-
+            setAuction(auction => auction && ({ ...auction, bid: null,timeRemaining:-1 }))
         })
 
         socket.on('auctionStopped', () => {
@@ -69,6 +67,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
             socket.off('bidPlaced');
             socket.off('auctionStopped');
             socket.off('auctionPaused');
+            // disconnectSocket();
             // socket.off('endAuction');
         };
     }, []);

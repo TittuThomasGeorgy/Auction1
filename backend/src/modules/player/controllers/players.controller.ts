@@ -161,3 +161,7 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         next(error);
     }
 }
+export const isPlayerSold = async (id: string) => {
+    const club = (await Player.findById(id))?.club;
+    return Boolean(club);
+}
