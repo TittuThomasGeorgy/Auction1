@@ -15,7 +15,7 @@ const AuctionClubCard = (props: ClubCardProps) => {
     return (
         <Box
             sx={{
-                width: 240,
+                width: 200,
                 height: 200, // Adjusted height to accommodate extra info
                 background: props.disabled
                     ? 'gray' // Disabled state background

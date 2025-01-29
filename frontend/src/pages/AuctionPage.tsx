@@ -92,14 +92,14 @@ const AuctionPage = () => {
             const _player = liveAuction.auction.player;
             if (_player) {
                 const currPlayerIdx = players.findIndex(player => player && player._id === _player);
-                setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
+                setCurrentPlayerIndex(currPlayerIdx >= 0 ? currPlayerIdx : 0)
             }
         }
-    }, [liveAuction.auction])
+    }, [liveAuction.auction, players])
 
     useEffect(() => {
         if (!(players.length > 0)) return
-        let currentPlayer = players[currentPlayerIndex]?._id;
+        let currentPlayer = liveAuction.auction?.player;
         let _players = players;
         if (sortBy === 'Sort by Position') {
             _players = _players
@@ -123,7 +123,7 @@ const AuctionPage = () => {
             const _player = liveAuction.auction.player;
             if (_player) {
                 const currPlayerIdx = players.findIndex(player => player && player._id === _player);
-                setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
+                setCurrentPlayerIndex(currPlayerIdx >= 0 ? currPlayerIdx : 0)
             }
         }
         // Listen for the start of a new auction
@@ -275,15 +275,30 @@ const AuctionPage = () => {
                         alignItems="center"
                         flex={{ xs: '1 1 100%', md: '1 1 25%' }} /* Full width on small, fixed on large */
                     >
-                        {(liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && (liveAuction.auction?.timeRemaining >= 0) ? (<>
-                            <Typography variant="h6" color="secondary" fontWeight="bold">
-                                TIME LEFT
-                            </Typography>
-                            <Typography variant="h2" color="primary" fontWeight="bold">
-                                {liveAuction.auction?.timeRemaining}
-                            </Typography>
-                        </>) : null}
+                        {(liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && (liveAuction.auction?.timeRemaining >= 0) ? (
+                            <>
+                                <Typography variant="h6" color="secondary" fontWeight="bold">
+                                    TIME LEFT
+                                </Typography>
+                                <Typography
+                                    variant="h2"
+                                    color="primary"
+                                    fontWeight="bold"
+                                    sx={{
+                                        animation: 'tick 1s infinite',
+                                        '@keyframes tick': {
+                                            '0%': { transform: 'scale(1)', color: '#FF4500' },  // Orange Red
+                                            '50%': { transform: 'scale(1.07)', color: '#FFD700' },  // Gold Flash
+                                            '100%': { transform: 'scale(1)', color: '#FF4500' },
+                                        },
+                                    }}
+                                >
+                                    {liveAuction.auction?.timeRemaining}
+                                </Typography>
+                            </>
+                        ) : null}
                     </Box>
+
                     <Box
                         display={{ xs: "flex", md: "none" }}
                         flexDirection="column"
@@ -328,7 +343,15 @@ const AuctionPage = () => {
                                 <Typography variant="h6" color="secondary" fontWeight="bold">
                                     TIME LEFT:
                                 </Typography>&nbsp;
-                                <Typography variant="h5" color="primary" fontWeight="bold">
+                                <Typography variant="h5" color="primary" fontWeight="bold"
+                                    sx={{
+                                        animation: 'tick 1s infinite',
+                                        '@keyframes tick': {
+                                            '0%': { transform: 'scale(1)', color: '#FF4500' },  // Orange Red
+                                            '50%': { transform: 'scale(1.07)', color: '#FFD700' },  // Gold Flash
+                                            '100%': { transform: 'scale(1)', color: '#FF4500' },
+                                        },
+                                    }}>
                                     {liveAuction.auction?.timeRemaining}
                                 </Typography></Stack>
                         </>) : null}
@@ -363,30 +386,46 @@ const AuctionPage = () => {
                 <br />
                 <Box
                     sx={{
-                        display: 'flex', // Flexbox layout
-                        flexWrap: 'wrap', // Allow wrapping if cards exceed container width
-                        gap: '16px', // Controls the space between cards
-                        justifyContent: 'center', // Center-align cards
+                        display: 'grid',
+                        gap: '16px',
+                        justifyContent: 'center',
+                        gridTemplateColumns: {
+                            xs: 'repeat(2, minmax(140px, 1fr))', // Two per row on extra-small screens
+                            sm: 'repeat(2, minmax(160px, 1fr))', // Two per row on small screens
+                            md: 'repeat(3, minmax(180px, 1fr))', // Three per row on medium screens
+                            lg: 'repeat(4, minmax(200px, 1fr))', // Four per row on large screens
+                        },
+                        width: '100%', // Ensure it takes full width
+                        maxWidth: '1000px', // Optional: Set max width to limit stretching
+                        margin: '0 auto', // Centers the grid within its container
                     }}
                 >
-                    {clubs.map(club =>
-                        <AuctionClubCard club={club} key={club._id} disabled={liveAuction.auction?.status != 'live'} onClick={() => setPlaceBidClub(club)} />
-                    )}
-                    {liveAuction.auction && placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
-                        currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
-                            const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
-                            if (res.success) {
-                                // setCurrentBid(res.data.bid);
-                                setPlaceBidClub(null)
-                            }
-                            enqueueSnackbar({
-                                variant: res.success ? 'success' : 'error',
-                                message: res.message
-                            })
-                        }}
-                        club={placeBidClub} />}
-
+                    {clubs.map(club => (
+                        <AuctionClubCard
+                            club={club}
+                            key={club._id}
+                            disabled={liveAuction.auction?.status !== 'live'}
+                            onClick={() => setPlaceBidClub(club)}
+                        />
+                    ))}
                 </Box>
+
+                {liveAuction.auction && placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
+                    currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
+                        const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
+                        if (res.success) {
+                            // setCurrentBid(res.data.bid);
+                            setPlaceBidClub(null)
+                        }
+                        enqueueSnackbar({
+                            variant: res.success ? 'success' : 'error',
+                            message: res.message
+                        })
+                    }}
+                    club={placeBidClub}
+                    timeRemaining={liveAuction.auction.timeRemaining ?? 0}
+                />}
+
                 <Dialog open={confirmation.open} onClose={() => setConfirmation({ open: false, action: null })}>
                     <DialogTitle>
                         {`Are you sure want to move to ${confirmation.action} Player as bid exists.`}
