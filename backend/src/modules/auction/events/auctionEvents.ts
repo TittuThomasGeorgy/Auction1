@@ -99,8 +99,8 @@ const playerChange = async (bid: IBid | null, player: string) => {
 }
 
 const playerSold = async (bid: IBid) => {
-    timeRemaining = 0
     io.emit('playerSold', { data: { bid }, message: 'Player Sold' });
+    timeRemaining = -1
 }
 const sellPlayer = async () => {
     if (auction?.player && currentBid) {

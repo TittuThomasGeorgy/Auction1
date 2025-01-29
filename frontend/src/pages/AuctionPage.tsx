@@ -119,7 +119,13 @@ const AuctionPage = () => {
 
     useEffect(() => {
         const socket = initSocket();
-
+        if (liveAuction.auction) {
+            const _player = liveAuction.auction.player;
+            if (_player) {
+                const currPlayerIdx = players.findIndex(player => player && player._id === _player);
+                setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
+            }
+        }
         // Listen for the start of a new auction
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
             const bid = res.data.bid;
@@ -404,7 +410,7 @@ const AuctionPage = () => {
                 {
                     players[currentPlayerIndex]?.club && <PlayerSoldModal
                         open={showSold}
-                        onClose={() => setShowSold(true)}
+                        onClose={() => setShowSold(false)}
                         club={clubs.find((clb) => clb._id === players[currentPlayerIndex].club) as IClub}
                         player={players[currentPlayerIndex]}
                     />
