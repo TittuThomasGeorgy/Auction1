@@ -1,9 +1,11 @@
-import { Modal, Fade, Box, Typography, Dialog, Slide } from '@mui/material'
-import React from 'react'
+import { Dialog, Box, Fade, Typography, DialogActions, Button, DialogContent, IconButton } from '@mui/material';
+import React from 'react';
 import { IPlayer } from '../types/PlayerType';
 import { IClub } from '../types/ClubType';
-import { TransitionProps } from '@mui/material/transitions';
-
+import PlayerCard from './PlayerCard';
+import Animations from '../animations';
+import Lottie from 'react-lottie';
+import { Close as CloseIcon } from '@mui/icons-material';
 interface PopupProps {
     open: boolean;
     onClose: () => void;
@@ -11,84 +13,130 @@ interface PopupProps {
     club: IClub;
 }
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & { children: React.ReactElement },
-    ref: React.Ref<unknown>
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: Animations.fireworks,
+    rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice',
+    },
+};
+
 const PlayerSoldModal = (props: PopupProps) => {
     return (
         <Dialog
             open={props.open}
-            onClose={() => props.onClose()}
-            TransitionComponent={Transition}
-            keepMounted
+            onClose={props.onClose}
+            maxWidth="md"
             sx={{
                 '& .MuiDialog-paper': {
-                    background: 'linear-gradient(145deg, #12263f, #1c4a7d)',
+                    background: 'rgba(15, 30, 50, 0.95)', // Deep navy blue, clean sports feel
                     borderRadius: '16px',
-                    padding: '20px',
+                    padding: '30px',
                     color: '#fff',
                     textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
                 },
             }}
         >
-            {/* Player Image */}
-            <Box
-                component="img"
-                src={props.player.image}
-                alt={props.player.name}
+            {/* Close Button */}
+            <IconButton
+                onClick={() => props.onClose()}
                 sx={{
-                    width: '150px',
-                    height: '150px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    margin: '0 auto',
-                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.5)',
-                }}
-            />
-
-            {/* Player Name */}
-            <Typography
-                variant="h5"
-                sx={{
-                    fontWeight: 700,
-                    marginTop: '16px',
-                    textTransform: 'uppercase',
-                    textShadow: '0px 3px 6px rgba(0, 0, 0, 0.8)',
+                    position: 'absolute',
+                    top: 5,
+                    right: 5,
+                    color: '#fff',
+                    background: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                        background: 'rgba(255,255,255,0.2)',
+                    },
                 }}
             >
-                {props.player.name}
-            </Typography>
-
-            {/* Club Logo */}
+                <CloseIcon fontSize="medium" />
+            </IconButton>
+            {/* Fireworks on both sides */}
             <Box
-                component="img"
-                src={props.club.logo}
-                alt={props.club.name}
                 sx={{
-                    width: '100px',
-                    height: '100px',
-                    marginTop: '16px',
-                    objectFit: 'contain',
-                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.5)',
-                }}
-            />
-
-            {/* Club Name */}
-            <Typography
-                variant="h6"
-                sx={{
-                    fontWeight: 600,
-                    marginTop: '8px',
-                    textShadow: '0px 2px 5px rgba(0, 0, 0, 0.7)',
+                    position: 'absolute',
+                    top: '50%',
+                    left: 0,
+                    transform: 'translateY(-50%)',
                 }}
             >
-                {props.club.name}
-            </Typography>
+                <Lottie options={defaultOptions} height={200} width={200} />
+            </Box>
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: 0,
+                    transform: 'translateY(-50%)',
+                }}
+            >
+                <Lottie options={defaultOptions} height={200} width={200} />
+            </Box>
+
+            {/* Welcome Message */}
+            <Fade in={props.open} timeout={600}>
+                <Typography
+                    variant="h3"
+                    sx={{
+                        fontWeight: 800,
+                        fontFamily: '"Rajdhani", sans-serif', // Sporty and sleek
+                        letterSpacing: '2px',
+                        background: 'linear-gradient(90deg, #1DB954, #17A589)', // Sporty green-teal gradient
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        textTransform: 'uppercase',
+                    }}
+                >
+                    Welcome
+                </Typography>
+            </Fade>
+
+            {/* Centered Player Card with Fade Effect */}
+            <Fade in={props.open} timeout={500}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                    <PlayerCard player={props.player} club={props.club} />
+                </Box>
+            </Fade>
+
+            {/* Club Logo & Name */}
+            <Fade in={props.open} timeout={600}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mt: 2 }}>
+                    <Box
+                        component="img"
+                        src={props.club.logo}
+                        alt={props.club.name}
+                        sx={{
+                            width: 60,
+                            height: 60,
+                            transition: 'all 0.5s ease-in-out',
+                        }}
+                    />
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 'bold',
+                            fontFamily: '"Teko", sans-serif', // Clean and sporty
+                            letterSpacing: '1.5px',
+                            background: 'linear-gradient(90deg, #FFC107, #FF9800)', // Golden-orange sports gradient
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            textTransform: 'uppercase',
+                            ml: 2,
+                        }}
+                    >
+                        {props.club.name}
+                    </Typography>
+                </Box>
+            </Fade>
+
+
         </Dialog>
-    )
-}
+    );
+};
 
-export default PlayerSoldModal
+export default PlayerSoldModal;

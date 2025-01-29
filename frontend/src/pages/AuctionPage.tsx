@@ -18,6 +18,7 @@ import MenuButton from '../components/MenuButton';
 import { io } from 'socket.io-client';
 import { IBid } from '../types/BidType';
 import { initSocket } from '../services/SocketClient';
+import PlayerSoldModal from '../components/PlayerSoldModal';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -39,8 +40,8 @@ const AuctionPage = () => {
         open: boolean;
         action: "next" | "previous" | null;
     }>({ open: false, action: null });
-    const [soldBid, setSoldBid] = useState<IBid | null>(null)
-    const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position')
+    const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position');
+    const [showSold, setShowSold] = useState(false)
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
@@ -125,11 +126,10 @@ const AuctionPage = () => {
             console.log(res.data);
 
             if (bid) {
-
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
                 setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
                 enqueueSnackbar({ variant: 'success', message: res.message });
-                // setSoldBid(bid);
+                setShowSold(true)
             }
 
         })
@@ -137,9 +137,6 @@ const AuctionPage = () => {
             socket.off('playerSold');
         };
     }, []);
-    useEffect(() => {
-        console.log(players);
-    }, [players])
 
 
     return (
@@ -403,13 +400,14 @@ const AuctionPage = () => {
                             Confirm
                         </Button>
                     </DialogActions>
-                </Dialog>{
-                    // soldBid && players.find(player => soldBid?.player === player._id)
-                    // && clubs.find(club => soldBid?.club === club._id) && <PlayerSoldModal open={Boolean(soldBid)}
-                    //     onClose={() => setSoldBid(null)}
-                    //     player={players.find(player => soldBid?.player === player._id) as IPlayer}
-                    //     club={clubs.find(club => soldBid?.club === club._id) as IClub}
-                    // />
+                </Dialog>
+                {
+                    players[currentPlayerIndex]?.club && <PlayerSoldModal
+                        open={showSold}
+                        onClose={() => setShowSold(true)}
+                        club={clubs.find((clb) => clb._id === players[currentPlayerIndex].club) as IClub}
+                        player={players[currentPlayerIndex]}
+                    />
                 }
             </Container >
         </>
