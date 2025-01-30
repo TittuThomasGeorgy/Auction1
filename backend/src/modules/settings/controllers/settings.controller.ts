@@ -37,6 +37,10 @@ export const createSettings = async () => {
             initialBalance: 0,
             playersPerClub: 6,
             bidTime: 10,
+            addOnTime: 5,
+            bidMultiple: 100,
+            keepMinBid: true,
+            minBid: 100,
             resetPassword: 'qazwsx',
         });
 

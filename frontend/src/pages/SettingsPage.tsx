@@ -1,18 +1,22 @@
-import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Paper, InputAdornment, Grid2 as Grid, Divider, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Switch } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import BackButton from '../components/BackButton';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { enqueueSnackbar } from 'notistack';
-import { SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
+import { AccessTime, AttachMoney, Groups, MoreTime, SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, TimerOutlined, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
 
 const SettingsPage = () => {
     const settingsServ = useSettings();
     const [settings, setSettings] = useState<ISettings>({
         _id: '',
         bidTime: 0,
+        addOnTime: 0,
         initialBalance: 0,
         playersPerClub: 0,
+        bidMultiple: 0,
+        keepMinBid: true,
+        minBid: 0
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -88,7 +92,7 @@ const SettingsPage = () => {
                                     disabled={!isEditing}
                                     slotProps={{
                                         input: {
-                                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                            startAdornment: <InputAdornment position="start"><AttachMoney /></InputAdornment>,
                                             endAdornment: <InputAdornment position="end">M</InputAdornment>,
                                             inputProps: { min: 0 },
                                         }
@@ -97,21 +101,55 @@ const SettingsPage = () => {
                                 />
                             </Grid>
                             <Grid size={4}>
-                                <Typography variant="body1" color="initial">Players Per Club:</Typography>
+                                <Typography variant="body1" color="initial">Bid Multiple By:</Typography>
                             </Grid>
                             <Grid size={8}>
                                 <TextField
                                     fullWidth
                                     type="number"
                                     variant="outlined"
-                                    value={settings.playersPerClub}
-                                    onChange={(e) => handleInputChange('playersPerClub', +e.target.value)}
+                                    value={settings.bidMultiple}
+                                    onChange={(e) => handleInputChange('bidMultiple', +e.target.value)}
                                     disabled={!isEditing}
                                     slotProps={{
                                         input: {
-                                            startAdornment: <InputAdornment position="start">👥</InputAdornment>,
-                                            endAdornment: <InputAdornment position="end">Players</InputAdornment>,
-                                            inputProps: { min: 1 },
+                                            startAdornment: <InputAdornment position="start"><AttachMoney /></InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                                            inputProps: { min: 0 },
+                                        }
+                                    }}
+                                    sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                />
+                            </Grid>
+                            <Grid size={4}>
+                                <Typography variant="body1" color="initial">Reserve Minimum Bid Per Player:</Typography>
+                            </Grid>
+                            <Grid size={8}>
+                                <Switch
+                                    checked={settings.keepMinBid}
+                                    onChange={(e) => setSettings((prev) => ({
+                                        ...prev,
+                                        keepMinBid: e.target.checked,
+                                    }))}
+                                    disabled={!isEditing}
+                                />
+                            </Grid>
+                            <Grid size={4}>
+                                <Typography variant="body1" color="initial"> Minimum Bid:</Typography>
+                            </Grid>
+                            <Grid size={8}>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    variant="outlined"
+                                    value={settings.minBid}
+                                    onChange={(e) => handleInputChange('minBid', +e.target.value)}
+                                    disabled={!isEditing || !settings.keepMinBid}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start"><AttachMoney /></InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                                            inputProps: { min: 0 },
                                         }
                                     }}
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
@@ -130,8 +168,50 @@ const SettingsPage = () => {
                                     disabled={!isEditing}
                                     slotProps={{
                                         input: {
-                                            startAdornment: <InputAdornment position="start">⏱</InputAdornment>,
+                                            startAdornment: <InputAdornment position="start"><TimerOutlined /></InputAdornment>,
                                             endAdornment: <InputAdornment position="end">Seconds</InputAdornment>,
+                                            inputProps: { min: 1 },
+                                        }
+                                    }}
+                                    sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                />
+                            </Grid>
+                            <Grid size={4}>
+                                <Typography variant="body1" color="initial">Extra   Bid Time:</Typography>
+                            </Grid>
+                            <Grid size={8}>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    variant="outlined"
+                                    value={settings.addOnTime}
+                                    onChange={(e) => handleInputChange('addOnTime', +e.target.value)}
+                                    disabled={!isEditing}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start"><MoreTime /></InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">Seconds</InputAdornment>,
+                                            inputProps: { min: 1 },
+                                        }
+                                    }}
+                                    sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                />
+                            </Grid>
+                            <Grid size={4}>
+                                <Typography variant="body1" color="initial">Players Per Club:</Typography>
+                            </Grid>
+                            <Grid size={8}>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    variant="outlined"
+                                    value={settings.playersPerClub}
+                                    onChange={(e) => handleInputChange('playersPerClub', +e.target.value)}
+                                    disabled={!isEditing}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start"><Groups /></InputAdornment>,
+                                            endAdornment: <InputAdornment position="end">Players</InputAdornment>,
                                             inputProps: { min: 1 },
                                         }
                                     }}

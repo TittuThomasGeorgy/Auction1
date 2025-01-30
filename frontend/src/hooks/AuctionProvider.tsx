@@ -44,7 +44,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
 
         })
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-            setAuction(auction => auction && ({ ...auction, bid: null,timeRemaining:-1 }))
+            setAuction(auction => auction && ({ ...auction, bid: null, timeRemaining: -1 }))
         })
 
         socket.on('auctionStopped', () => {
@@ -77,7 +77,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         const getData = async () => {
             const res = await auctionServ.getAuction();
             if (res.data.status != 'stopped')
-                setAuction(res.data)
+                setAuction({ ...res.data, timeRemaining: -1 })
         }
         getData();
     }, [])

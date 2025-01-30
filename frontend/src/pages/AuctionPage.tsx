@@ -61,7 +61,7 @@ const AuctionPage = () => {
     const nextPlayer = async () => {
         setCurrentPlayerIndex((prevIndex) => {
             const newIndex = (prevIndex + 1) % players.length;
-           liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
+            liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
             return newIndex;
         });
     }
@@ -69,7 +69,7 @@ const AuctionPage = () => {
         setCurrentPlayerIndex((prevIndex) => {
             const index = (prevIndex - 1) % players.length;
             const newIndex = index < 0 ? players.length - 1 : index
-           liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
+            liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
             return newIndex;
         });
     };
@@ -377,8 +377,8 @@ const AuctionPage = () => {
                         await AuctionServ.playPause('resume'); // A default synchronous return if needed
                     }} onPause={async () => {
                         await AuctionServ.playPause('pause'); // A default synchronous return if needed
-                    }} onAddTime={function (): void {
-                        throw new Error('Function not implemented.');
+                    }} onAddTime={async () => {
+                        await AuctionServ.addTime(); // A default synchronous return if needed
                     }} onSell={async () => {
                         // throw new Error('Function not implemented.');
                         await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed

@@ -12,6 +12,7 @@ const useAuction = () => {
     playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, { action })),
     start: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/start`, { player })),
     stop: () => getStandardResponse<IAuction>(axios.post(`/auction/stop`, {})),
+    addTime: () => getStandardResponse<IAuction>(axios.post(`/auction/addTime`, {})),
     switchPlayer: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/nextPlayer`, { player })),
     sell: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/sell`, { player })),
     placeBid: (club: string, player: string, bid: number) => getStandardResponse<IBid>(axios.post(`/auction/bid`, { club, player, bid })),
