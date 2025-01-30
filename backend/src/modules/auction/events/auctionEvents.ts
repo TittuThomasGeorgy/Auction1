@@ -65,6 +65,13 @@ const restartTime = async () => {
     console.log(timeRemaining, 'resetter');
     runAuction();
 }
+const addTime = async () => {
+    auction = (await isAuctionExist()) ?? null;
+    const setting = await isSettingExist();
+    timeRemaining = timeRemaining + (setting?.addOnTime ?? 0);
+    console.log(timeRemaining, 'Time Added'.green);
+    // runAuction();
+}
 const stopLiveAuction = async () => {
     if (auctionTimer) clearInterval(auctionTimer);
     timeRemaining = -2;
@@ -121,4 +128,4 @@ const sellPlayer = async () => {
         playerSold(currentBid);
     }
 }
-export { startLiveAuction, bidPlaced, restartTime, stopLiveAuction, playPauseLiveAuction, playerChange, playerSold }
+export { startLiveAuction, bidPlaced, restartTime, stopLiveAuction, playPauseLiveAuction, playerChange, playerSold, addTime }

@@ -54,6 +54,10 @@ export const createSettings = async () => {
 }
 export const updateSettings = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const auction = await isAuctionExist(true);
+        if (auction?.status != 'stopped')
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction Running. Please Stop auction.');
+
         const _updatedSettings = req.body;
         const prevSettings = await isSettingExist();
         if (!prevSettings) {

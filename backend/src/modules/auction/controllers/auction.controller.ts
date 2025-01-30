@@ -7,7 +7,7 @@ import Bid from "../models/Bid";
 import { io } from "../../../server";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
-import { bidPlaced, playerChange, playerSold, playPauseLiveAuction, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
+import { addTime, bidPlaced, playerChange, playerSold, playPauseLiveAuction, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
 import { IBid } from "../types/bid";
 import Player from "../../player/models/Player";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
@@ -76,6 +76,21 @@ export const stopAuction = async (req: Request, res: Response, next: NextFunctio
         }, { new: true }) // Optionally return the updated document
         stopLiveAuction();
         sendApiResponse(res, 'OK', data, 'Successfully Stopped auction');
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
+export const addAuctionTime = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist();
+        if (auction?.status === 'stopped')
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction not Started .');
+
+        const playerSold = auction && await isPlayerSold(auction?.player.toString());
+        if (playerSold)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+        addTime();
+        sendApiResponse(res, 'OK', null, 'Successfully Time added');
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
