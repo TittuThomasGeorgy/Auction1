@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -37,6 +37,9 @@ const BidDialog = ({ open, onClose, onSubmit, club, currentBid, timeRemaining }:
         }
     };
 
+    useEffect(() => {
+        setBidAmount(currentBid + 100)
+    }, [currentBid])
     return (
         <Dialog open={open} onClose={onClose} aria-labelledby="bid-dialog-title">
             <DialogContent>

@@ -29,15 +29,17 @@ const runAuction = async () => {
     auction = (await isAuctionExist()) ?? null;
     // Timer for the auction
     auctionTimer = setInterval(async () => {
-        if (timeRemaining >= 0 && auction?.status === 'live') {
+        if (timeRemaining >= -1 && auction?.status === 'live') {
             console.log("T:", timeRemaining, new Date());
             // Update frontend with the time remaining
             io.emit('auctionTimeUpdate', { timeRemaining });
             timeRemaining -= 1;
-        } else {
+        } else if (timeRemaining == -2 && auction?.status === 'live') {
             // End the current auction
             playPauseLiveAuction('pause');
             sellPlayer();
+        } else {
+            clearInterval(auctionTimer)
             // auction.isLive = false;
             // auction.status = 'completed';
             // await auction.save();
@@ -65,7 +67,7 @@ const restartTime = async () => {
 }
 const stopLiveAuction = async () => {
     if (auctionTimer) clearInterval(auctionTimer);
-    timeRemaining = -1;
+    timeRemaining = -2;
     auction = null;
     currentBid = null;
     io.emit('auctionStopped', {})
@@ -77,15 +79,19 @@ const playPauseLiveAuction = async (action: 'pause' | 'resume') => {
             status: action == 'resume' ? 'live' : 'pause',
         }, { new: true }) // Optionally return the updated document
         if (action == 'pause') {
+            console.log("PAUSED".red);
+
             auction.status = 'pause'
             io.emit('auctionPaused', { status: 'pause' });
             // if (auctionTimer) clearInterval(auctionTimer);
             if (auctionTimer) clearInterval(auctionTimer);
         }
         else {
+            console.log("RESUMED".green);
+
             auction.status = 'live'
             io.emit('auctionPaused', { status: 'live' });
-            if (timeRemaining == -1) restartTime();
+            if (timeRemaining < 0) restartTime();
             else runAuction()
         }
     }
@@ -100,7 +106,7 @@ const playerChange = async (bid: IBid | null, player: string) => {
 
 const playerSold = async (bid: IBid) => {
     io.emit('playerSold', { data: { bid }, message: 'Player Sold' });
-    timeRemaining = -1
+    timeRemaining = -2
 }
 const sellPlayer = async () => {
     if (auction?.player && currentBid) {

@@ -135,7 +135,9 @@ const AuctionPage = () => {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
                 setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
                 enqueueSnackbar({ variant: 'success', message: res.message });
-                setShowSold(true)
+                setShowSold(true);
+                setPlaceBidClub(null);
+
             }
 
         })
@@ -217,7 +219,7 @@ const AuctionPage = () => {
                         style={{ scrollSnapType: 'x mandatory' }}
                     >
                         {/* Previous Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining > 0))) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('previous')}
                                 disabled={players.length === 0}
@@ -256,7 +258,7 @@ const AuctionPage = () => {
                         </Box>
 
                         {/* Next Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining > 0))) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('next')}
                                 disabled={players.length === 0}
@@ -338,6 +340,7 @@ const AuctionPage = () => {
 
                             )
                         })()}
+
                         {(liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && (liveAuction.auction?.timeRemaining >= 0) ? (<>
                             <Stack direction={'row'}>
                                 <Typography variant="h6" color="secondary" fontWeight="bold">
