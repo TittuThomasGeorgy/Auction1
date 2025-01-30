@@ -57,7 +57,7 @@ const PlayerSoldModal = (props: PopupProps) => {
                 <CloseIcon fontSize="medium" />
             </IconButton>
             {/* Fireworks on both sides */}
-            <Box
+            {/* <Box
                 sx={{
                     position: 'absolute',
                     top: '50%',
@@ -66,18 +66,22 @@ const PlayerSoldModal = (props: PopupProps) => {
                 }}
             >
                 <Lottie options={defaultOptions} height={200} width={200} />
-            </Box>
+            </Box> */}
             <Box
                 sx={{
                     position: 'absolute',
-                    top: '50%',
-                    right: 0,
-                    transform: 'translateY(-50%)',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    // zIndex: -1, // Ensures it stays behind other content
                 }}
             >
-                <Lottie options={defaultOptions} height={200} width={200} />
+                <Lottie options={defaultOptions} width="100%" height="100%" />
             </Box>
-
             {/* Welcome Message */}
             <Fade in={props.open} timeout={600}>
                 <Typography
