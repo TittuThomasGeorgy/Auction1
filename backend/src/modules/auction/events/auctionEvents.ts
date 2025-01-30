@@ -2,7 +2,7 @@ import { log } from "console";
 import { io } from "../../../server";
 import { getPlayers } from "../../player/controllers/players.controller";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
-import { isAuctionExist, placeBid, validateSellPlayer } from "../controllers/auction.controller";
+import { isAuctionExist, validateSellPlayer } from "../controllers/auction.controller";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
 import { IBid } from "../types/bid";
@@ -50,12 +50,11 @@ const runAuction = async () => {
     }, 1000); // Countdown every second
 }
 
-const bidPlaced = async (bid: IBid) => {
+const placeBid = async (bid: IBid | null) => {
     auction = (await isAuctionExist()) ?? null;
     currentBid = bid;
     restartTime();
     io.emit('bidPlaced', { data: bid, message: `Bid Placed successfully` })
-
 }
 const restartTime = async () => {
     auction = (await isAuctionExist()) ?? null;
@@ -128,4 +127,4 @@ const sellPlayer = async () => {
         playerSold(currentBid);
     }
 }
-export { startLiveAuction, bidPlaced, restartTime, stopLiveAuction, playPauseLiveAuction, playerChange, playerSold, addTime }
+export { startLiveAuction, placeBid, restartTime, stopLiveAuction, playPauseLiveAuction, playerChange, playerSold, addTime }

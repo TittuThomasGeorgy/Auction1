@@ -7,7 +7,7 @@ import Bid from "../models/Bid";
 import { io } from "../../../server";
 import Auction from "../models/Auction";
 import { IAuction } from "../types/auction";
-import { addTime, bidPlaced, playerChange, playerSold, playPauseLiveAuction, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
+import { addTime, placeBid, playerChange, playerSold, playPauseLiveAuction, startLiveAuction, stopLiveAuction } from "../events/auctionEvents";
 import { IBid } from "../types/bid";
 import Player from "../../player/models/Player";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
@@ -127,7 +127,7 @@ export const nextPlayer = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const placeBid = async (req: Request, res: Response, next: NextFunction) => {
+export const placeAuctionBid = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist(true);
         if (auction?.status != 'live')
@@ -147,7 +147,7 @@ export const placeBid = async (req: Request, res: Response, next: NextFunction) 
         if (!newBid) {
             return sendApiResponse(res, 'CONFLICT', null, 'Bid Not Placed');
         }
-        bidPlaced(newBid);
+        placeBid(newBid);
         sendApiResponse(res, 'OK', newBid, 'Bid Placed')
     } catch (error) {
         next(error);
@@ -260,6 +260,30 @@ const isBidValid = async (_bid: IBid) => {
 const getNoOfPlayers = async (clubId: string) => {
     const data = await Player.find({ club: clubId })
     return data.length ?? 0
+}
+
+export const undoBid = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const auction = await isAuctionExist(true);
+        if (!auction || auction?.status === 'stopped')
+            return sendApiResponse(res, 'CONFLICT', null, 'Auction Stopped. Please Try again');
+
+        const playerSold = await isPlayerSold(auction?.player.toString());
+        if (playerSold)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+
+        const _lastBid = await lastBid(auction?.player.toString())
+        if (_lastBid)
+            await Bid.findByIdAndUpdate(_lastBid?._id, { state: 0 });
+
+        const _prevBid = await lastBid(auction?.player.toString())
+        await Auction.findByIdAndUpdate(auction?._id, { bid: _prevBid?._id ?? null });
+
+        placeBid(_prevBid);
+        sendApiResponse(res, 'OK', _prevBid, 'Bid Undo')
+    } catch (error) {
+        next(error);
+    }
 }
 // export const getClubs = async (req: Request, res: Response, next: NextFunction) => {
 //     try {

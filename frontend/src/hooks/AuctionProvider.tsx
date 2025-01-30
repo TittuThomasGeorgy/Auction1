@@ -33,8 +33,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
         socket.on('auctionTimeUpdate', (data: { timeRemaining: number }) => {
             setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
         })
-        socket.on('bidPlaced', (res: { data: IBid, message: string }) => {
-
+        socket.on('bidPlaced', (res: { data: IBid | null, message: string }) => {
             setAuction(auction => auction && ({ ...auction, bid: res.data }))
             // enqueueSnackbar({ variant: 'info', message: res.message });
         })

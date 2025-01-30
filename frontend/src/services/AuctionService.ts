@@ -16,6 +16,7 @@ const useAuction = () => {
     switchPlayer: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/nextPlayer`, { player })),
     sell: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/sell`, { player })),
     placeBid: (club: string, player: string, bid: number) => getStandardResponse<IBid>(axios.post(`/auction/bid`, { club, player, bid })),
+    undoBid: () => getStandardResponse<IBid>(axios.post(`/auction/undoBid`, {})),
     // placeBid: (club: string, player: string, bid: number) => getStandardSocketResponse<IBid>(axios.post(`/auction/`, { club, player, bid })),
   }
 };

@@ -382,8 +382,8 @@ const AuctionPage = () => {
                     }} onSell={async () => {
                         // throw new Error('Function not implemented.');
                         await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed
-                    }} onUndo={function (): void {
-                        throw new Error('Function not implemented.');
+                    }} onUndo={async () => {
+                        await AuctionServ.undoBid(); // A default synchronous return if needed
                     }} onStart={async () => {
                         await AuctionServ.start(players[currentPlayerIndex]?._id); // A default synchronous return if needed
                     }} onStop={async () => {
