@@ -49,34 +49,39 @@ const AuctionPage = () => {
         );
     }, []);
 
-    const nextPlayer = async () => {
-        const currentIdx = (currentPlayerIndex + 1) % players.length
-        setCurrentPlayerIndex(currentIdx);
-        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx]._id)
-    }
+
     const handleNextPlayer = async (type: 'next' | 'previous') => {
         if (liveAuction.auction?.bid && !players[currentPlayerIndex]?.club)
             setConfirmation({ open: true, action: type })
-        else if (type == 'next')
+        else if (type === 'next')
             nextPlayer();
-        else if (type == 'previous')
+        else if (type === 'previous')
             previousPlayer();
     };
-
+    const nextPlayer = async () => {
+        setCurrentPlayerIndex((prevIndex) => {
+            const newIndex = (prevIndex + 1) % players.length;
+           liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
+            return newIndex;
+        });
+    }
     const previousPlayer = async () => {
-        const currentIdx = (currentPlayerIndex - 1) % players.length;
-        setCurrentPlayerIndex(currentIdx < 0 ? players.length - 1 : currentIdx);
-        liveAuction.auction && await AuctionServ.switchPlayer(players[currentIdx < 0 ? players.length - 1 : currentIdx]._id)
+        setCurrentPlayerIndex((prevIndex) => {
+            const index = (prevIndex - 1) % players.length;
+            const newIndex = index < 0 ? players.length - 1 : index
+           liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
+            return newIndex;
+        });
     };
 
 
     // Add keyboard navigation
     useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
+        const handleKeyDown = async (event: KeyboardEvent) => {
             if (event.key === 'ArrowRight') {
-                handleNextPlayer('next');
+                await handleNextPlayer('next');
             } else if (event.key === 'ArrowLeft') {
-                handleNextPlayer('previous');
+                await handleNextPlayer('previous');
             }
         };
 
@@ -84,7 +89,7 @@ const AuctionPage = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [players]); // Add players as a dependency to ensure the effect updates correctly
+    }, [handleNextPlayer]); // Add players as a dependency to ensure the effect updates correctly
 
     useEffect(() => {
         if (liveAuction.auction) {
