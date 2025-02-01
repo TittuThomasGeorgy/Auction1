@@ -121,6 +121,16 @@ const AuctionPage = () => {
         setPlayers(_players)
     }, [sortBy, players]);
 
+    useEffect(() => {
+        if (showSold) {
+            const timer = setTimeout(() => {
+                setShowSold(false);
+            }, 10000);
+    
+            return () => clearTimeout(timer);
+        }
+    }, [showSold]);
+
 
     useEffect(() => {
         const socket = initSocket();

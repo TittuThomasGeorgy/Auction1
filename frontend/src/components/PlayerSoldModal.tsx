@@ -16,13 +16,14 @@ interface PopupProps {
 const defaultOptions = {
     loop: true,
     autoplay: true,
-    animationData: Animations.fireworks,
+    animationData: Animations.firework,
     rendererSettings: {
         preserveAspectRatio: 'xMidYMid slice',
     },
 };
 
 const PlayerSoldModal = (props: PopupProps) => {
+    
     return (
         <Dialog
             open={props.open}
@@ -70,10 +71,10 @@ const PlayerSoldModal = (props: PopupProps) => {
             <Box
                 sx={{
                     position: 'absolute',
-                    top: 0,
+                    top: 100,
                     left: 0,
                     width: '100%',
-                    height: '100%',
+                    height: '60%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

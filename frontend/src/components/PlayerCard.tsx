@@ -57,7 +57,7 @@ const PlayerCard = (props: PlayerCardProps) => {
                             src={props.club.logo}
                             alt={props.club.name}
                             sx={{
-                                width: 65,
+                                // width: 65,
                                 height: 65,
                                 position: 'absolute',
                                 top: 60,
