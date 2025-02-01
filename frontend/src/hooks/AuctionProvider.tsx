@@ -43,7 +43,7 @@ export const AuctionProvider = (props: { children: ReactNode }) => {
 
         })
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-            setAuction(auction => auction && ({ ...auction, bid: null, timeRemaining: -1 }))
+            setAuction(auction => auction && ({ ...auction, bid: null, timeRemaining: -2 }))
         })
 
         socket.on('auctionStopped', () => {

@@ -19,6 +19,8 @@ import { io } from 'socket.io-client';
 import { IBid } from '../types/BidType';
 import { initSocket } from '../services/SocketClient';
 import PlayerSoldModal from '../components/PlayerSoldModal';
+import useSettings from '../services/SettingsService';
+import { ISettings } from '../types/SettingsType';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -31,6 +33,8 @@ const AuctionPage = () => {
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
     const AuctionServ = useAuction();
+    const settingsServ = useSettings();
+
     const liveAuction = useLiveAuction();
     const [players, setPlayers] = useState<IPlayer[]>([]);
     const [clubs, setClubs] = useState<IClub[]>([]);
@@ -42,11 +46,25 @@ const AuctionPage = () => {
     }>({ open: false, action: null });
     const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position');
     const [showSold, setShowSold] = useState(false)
+    const [settings, setSettings] = useState<ISettings>({
+        _id: '',
+        bidTime: 0,
+        addOnTime: 0,
+        initialBalance: 0,
+        playersPerClub: 0,
+        bidMultiple: 0,
+        keepMinBid: true,
+        minBid: 0
+    });
+
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
         PlayerServ.getAll().then((res) =>
             setPlayers(res.data)
         );
+        settingsServ.get()
+            .then((res) => setSettings(res.data))
+            .catch((err) => console.error(err));
     }, []);
 
 
@@ -120,16 +138,15 @@ const AuctionPage = () => {
         setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
         setPlayers(_players)
     }, [sortBy, players]);
-
     useEffect(() => {
-        if (showSold) {
-            const timer = setTimeout(() => {
+        const timer = setTimeout(() => {
+            if (showSold) {
                 setShowSold(false);
-            }, 10000);
-    
-            return () => clearTimeout(timer);
-        }
-    }, [showSold]);
+            }
+        }, 10000);
+
+        return () => clearTimeout(timer); // ✅ Cleanup timeout properly
+    }, [showSold]); // ✅ Dependency remains the same
 
 
     useEffect(() => {
@@ -174,6 +191,20 @@ const AuctionPage = () => {
                     { label: 'Sort by Status', onClick: () => setSortBy('Sort by Status') },
                 ]} sx={{ float: 'right' }} selected={sortBy} />
                 {/* <br /> */}
+                <Typography textAlign={'right'}
+                    sx={{
+                        fontSize: '14px',
+                        // fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'end',
+                        gap: '2px',
+                    }}
+                >
+
+                    {currentPlayerIndex + 1} / {players.length}
+
+                </Typography>
                 <Box
                     display="flex"
                     alignItems="center"
@@ -256,6 +287,7 @@ const AuctionPage = () => {
                                 transition: 'transform 0.5s ease-in-out',
                             }}
                         >
+
                             {players.map((player) => (
                                 <Box
                                     key={player._id}
@@ -264,6 +296,7 @@ const AuctionPage = () => {
                                     justifyContent="center"
                                     alignItems="center"
                                 >
+
                                     <PlayerCard
                                         player={player}
                                         club={clubs.find((clb) => clb._id === player.club) ?? null}
@@ -390,7 +423,6 @@ const AuctionPage = () => {
                     }} onAddTime={async () => {
                         await AuctionServ.addTime(); // A default synchronous return if needed
                     }} onSell={async () => {
-                        // throw new Error('Function not implemented.');
                         await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed
                     }} onUndo={async () => {
                         await AuctionServ.undoBid(); // A default synchronous return if needed
@@ -418,31 +450,38 @@ const AuctionPage = () => {
                         margin: '0 auto', // Centers the grid within its container
                     }}
                 >
-                    {clubs.map(club => (
-                        <AuctionClubCard
-                            club={club}
-                            key={club._id}
-                            disabled={liveAuction.auction?.status !== 'live'}
-                            onClick={() => setPlaceBidClub(club)}
-                        />
-                    ))}
+                    {clubs.map(club => {
+                        const _playerCount = players.filter(player => player.club === club._id).length;
+                        return (
+
+                            <AuctionClubCard
+                                club={club}
+                                key={club._id}
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub}
+                                onClick={() => setPlaceBidClub(club)}
+                                playerCount={_playerCount}
+                                maxPlayers={settings.playersPerClub}
+                            />
+                        )
+                    })}
                 </Box>
 
-                {liveAuction.auction && placeBidClub && <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
-                    currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
-                        const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
-                        if (res.success) {
-                            // setCurrentBid(res.data.bid);
-                            setPlaceBidClub(null)
-                        }
-                        enqueueSnackbar({
-                            variant: res.success ? 'success' : 'error',
-                            message: res.message
-                        })
-                    }}
-                    club={placeBidClub}
-                    timeRemaining={liveAuction.auction.timeRemaining ?? 0}
-                />}
+                {liveAuction.auction && placeBidClub &&
+                    <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
+                        currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
+                            const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
+                            if (res.success) {
+                                // setCurrentBid(res.data.bid);
+                                setPlaceBidClub(null)
+                            }
+                            enqueueSnackbar({
+                                variant: res.success ? 'success' : 'error',
+                                message: res.message
+                            })
+                        }}
+                        club={placeBidClub}
+                        timeRemaining={liveAuction.auction.timeRemaining ?? 0}
+                    />}
 
                 <Dialog open={confirmation.open} onClose={() => setConfirmation({ open: false, action: null })}>
                     <DialogTitle>
@@ -465,7 +504,8 @@ const AuctionPage = () => {
                     </DialogActions>
                 </Dialog>
                 {
-                    players[currentPlayerIndex]?.club && <PlayerSoldModal
+                    players[currentPlayerIndex]?.club &&
+                    <PlayerSoldModal
                         open={showSold}
                         onClose={() => setShowSold(false)}
                         club={clubs.find((clb) => clb._id === players[currentPlayerIndex].club) as IClub}

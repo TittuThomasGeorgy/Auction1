@@ -11,6 +11,7 @@ interface PopupProps {
     onClose: () => void;
     player: IPlayer;
     club: IClub;
+    // timer: number;
 }
 
 const defaultOptions = {
@@ -23,7 +24,7 @@ const defaultOptions = {
 };
 
 const PlayerSoldModal = (props: PopupProps) => {
-    
+
     return (
         <Dialog
             open={props.open}

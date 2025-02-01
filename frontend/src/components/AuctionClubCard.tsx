@@ -1,17 +1,27 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, LinearProgress, Typography } from '@mui/material';
 import { IClub } from '../types/ClubType';
 // import { useNavigate } from 'react-router-dom';
 
 interface ClubCardProps {
     club: IClub;
     disabled?: boolean; // Optional property to disable the card
-    onClick: () => void
+    onClick: () => void;
+    playerCount: number;
+    maxPlayers: number;
 }
 
 const AuctionClubCard = (props: ClubCardProps) => {
     // const navigate = useNavigate();
+    // Calculate fill percentage
+    const fillPercentage = (props.playerCount / props.maxPlayers) * 100;
 
+    // Define dynamic colors based on player count
+    const getProgressColor = () => {
+        if (fillPercentage === 100) return '#FF4747'; // Red if full
+        if (fillPercentage >= 75) return '#FFA500'; // Orange if nearly full
+        return '#4CAF50'; // Green if room available
+    };
     return (
         <Box
             sx={{
@@ -111,8 +121,48 @@ const AuctionClubCard = (props: ClubCardProps) => {
                     ${props.club.balance.toLocaleString()} M
                 </Typography>
             </Box>
+            {/* Player Count Display */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: 10,
+                    left: 10,
+                    right: 10,
+                    textAlign: 'center',
+                    zIndex: 2,
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: getProgressColor(),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '2px',
+                    }}
+                >
+                    {/* <SportsSoccerIcon sx={{ fontSize: 18 }} /> */}
+                    {/* Progress Bar */}
+                    <LinearProgress
+                        variant="determinate"
+                        value={fillPercentage}
+                        sx={{
+                            width: '80%',
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: 'rgba(255,255,255,0.3)',
+                            '& .MuiLinearProgress-bar': {
+                                backgroundColor: getProgressColor(),
+                            },
+                            margin: '5px auto',
+                        }}
+                    />
+                    {props.playerCount} / {props.maxPlayers}
 
-
+                </Typography>
+            </Box>
         </Box>
     );
 };
