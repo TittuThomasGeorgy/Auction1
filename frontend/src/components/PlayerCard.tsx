@@ -51,7 +51,6 @@ const PlayerCard = (props: PlayerCardProps) => {
 
                 {/* Club Logo with MUI Zoom */}
                 {props.club && (
-                    <Zoom in={Boolean(props.club)} timeout={500}>
                         <Box
                             component="img"
                             src={props.club.logo}
@@ -66,7 +65,6 @@ const PlayerCard = (props: PlayerCardProps) => {
                                 transition: 'all 0.6s ease-in-out',
                             }}
                         />
-                    </Zoom>
                 )}
 
                 {/* Decorative Background */}

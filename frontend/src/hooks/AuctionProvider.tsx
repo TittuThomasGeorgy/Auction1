@@ -1,104 +1,92 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import io from 'socket.io-client';
+import { enqueueSnackbar } from 'notistack';
 import { IAuction } from '../types/AuctionType';
 import { IBid } from '../types/BidType';
-import { enqueueSnackbar } from 'notistack';
 import useAuction from '../services/AuctionService';
 import { initSocket } from '../services/SocketClient';
 
-
-// Auction context
 const AuctionContext = createContext<AuctionContextType | null>(null);
 
-// Auction Provider Component
-export const AuctionProvider = (props: { children: ReactNode }) => {
+export const AuctionProvider = ({ children }: { children: ReactNode }) => {
     const auctionServ = useAuction();
     const [auction, setAuction] = useState<IAuction | null>(null);
 
     useEffect(() => {
         const socket = initSocket();
-        // Listen for the start of a new auction
-        socket.on('auctionStarted', (data: { auction: IAuction }) => {
+
+        const handleAuctionStarted = (data: { auction: IAuction }) => {
             setAuction(data.auction);
             enqueueSnackbar({ variant: 'success', message: "Auction Started" });
-        });
-        socket.on('auctionPaused', (data: { status: 'pause' | 'live' }) => {
-            setAuction(auction => auction && ({ ...auction, status: data.status }))
-            if (data.status == 'live')
-                enqueueSnackbar({ variant: 'info', message: "Auction Resumed" });
-            else
-                enqueueSnackbar({ variant: 'info', message: "Auction Paused" });
-        });
+        };
 
-        socket.on('auctionTimeUpdate', (data: { timeRemaining: number }) => {
-            setAuction(auction => auction && ({ ...auction, timeRemaining: data.timeRemaining }))
-        })
-        socket.on('bidPlaced', (res: { data: IBid | null, message: string }) => {
-            setAuction(auction => auction && ({ ...auction, bid: res.data }))
-            // enqueueSnackbar({ variant: 'info', message: res.message });
-        })
-        socket.on('playerSwitched', (res: { data: { bid: IBid | null, player: string }, message: string }) => {
-            setAuction(auction => auction && ({ ...auction, bid: res.data.bid, player: res.data.player }))
-            // enqueueSnackbar({ variant: 'info', message: res.message });
+        const handleAuctionPaused = (data: { status: 'pause' | 'live' }) => {
+            setAuction(auction => auction ? { ...auction, status: data.status } : null);
+            enqueueSnackbar({ variant: 'info', message: data.status === 'live' ? "Auction Resumed" : "Auction Paused" });
+        };
 
-        })
-        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-            setAuction(auction => auction && ({ ...auction, bid: null, timeRemaining: -2 }))
-        })
+        const handleTimeUpdate = (data: { timeRemaining: number }) => {
+            setAuction(auction => auction ? { ...auction, timeRemaining: data.timeRemaining } : null);
+        };
 
-        socket.on('auctionStopped', () => {
+        const handleBidPlaced = (res: { data: IBid | null, message: string }) => {
+            setAuction(auction => auction ? { ...auction, bid: res.data } : null);
+        };
+
+        const handlePlayerSwitched = (res: { data: { bid: IBid | null, player: string }, message: string }) => {
+            setAuction(auction => auction ? { ...auction, bid: res.data.bid, player: res.data.player } : null);
+        };
+
+        const handlePlayerSold = (res: { data: { bid: IBid | null }, message: string }) => {
+            setAuction(auction => auction ? { ...auction, bid: null, timeRemaining: -2 } : null);
+        };
+
+        const handleAuctionStopped = () => {
             setAuction(null);
             enqueueSnackbar({ variant: 'success', message: "Auction Stopped" });
-        })
-        // // Listen for auction end
-        // socket.on('endAuction', (data) => {
-        //     if (auction && auction.auctionId === data.auctionId) {
-        //         setAuction(null);
-        //         alert('Auction ended');
-        //     }
-        // });
-        // console.log(auction);
+        };
+
+        socket.on('auctionStarted', handleAuctionStarted);
+        socket.on('auctionPaused', handleAuctionPaused);
+        socket.on('auctionTimeUpdate', handleTimeUpdate);
+        socket.on('bidPlaced', handleBidPlaced);
+        socket.on('playerSwitched', handlePlayerSwitched);
+        socket.on('playerSold', handlePlayerSold);
+        socket.on('auctionStopped', handleAuctionStopped);
 
         return () => {
-            socket.off('auctionStarted');
-            socket.off('auctionTimeUpdate');
-            socket.off('playerSwitched');
-            socket.off('bidPlaced');
-            socket.off('auctionStopped');
-            socket.off('auctionPaused');
-            // disconnectSocket();
-            // socket.off('endAuction');
+            socket.off('auctionStarted', handleAuctionStarted);
+            socket.off('auctionPaused', handleAuctionPaused);
+            socket.off('auctionTimeUpdate', handleTimeUpdate);
+            socket.off('bidPlaced', handleBidPlaced);
+            socket.off('playerSwitched', handlePlayerSwitched);
+            socket.off('playerSold', handlePlayerSold);
+            socket.off('auctionStopped', handleAuctionStopped);
+
+            // Ensure socket disconnects to prevent memory leaks
+            socket.disconnect();
         };
     }, []);
 
-
     useEffect(() => {
-        const getData = async () => {
+        const fetchAuctionData = async () => {
             const res = await auctionServ.getAuction();
-            if (res.data.status != 'stopped')
-                setAuction({ ...res.data, timeRemaining: -1 })
-        }
-        getData();
-    }, [])
+            if (res.data.status !== 'stopped' && !auction) {
+                setAuction({ ...res.data, timeRemaining: -1 });
+            }
+        };
+        fetchAuctionData();
+    }, [auction]); // Depend on auction to prevent unnecessary API calls
 
-
-
-    return (
-        <AuctionContext.Provider value={{ auction }}>
-            {props.children}
-        </AuctionContext.Provider>
-    );
+    return <AuctionContext.Provider value={{ auction }}>{children}</AuctionContext.Provider>;
 };
 
-// Hook to use the Auction context
 export const useLiveAuction = () => {
     const context = useContext(AuctionContext);
     if (!context) {
-        throw new Error('useAuction must be used within a AuctionProvider');
+        throw new Error('useLiveAuction must be used within an AuctionProvider');
     }
     return context;
 };
-
 
 interface AuctionContextType {
     auction: IAuction | null;

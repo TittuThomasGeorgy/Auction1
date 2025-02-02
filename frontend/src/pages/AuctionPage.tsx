@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Container, Dialog, DialogActions, DialogTitle, IconButton, Stack, Typography, Tooltip } from '@mui/material';
 import { KeyboardArrowLeft as ArrowLeftIcon, KeyboardArrowRight as ArrowRightIcon, MoreVert as OptionIcon } from '@mui/icons-material';
 import BackButton from '../components/BackButton';
@@ -52,9 +52,9 @@ const AuctionPage = () => {
         addOnTime: 0,
         initialBalance: 0,
         playersPerClub: 0,
-        bidMultiple: 0,
+        bidMultiple: 100,
         keepMinBid: true,
-        minBid: 0
+        minBid: 100,
     });
 
     useEffect(() => {
@@ -67,31 +67,37 @@ const AuctionPage = () => {
             .catch((err) => console.error(err));
     }, []);
 
+    const [isSwitching, setIsSwitching] = useState(false);
 
-    const handleNextPlayer = async (type: 'next' | 'previous') => {
+    const handleNextPlayer = useCallback(async (type: 'next' | 'previous') => {
+        if (isSwitching) return;
+
+        setIsSwitching(true);
+        setTimeout(() => setIsSwitching(false), 300);
+
         if (liveAuction.auction?.bid && !players[currentPlayerIndex]?.club)
-            setConfirmation({ open: true, action: type })
+            setConfirmation({ open: true, action: type });
         else if (type === 'next')
             nextPlayer();
         else if (type === 'previous')
             previousPlayer();
-    };
-    const nextPlayer = async () => {
-        setCurrentPlayerIndex((prevIndex) => {
-            const newIndex = (prevIndex + 1) % players.length;
-            liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
-            return newIndex;
-        });
-    }
-    const previousPlayer = async () => {
-        setCurrentPlayerIndex((prevIndex) => {
-            const index = (prevIndex - 1) % players.length;
-            const newIndex = index < 0 ? players.length - 1 : index
-            liveAuction.auction && AuctionServ.switchPlayer(players[newIndex]._id);
-            return newIndex;
-        });
-    };
+    }, [isSwitching, currentPlayerIndex, players, liveAuction.auction]);
 
+    const nextPlayer = useCallback(async () => {
+        setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % players.length);
+        
+        if (liveAuction.auction) {
+            await AuctionServ.switchPlayer(players[(currentPlayerIndex + 1) % players.length]._id);
+        }
+    }, [currentPlayerIndex, players, liveAuction.auction]);
+    
+    const previousPlayer = useCallback(async () => {
+        setCurrentPlayerIndex((prevIndex) => (prevIndex - 1 + players.length) % players.length);
+        
+        if (liveAuction.auction) {
+            await AuctionServ.switchPlayer(players[(currentPlayerIndex - 1 + players.length) % players.length]._id);
+        }
+    }, [currentPlayerIndex, players, liveAuction.auction]);
 
     // Add keyboard navigation
     useEffect(() => {
@@ -270,7 +276,7 @@ const AuctionPage = () => {
                         {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('previous')}
-                                disabled={players.length === 0}
+                                disabled={players.length === 0 || isSwitching}
                                 color="primary"
                                 size="large"
                                 style={{ position: 'absolute', left: 0, zIndex: 10 }}
@@ -316,7 +322,7 @@ const AuctionPage = () => {
                         {/* Next Player Button */}
                         {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
                             <IconButton
-                                onClick={() => handleNextPlayer('next')}
+                                onClick={() => handleNextPlayer('next') || isSwitching}
                                 disabled={players.length === 0}
                                 color="primary"
                                 size="large"
@@ -489,6 +495,10 @@ const AuctionPage = () => {
                         }}
                         club={placeBidClub}
                         timeRemaining={liveAuction.auction.timeRemaining ?? 0}
+                        bidMultiple={settings.bidMultiple}
+                        keepMinBid={settings.keepMinBid}
+                        minBid={settings.minBid}
+
                     />}
 
                 <Dialog open={confirmation.open} onClose={() => setConfirmation({ open: false, action: null })}>

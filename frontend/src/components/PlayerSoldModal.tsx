@@ -1,5 +1,5 @@
-import { Dialog, Box, Fade, Typography, DialogActions, Button, DialogContent, IconButton } from '@mui/material';
-import React, { useMemo } from 'react';
+import { Dialog, Box, Fade, Typography, DialogActions, Button, DialogContent, IconButton, Zoom } from '@mui/material';
+import React, { useEffect, useMemo } from 'react';
 import { IPlayer } from '../types/PlayerType';
 import { IClub } from '../types/ClubType';
 import PlayerCard from './PlayerCard';
@@ -17,12 +17,16 @@ interface PopupProps {
 const PlayerSoldModal = (props: PopupProps) => {
     const defaultOptions = useMemo(() => ({
         loop: true,
-        autoplay: true,
+        autoplay: true, // Reduce initial load impact
         animationData: Animations.firework,
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid slice',
         },
     }), []);
+    const MemoizedPlayerCard = React.memo(PlayerCard, (prevProps, nextProps) =>
+        prevProps.player._id === nextProps.player._id && prevProps.club?._id === nextProps.club?._id
+    );
+
     return (
         <Dialog
             open={props.open}
@@ -39,7 +43,9 @@ const PlayerSoldModal = (props: PopupProps) => {
                     overflow: 'hidden',
                 },
             }}
-            keepMounted={true}
+            disableEnforceFocus
+            disableAutoFocus
+            keepMounted
         >
             {/* Close Button */}
             <IconButton
@@ -83,7 +89,7 @@ const PlayerSoldModal = (props: PopupProps) => {
                 <Lottie options={defaultOptions} width="100%" height="100%" />
             </Box>
             {/* Welcome Message */}
-            <Fade in={props.open} timeout={2000}>
+            <Fade in={props.open} timeout={{ enter: 2000, exit: 300 }}>
                 <Typography
                     variant="h3"
                     sx={{
@@ -99,16 +105,17 @@ const PlayerSoldModal = (props: PopupProps) => {
                     Welcome
                 </Typography>
             </Fade>
-
             {/* Centered Player Card with Fade Effect */}
-            <Fade in={props.open} timeout={6000}>
+            {/* {props.open && ( */}
+            <Zoom in={props.open} timeout={2500}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                    <PlayerCard player={props.player} club={props.club} />
+                    <MemoizedPlayerCard player={props.player} club={props.club} />
                 </Box>
-            </Fade>
+            </Zoom>
+            {/* )} */}
 
             {/* Club Logo & Name */}
-            <Fade in={props.open} timeout={2000}>
+            <Fade in={props.open} timeout={{ enter: 2000, exit: 300 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mt: 2 }}>
                     <Box
                         component="img"

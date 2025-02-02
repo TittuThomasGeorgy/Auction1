@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useMemo, useState } from 'react';
+import React, { ReactNode, useContext, useCallback, useState } from 'react';
 import { LoaderContextType } from '../types/CommonTypes';
 import { Box } from '@mui/material';
 import Animations from '../animations';
@@ -13,22 +13,24 @@ interface LoaderProviderProps {
 export const LoaderProvider = (props: LoaderProviderProps) => {
   const [count, setCount] = useState(0);
 
-  const value = useMemo<LoaderContextType>(
-    () => ({
-      count,
-      onLoad: () => setCount((count) => count + 1),
-      offLoad: () => setCount((count) => count - 1),
-    }),
-    [count]
-  );
+  // Prevent function recreation on every render
+  const onLoad = useCallback(() => {
+    setCount((prev) => prev + 1);
+  }, []);
+
+  const offLoad = useCallback(() => {
+    setCount((prev) => Math.max(0, prev - 1)); // Ensures count never goes below zero
+  }, []);
+
+  const value: LoaderContextType = { count, onLoad, offLoad };
 
   // Lottie options for the loading animation
   const defaultOptions = {
     loop: true,
-    autoplay: true, // Animation will start automatically
-    animationData: Animations.loading, // The Lottie JSON animation
+    autoplay: true,
+    animationData: Animations.loading,
     rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice', // To ensure the animation is responsive
+      preserveAspectRatio: 'xMidYMid slice',
     },
   };
 

@@ -21,54 +21,60 @@ interface BidPlayerDialogProps {
     club: IClub;
     currentBid: number;
     timeRemaining: number;
+    bidMultiple: number,
+    keepMinBid: boolean,
+    minBid: number,
 }
 
-const BidDialog = ({ open, onClose, onSubmit, club, currentBid, timeRemaining }: BidPlayerDialogProps) => {
-    const [bidAmount, setBidAmount] = useState<number>(currentBid + 100);
+const BidDialog = (props: BidPlayerDialogProps) => {
+    const [bidAmount, setBidAmount] = useState<number>(props.minBid);
 
     const handleQuickBid = (amount: number) => setBidAmount(amount);
     const handleManualBid = (event: React.ChangeEvent<HTMLInputElement>) => setBidAmount(Number(event.target.value));
 
+
     const handleSubmit = () => {
-        if (bidAmount > currentBid) {
-            onSubmit(bidAmount);
+        if (bidAmount % props.bidMultiple != 0) {
+            enqueueSnackbar({ variant: 'error', message: `Bid Should be multiple of ${props.bidMultiple} ` });
+        } else if (bidAmount > props.currentBid) {
+            props.onSubmit(bidAmount);
         } else {
             enqueueSnackbar({ variant: 'error', message: 'Invalid Bid' });
         }
     };
 
     useEffect(() => {
-        setBidAmount(currentBid + 100)
-    }, [currentBid])
+        setBidAmount(props.currentBid + props.bidMultiple)
+    }, [props.currentBid])
     return (
-        <Dialog open={open} onClose={onClose} aria-labelledby="bid-dialog-title">
+        <Dialog open={props.open} onClose={props.onClose} aria-labelledby="bid-dialog-title">
             <DialogContent>
                 <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
                     {/* Club Name & Logo */}
                     <Stack direction="row" alignItems="center" gap={2}>
                         <Box
                             component="img"
-                            src={club.logo}
-                            alt={`${club.name} logo`}
+                            src={props.club.logo}
+                            alt={`${props.club.name} logo`}
                             sx={{ width: 50, height: 50, objectFit: 'contain' }}
                         />
                         <Typography variant="h5" fontWeight="bold" color="primary">
-                            {club.name}
+                            {props.club.name}
                         </Typography>
                     </Stack>
 
                     {/* Club Balance */}
                     <Typography variant="h6" fontWeight="bold" sx={{ color: '#2E7D32' }}>
-                        Balance: <span style={{ color: '#388E3C' }}>${club.balance.toLocaleString()}M</span>
+                        Balance: <span style={{ color: '#388E3C' }}>${props.club.balance.toLocaleString()}M</span>
                     </Typography>
 
                     {/* Current Bid */}
                     <Typography variant="h6" fontWeight="bold" sx={{ color: '#D32F2F' }}>
-                        Current Bid: <span style={{ color: '#C62828' }}>${currentBid.toLocaleString()}M</span>
+                        Current Bid: <span style={{ color: '#C62828' }}>${props.currentBid.toLocaleString()}M</span>
                     </Typography>
 
                     {/* Timer */}
-                    {timeRemaining >= 0 && (
+                    {props.timeRemaining >= 0 && (
                         <Stack direction="row" alignItems="center" gap={1}>
                             <Typography variant="h6" fontWeight="bold" sx={{ color: '#6A1B9A' }}>
                                 TIME LEFT:
@@ -85,7 +91,7 @@ const BidDialog = ({ open, onClose, onSubmit, club, currentBid, timeRemaining }:
                                     },
                                 }}
                             >
-                                {timeRemaining}s
+                                {props.timeRemaining}s
                             </Typography>
                         </Stack>
                     )}
@@ -95,9 +101,9 @@ const BidDialog = ({ open, onClose, onSubmit, club, currentBid, timeRemaining }:
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((option) => (
                             <Chip
                                 key={option}
-                                label={`$${currentBid + option * 100}`}
-                                onClick={() => handleQuickBid(currentBid + option * 100)}
-                                color={bidAmount === currentBid + option * 100 ? 'primary' : 'default'}
+                                label={`$${props.currentBid + option * props.bidMultiple}`}
+                                onClick={() => handleQuickBid(props.currentBid + option * props.bidMultiple)}
+                                color={bidAmount === props.currentBid + option * props.bidMultiple ? 'primary' : 'default'}
                                 sx={{ p: 1, minWidth: 80, fontSize: '1rem', fontWeight: 'bold' }}
                             />
                         ))}
@@ -127,7 +133,7 @@ const BidDialog = ({ open, onClose, onSubmit, club, currentBid, timeRemaining }:
 
             {/* Action Buttons */}
             <DialogActions>
-                <Button onClick={onClose} color="secondary" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                <Button onClick={props.onClose} color="secondary" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>
                     Cancel
                 </Button>
                 <Button
