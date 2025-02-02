@@ -32,7 +32,7 @@ export const uploadFiles = async (filename: string, file: Express.Multer.File, f
 
             GoogleDrive.deleteFile(existingFileId)
                 .then(() =>
-                    console.log('deleted user image from Google Drive'.bgYellow)
+                    console.log('Deleted user image from Google Drive'.bgYellow)
                 ).catch((error) => {
                     console.log('File Delete Error =>', error);
                 });

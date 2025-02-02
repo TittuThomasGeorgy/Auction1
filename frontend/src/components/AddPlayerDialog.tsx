@@ -89,8 +89,9 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                         setFile(fil)
                                     }}
                                     sx={{
-                                        background: 'linear-gradient(135deg, #0f3a67, #1c5c94)', width: 200,
-                                        height: 200,
+                                        background: 'linear-gradient(135deg, #0f3a67, #1c5c94)',
+                                         width: 200,
+                                        height: 300,
                                         objectFit: 'contain',
                                         // position: 'absolute',
                                         // top: '40%',

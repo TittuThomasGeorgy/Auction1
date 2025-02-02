@@ -91,7 +91,14 @@ class GoogleDrive {
       if (GoogleDrive.service === null) {
         return reject(new Error('The Google Drive Service must be initialized before use!'));
       }
-      GoogleDrive.service.files.delete({ fileId: fileId }).then(resolve).catch(reject);
+      GoogleDrive.service.files.delete({ fileId: fileId }).then(resolve).catch((error: any) => {
+        if (error.response && error.response.status === 404) {
+          console.log("File not found, nothing to delete.");
+          resolve(null); // ✅ Handle file not found
+        } else {
+          reject(error); // Other errors
+        }
+      });
     });
   }
 

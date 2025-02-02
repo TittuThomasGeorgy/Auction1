@@ -151,6 +151,7 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         }
 
         if (!req.body.club) _updatedPlayer.club = null;
+        _updatedPlayer.bid = prevPlayer.bid ?? null;
         const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, _updatedPlayer);
         if (!updatedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Updated');

@@ -130,7 +130,7 @@ const AuctionPage = () => {
         } else {
             _players = _players
                 .sort((a, b) => {
-                    const clubComparison = (b.club ? 1 : 0) - (a.club ? 1 : 0);
+                    const clubComparison = b.club && a.club && b.club.localeCompare(a.club);
                     return clubComparison || a.name.localeCompare(b.name);
                 })
         }
@@ -185,26 +185,28 @@ const AuctionPage = () => {
             <br />
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)', padding: '20px' }}>
+                <Box sx={{ float: 'right' }}>
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            // fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'end',
+                            gap: '2px',
+                        }}
+                    >
 
-                <MenuButton menuItems={[
-                    { label: 'Sort by Position', onClick: () => setSortBy('Sort by Position') },
-                    { label: 'Sort by Status', onClick: () => setSortBy('Sort by Status') },
-                ]} sx={{ float: 'right' }} selected={sortBy} />
-                {/* <br /> */}
-                <Typography textAlign={'right'}
-                    sx={{
-                        fontSize: '14px',
-                        // fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'end',
-                        gap: '2px',
-                    }}
-                >
+                        {currentPlayerIndex + 1} / {players.length}
 
-                    {currentPlayerIndex + 1} / {players.length}
+                    </Typography>
+                    <MenuButton menuItems={[
+                        { label: 'Sort by Position', onClick: () => setSortBy('Sort by Position') },
+                        { label: 'Sort by Status', onClick: () => setSortBy('Sort by Status') },
+                    ]} selected={sortBy} />
+                    {/* <br /> */}
 
-                </Typography>
+                </Box>
                 <Box
                     display="flex"
                     alignItems="center"
@@ -288,21 +290,27 @@ const AuctionPage = () => {
                             }}
                         >
 
-                            {players.map((player) => (
-                                <Box
-                                    key={player._id}
-                                    flex="0 0 100%"
-                                    display="flex"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                >
+                            {players.map((player) => {
+                                const _club = clubs.find((clb) => clb._id === player.club);
+                                return (
+                                    <Box
+                                        key={player._id}
+                                        flex="0 0 100%"
+                                        display="flex"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                    >
 
-                                    <PlayerCard
-                                        player={player}
-                                        club={clubs.find((clb) => clb._id === player.club) ?? null}
-                                    />
-                                </Box>
-                            ))}
+                                        <PlayerCard
+                                            player={player}
+                                            club={_club ?? null}
+                                            onClick={_club ? () => {
+                                                setShowSold(true)
+                                            } : undefined}
+                                        />
+                                    </Box>
+                                )
+                            })}
                         </Box>
 
                         {/* Next Player Button */}
