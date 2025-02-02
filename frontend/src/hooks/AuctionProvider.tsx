@@ -69,13 +69,15 @@ export const AuctionProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const fetchAuctionData = async () => {
-            const res = await auctionServ.getAuction();
-            if (res.data.status !== 'stopped' && !auction) {
-                setAuction({ ...res.data, timeRemaining: -1 });
+            if (!auction || auction.status === 'stopped') {
+                const res = await auctionServ.getAuction();
+                if (res.data.status !== 'stopped') {
+                    setAuction({ ...res.data, timeRemaining: -1 });
+                }
             }
         };
         fetchAuctionData();
-    }, [auction]); // Depend on auction to prevent unnecessary API calls
+    }, [auction]); // Trigger only if auction is null or stopped/ Depend on auction to prevent unnecessary API calls
 
     return <AuctionContext.Provider value={{ auction }}>{children}</AuctionContext.Provider>;
 };
