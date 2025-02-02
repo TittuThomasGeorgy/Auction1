@@ -1,5 +1,5 @@
 import { Dialog, Box, Fade, Typography, DialogActions, Button, DialogContent, IconButton } from '@mui/material';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IPlayer } from '../types/PlayerType';
 import { IClub } from '../types/ClubType';
 import PlayerCard from './PlayerCard';
@@ -14,17 +14,15 @@ interface PopupProps {
     // timer: number;
 }
 
-const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: Animations.firework,
-    rendererSettings: {
-        preserveAspectRatio: 'xMidYMid slice',
-    },
-};
-
 const PlayerSoldModal = (props: PopupProps) => {
-
+    const defaultOptions = useMemo(() => ({
+        loop: true,
+        autoplay: true,
+        animationData: Animations.firework,
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid slice',
+        },
+    }), []);
     return (
         <Dialog
             open={props.open}
@@ -41,6 +39,7 @@ const PlayerSoldModal = (props: PopupProps) => {
                     overflow: 'hidden',
                 },
             }}
+            keepMounted={true}
         >
             {/* Close Button */}
             <IconButton
@@ -76,16 +75,15 @@ const PlayerSoldModal = (props: PopupProps) => {
                     left: 0,
                     width: '100%',
                     height: '60%',
-                    display: 'flex',
+                    display: props.open ? 'flex' : 'none',  // Instead of unmounting
                     alignItems: 'center',
                     justifyContent: 'center',
-                    // zIndex: -1, // Ensures it stays behind other content
                 }}
             >
                 <Lottie options={defaultOptions} width="100%" height="100%" />
             </Box>
             {/* Welcome Message */}
-            <Fade in={props.open} timeout={600}>
+            <Fade in={props.open} timeout={2000}>
                 <Typography
                     variant="h3"
                     sx={{
@@ -103,14 +101,14 @@ const PlayerSoldModal = (props: PopupProps) => {
             </Fade>
 
             {/* Centered Player Card with Fade Effect */}
-            <Fade in={props.open} timeout={500}>
+            <Fade in={props.open} timeout={6000}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
                     <PlayerCard player={props.player} club={props.club} />
                 </Box>
             </Fade>
 
             {/* Club Logo & Name */}
-            <Fade in={props.open} timeout={600}>
+            <Fade in={props.open} timeout={2000}>
                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mt: 2 }}>
                     <Box
                         component="img"
