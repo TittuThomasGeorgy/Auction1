@@ -85,15 +85,15 @@ const AuctionPage = () => {
 
     const nextPlayer = useCallback(async () => {
         setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % players.length);
-        
+
         if (liveAuction.auction) {
             await AuctionServ.switchPlayer(players[(currentPlayerIndex + 1) % players.length]._id);
         }
     }, [currentPlayerIndex, players, liveAuction.auction]);
-    
+
     const previousPlayer = useCallback(async () => {
         setCurrentPlayerIndex((prevIndex) => (prevIndex - 1 + players.length) % players.length);
-        
+
         if (liveAuction.auction) {
             await AuctionServ.switchPlayer(players[(currentPlayerIndex - 1 + players.length) % players.length]._id);
         }
@@ -149,7 +149,7 @@ const AuctionPage = () => {
             if (showSold) {
                 setShowSold(false);
             }
-        }, 10000);
+        }, 6000);
 
         return () => clearTimeout(timer); // ✅ Cleanup timeout properly
     }, [showSold]); // ✅ Dependency remains the same
@@ -466,12 +466,15 @@ const AuctionPage = () => {
                 >
                     {clubs.map(club => {
                         const _playerCount = players.filter(player => player.club === club._id).length;
+                        const _maxBid = club.balance - ((settings.playersPerClub - _playerCount - 1) * settings.minBid)
+                        const maxBid = settings.keepMinBid ? _maxBid : club.balance;
+
                         return (
 
                             <AuctionClubCard
                                 club={club}
                                 key={club._id}
-                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub}
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid)                                }
                                 onClick={() => setPlaceBidClub(club)}
                                 playerCount={_playerCount}
                                 maxPlayers={settings.playersPerClub}
@@ -480,26 +483,42 @@ const AuctionPage = () => {
                     })}
                 </Box>
 
-                {liveAuction.auction && placeBidClub &&
-                    <BidDialog open={Boolean(placeBidClub)} onClose={() => setPlaceBidClub(null)}
-                        currentBid={liveAuction.auction?.bid?.bid ?? 100} onSubmit={async (bid) => {
-                            const res = await AuctionServ.placeBid(placeBidClub._id, players[currentPlayerIndex]?._id, bid);
-                            if (res.success) {
-                                // setCurrentBid(res.data.bid);
-                                setPlaceBidClub(null)
-                            }
-                            enqueueSnackbar({
-                                variant: res.success ? 'success' : 'error',
-                                message: res.message
-                            })
-                        }}
-                        club={placeBidClub}
-                        timeRemaining={liveAuction.auction.timeRemaining ?? 0}
-                        bidMultiple={settings.bidMultiple}
-                        keepMinBid={settings.keepMinBid}
-                        minBid={settings.minBid}
+                {liveAuction.auction && placeBidClub && (
+                    (() => {
+                        const noOfPlayer = players.filter(player => player.club === placeBidClub._id).length;
+                        const _maxBid = placeBidClub.balance - ((settings.playersPerClub - noOfPlayer - 1) * settings.minBid)
+                        const maxBid = settings.keepMinBid ? _maxBid : placeBidClub.balance;
+                        return (
+                            <BidDialog
+                                open={Boolean(placeBidClub)}
+                                onClose={() => setPlaceBidClub(null)}
+                                currentBid={liveAuction.auction?.bid?.bid ?? 100}
+                                onSubmit={async (bid) => {
+                                    const res = await AuctionServ.placeBid(
+                                        placeBidClub._id,
+                                        players[currentPlayerIndex]?._id,
+                                        bid
+                                    );
 
-                    />}
+                                    enqueueSnackbar({
+                                        variant: res.success ? 'success' : 'error',
+                                        message: res.message,
+                                    });
+
+                                    if (res.success) {
+                                        setPlaceBidClub(null);
+                                    }
+                                }}
+                                club={placeBidClub}
+                                timeRemaining={liveAuction.auction.timeRemaining ?? 0}
+                                bidMultiple={settings.bidMultiple}
+                                maxBid={maxBid}
+                                minBid={settings.minBid}
+                            />
+                        );
+                    })()
+                )}
+
 
                 <Dialog open={confirmation.open} onClose={() => setConfirmation({ open: false, action: null })}>
                     <DialogTitle>

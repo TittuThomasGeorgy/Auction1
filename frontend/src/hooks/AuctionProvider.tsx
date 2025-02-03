@@ -21,7 +21,7 @@ export const AuctionProvider = ({ children }: { children: ReactNode }) => {
 
         const handleAuctionPaused = (data: { status: 'pause' | 'live' }) => {
             setAuction(auction => auction ? { ...auction, status: data.status } : null);
-            enqueueSnackbar({ variant: 'info', message: data.status === 'live' ? "Auction Resumed" : "Auction Paused" });
+            // enqueueSnackbar({ variant: 'info', message: data.status === 'live' ? "Auction Resumed" : "Auction Paused" });
         };
 
         const handleTimeUpdate = (data: { timeRemaining: number }) => {

@@ -51,20 +51,20 @@ const PlayerCard = (props: PlayerCardProps) => {
 
                 {/* Club Logo with MUI Zoom */}
                 {props.club && (
-                        <Box
-                            component="img"
-                            src={props.club.logo}
-                            alt={props.club.name}
-                            sx={{
-                                // width: 65,
-                                height: 65,
-                                position: 'absolute',
-                                top: 60,
-                                left: 20,
-                                zIndex: 3,
-                                transition: 'all 0.6s ease-in-out',
-                            }}
-                        />
+                    <Box
+                        component="img"
+                        src={props.club.logo}
+                        alt={props.club.name}
+                        sx={{
+                            // width: 65,
+                            height: 65,
+                            position: 'absolute',
+                            top: 60,
+                            left: 20,
+                            zIndex: 3,
+                            transition: 'all 0.6s ease-in-out',
+                        }}
+                    />
                 )}
 
                 {/* Decorative Background */}

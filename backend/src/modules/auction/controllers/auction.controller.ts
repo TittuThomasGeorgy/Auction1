@@ -12,6 +12,8 @@ import { IBid } from "../types/bid";
 import Player from "../../player/models/Player";
 import { isSettingExist } from "../../settings/controllers/settings.controller";
 import { isPlayerSold } from "../../player/controllers/players.controller";
+import { Settings } from "http2";
+import { ISettings } from "../../settings/types/setting";
 
 export const isAuctionExist = async (populateBid?: boolean): Promise<IAuction | null> => {
     let query = Auction.findOne({});
@@ -221,45 +223,80 @@ export const sellPlayer = async (req: Request, res: Response, next: NextFunction
 
 const validateBid = async (res: Response, _bid: IBid) => {
     const _isBidValid = await isBidValid(_bid);
-    if (_isBidValid == 1)
-        return sendApiResponse(res, 'CONFLICT', null, 'Player Not matching');
-    else if (_isBidValid == 2)
-        return sendApiResponse(res, 'CONFLICT', null, 'Not Enough balance');
-    else if (_isBidValid == 3)
-        return sendApiResponse(res, 'CONFLICT', null, 'Higher bid Exist');
-    return 0;
-}
+
+    switch (_isBidValid) {
+        case 1:
+            return sendApiResponse(res, 'CONFLICT', null, 'Player Not Matching');
+        case 2:
+            return sendApiResponse(res, 'CONFLICT', null, 'Not Enough Balance');
+        case 3:
+            return sendApiResponse(res, 'CONFLICT', null, 'Higher Bid Exists');
+        case 4:
+            return sendApiResponse(res, 'CONFLICT', null, 'Bid is Less than Minimum Bid');
+        case 5:
+            return sendApiResponse(res, 'CONFLICT', null, `Bid must be a multiple of the set value`);
+        case 6:
+            return sendApiResponse(res, 'CONFLICT', null, `Bid is greater than the allowed max bid`);
+        default:
+            return 0; // Bid is valid
+    }
+};
 const isBidValid = async (_bid: IBid) => {
     const auction = await isAuctionExist(true);
-    const setting = await isSettingExist();
+    const setting = (await isSettingExist()) as unknown as ISettings;
     const club = (await Club.findById(_bid.club))?.toJSON();
     const bid = (auction?.bid as unknown as IBid)?.bid ?? 0;
-    // Ensure both are strings before comparison
+
     const auctionPlayer = auction?.player?.toString();
     const bidPlayer = _bid.player?.toString();
 
+    const _playerCount = await getNoOfPlayers(_bid.club.toString());
+    const _maxBid = club && (club?.balance - ((setting.playersPerClub - _playerCount - 1) * setting.minBid));
+    const maxBid = !setting.keepMinBid && club ? club.balance : _maxBid;
 
-    // Compare player IDs
+    // 1️⃣ Player Mismatch
     if (auctionPlayer !== bidPlayer) {
-        console.log('Player not Matching'.red, auctionPlayer, bidPlayer);
-
+        console.log('Player Not Matching'.red, auctionPlayer, bidPlayer);
         return 1;
     }
-    else if (club && (club.balance < _bid.bid)) {
-        console.log('Not Enough Balance'.red, club?.balance, _bid.bid);
+
+    // 2️⃣ Not Enough Balance
+    if (club && club.balance < _bid.bid) {
+        console.log('Not Enough Balance'.red, club.balance, _bid.bid);
         return 2;
     }
-    else if (bid > _bid.bid) {
-        console.log('Higher bid Exist');
+
+    // 3️⃣ Higher Bid Exists
+    if (bid > _bid.bid) {
+        console.log('Higher Bid Exists'.red);
         return 3;
     }
 
-    // else if()
-    return 0;
-}
+    // 4️⃣ Bid is Less than Minimum Bid
+    if (_bid.bid < setting?.minBid) {
+        console.log('Bid is Less than Minimum Bid'.red);
+        return 4;
+    }
+
+    // 5️⃣ Bid is Not a Multiple of the Set Value
+    if (_bid.bid % setting?.bidMultiple !== 0) {
+        console.log(`Bid is not a multiple of ${setting?.bidMultiple}`.red);
+        return 5;
+    }
+
+    // 6️⃣ Bid is Greater than Max Bid
+    if (maxBid && _bid.bid > maxBid) {
+        console.log(`Bid is greater than maxBid (${maxBid})`.red);
+        return 6;
+    }
+
+    return 0; // ✅ Valid Bid
+};
+
+
 const getNoOfPlayers = async (clubId: string) => {
-    const data = await Player.find({ club: clubId })
-    return data.length ?? 0
+    const data = await Player.countDocuments({ club: clubId })
+    return data;
 }
 
 export const undoBid = async (req: Request, res: Response, next: NextFunction) => {

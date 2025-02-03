@@ -22,8 +22,8 @@ interface BidPlayerDialogProps {
     currentBid: number;
     timeRemaining: number;
     bidMultiple: number,
-    keepMinBid: boolean,
     minBid: number,
+    maxBid: number,
 }
 
 const BidDialog = (props: BidPlayerDialogProps) => {
@@ -49,7 +49,7 @@ const BidDialog = (props: BidPlayerDialogProps) => {
     return (
         <Dialog open={props.open} onClose={props.onClose} aria-labelledby="bid-dialog-title">
             <DialogContent>
-                <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+                <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
                     {/* Club Name & Logo */}
                     <Stack direction="row" alignItems="center" gap={2}>
                         <Box
@@ -67,6 +67,12 @@ const BidDialog = (props: BidPlayerDialogProps) => {
                     <Typography variant="h6" fontWeight="bold" sx={{ color: '#2E7D32' }}>
                         Balance: <span style={{ color: '#388E3C' }}>${props.club.balance.toLocaleString()}M</span>
                     </Typography>
+                    <Typography variant="h6" fontWeight="bold" sx={{ color: '#FF8F00' }}>
+                        Max Bid: <span style={{ color: '#FFA726' }}>
+                            ${props.maxBid.toLocaleString()}M
+                        </span>
+                    </Typography>
+
 
                     {/* Current Bid */}
                     <Typography variant="h6" fontWeight="bold" sx={{ color: '#D32F2F' }}>
@@ -105,6 +111,7 @@ const BidDialog = (props: BidPlayerDialogProps) => {
                                 onClick={() => handleQuickBid(props.currentBid + option * props.bidMultiple)}
                                 color={bidAmount === props.currentBid + option * props.bidMultiple ? 'primary' : 'default'}
                                 sx={{ p: 1, minWidth: 80, fontSize: '1rem', fontWeight: 'bold' }}
+                                disabled={(props.currentBid + option * props.bidMultiple) > props.maxBid}
                             />
                         ))}
                     </Box>
