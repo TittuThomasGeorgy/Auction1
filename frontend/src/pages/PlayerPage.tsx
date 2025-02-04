@@ -13,6 +13,8 @@ import useClub from '../services/ClubService';
 import { IClub } from '../types/ClubType';
 import BackButton from '../components/BackButton';
 import PlayerFilter from '../components/PlayerFilter';
+import { initSocket } from '../services/SocketClient';
+import { IBid } from '../types/BidType';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -38,6 +40,20 @@ const PlayerPage = () => {
         PlayerServ.getAll({ searchKey, filter })
             .then((res) => setPlayers(res.data))
     }, [searchKey, filter]);
+    useEffect(() => {
+        const socket = initSocket();
+        // Listen for the start of a new auction
+        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+            const bid = res.data.bid;
+            if (bid ) {
+                setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
+            }
+
+        })
+        return () => {
+            socket.off('playerSold');
+        };
+    }, []);
     return (
         <>
             <BackButton />
