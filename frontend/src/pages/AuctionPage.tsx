@@ -59,7 +59,7 @@ const AuctionPage = () => {
 
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));
-        PlayerServ.getAll().then((res) =>
+        PlayerServ.getAll({}).then((res) =>
             setPlayers(res.data)
         );
         settingsServ.get()

@@ -35,7 +35,7 @@ const PlayerPage = () => {
             .then((res) => setClubs(res.data))
     }, []);
     useEffect(() => {
-        PlayerServ.getAll(searchKey, filter)
+        PlayerServ.getAll({ searchKey, filter })
             .then((res) => setPlayers(res.data))
     }, [searchKey, filter]);
     return (

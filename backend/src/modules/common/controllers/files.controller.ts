@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 
 export const uploadFiles = async (filename: string, file: Express.Multer.File, filePath: string, existingFileId?: string | null): Promise<IFileModel | null> => {
     try {
+        console.log(filePath, file);
+
         const fileID = await GoogleDrive.uploadFile({
             name: filename,
             body: fs.createReadStream(file.path),

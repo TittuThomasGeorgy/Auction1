@@ -9,6 +9,9 @@ import {
     CardMedia,
     Divider,
     Button,
+    Container,
+    Grid2 as Grid,
+    LinearProgress
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { IClub } from '../types/ClubType';
@@ -17,142 +20,206 @@ import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
 import { defClub } from '../services/DefaultValues';
+import usePlayer from '../services/PlayerService';
+import { IPlayer } from '../types/PlayerType';
+import SquadComponent from '../components/Squad';
+import useSettings from '../services/SettingsService';
+import { ISettings } from '../types/SettingsType';
+import { initSocket } from '../services/SocketClient';
+import { IBid } from '../types/BidType';
 
 
 const ClubView = () => {
     const { id } = useParams();
     const ClubServ = useClub();
+    const PlayerServ = usePlayer();
     const [club, setClub] = useState<IClub>(defClub);
     const [open, setOpen] = useState(false);
+    const [players, setPlayers] = useState<IPlayer[]>([])
+    const settingsServ = useSettings();
+    const [settings, setSettings] = useState<ISettings>({
+        _id: '',
+        bidTime: 0,
+        addOnTime: 0,
+        initialBalance: 0,
+        playersPerClub: 1,
+        bidMultiple: 100,
+        keepMinBid: true,
+        minBid: 100,
+    });
+    const [fillPerCent, setFillPerCent] = useState(0)
+
+    // Define dynamic colors based on player count
+    const getProgressColor = () => {
+        if (fillPerCent === 100) return '#FF4747'; // Red if full
+        if (fillPerCent >= 75) return '#FFA500'; // Orange if nearly full
+        return '#4CAF50'; // Green if room available
+    };
     const getData = async (_id: string) => {
         const res = await ClubServ.getById(_id);
         setClub(res.data);
+        const res2 = await PlayerServ.getAll({ club: _id })
+        setPlayers(res2.data)
+        const res3 = await settingsServ.get()
+        setSettings(res3.data)
+        setFillPerCent((res2.data.length / res3.data.playersPerClub) * 100)
+
     }
     useEffect(() => {
         if (id)
             getData(id);
     }, [id])
+     useEffect(() => {
+            const socket = initSocket();
+            // Listen for the start of a new auction
+            socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+                const bid = res.data.bid;
+                if (bid && bid.club===id) {
+                    getData(id);    
+                }
+    
+            })
+            return () => {
+                socket.off('playerSold');
+            };
+        }, []);
     return (
         <>
             <BackButton />
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    p: 4,
-                    minHeight: '100vh',
-                    // bgcolor: '#f0f4ff',
-                }}
-            >
-                {/* club Logo */}
-                <Card
-                    sx={{
-                        maxWidth: 600,
-                        width: '100%',
-                        borderRadius: 4,
-                        overflow: 'hidden',
-                        boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.2)',
-                    }}
+            <br />
+            <Container sx={{
+                bgcolor: 'rgba(24, 24, 24, 0.75)'
+            }}>
+                <br />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ textTransform: 'none', float: 'right' }}
+                    startIcon={<EditIcon />}
+                    onClick={() => setOpen(true)}
                 >
-                    <CardMedia
+                    Edit
+                </Button>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+
+                    <Box
                         component="img"
-                        image={club.logo}
+                        src={club.logo}
                         alt={`${club.name} logo`}
                         sx={{
-                            height: 150,
+                            width: 50,
+                            height: 50,
                             objectFit: 'contain',
-                            bgcolor: '#e3f2fd',
+                            // position: 'absolute',
+                            top: 20,
+                            zIndex: 2,
                         }}
                     />
-                    <CardContent>
-                        {/* club Header */}
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                            <Typography
-                                variant="h4"
-                                component="div"
-                                sx={{ fontWeight: 'bold', color: '#1e88e5' }}
-                            >
-                                {club.name}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: '#757575' }}>
-                                {`(${club.code})`}
-                            </Typography>
-                        </Stack>
 
-                        <Divider sx={{ my: 2 }} />
+                    <Typography
+                        variant="h4"
+                        component="div"
+                        sx={{ fontWeight: 'bold', color: '#1e88e5', justifyContent: 'center', textAlign: 'center' }}
+                    >
+                        {club.name}
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#757575' }}>
+                        {`(${club.code})`}
+                    </Typography>
 
-                        {/* club Manager */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <Avatar
+                </Stack>
+                <Grid container spacing={1}>
+                    <Grid size={9}>
+                        <SquadComponent squad={players} />
+                    </Grid>
+                    <Grid size={3}>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '20px',
+                            position: 'relative',
+                        }}>
+                            <Box
+                                component="img"
+
                                 src={club.manager.img}
                                 alt={club.manager.name}
                                 sx={{
-                                    width: 80,
-                                    height: 80,
-                                    mr: 2,
-                                    boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
                                 }}
                             />
+                            <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 'bold', color: '#1e88e5', mb: 0.5 }}
+                            >
+                                {club.manager.name}
+                            </Typography>
+                            <Divider sx={{ my: 2 }} />
+
                             <Box>
+                                <br />
                                 <Typography
-                                    variant="h6"
-                                    sx={{ fontWeight: 'bold', color: '#1e88e5', mb: 0.5 }}
+                                    sx={{
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        color: 'rgba(255, 255, 255, 0.9)',
+                                    }}
                                 >
-                                    Manager: {club.manager.name}
+                                    Balance:  ${club.balance.toLocaleString()} M
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#757575' }}>
-                                    Username: {club.username}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: '#757575' }}>
-                                    Balance:{ `$ ${club.balance.toLocaleString()} M`}
+                                <br />
+                                <Typography
+                                    sx={{
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        color: getProgressColor(),
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '2px',
+                                        flexDirection: 'column'
+                                    }}
+                                >
+                                    {/* <SportsSoccerIcon sx={{ fontSize: 18 }} /> */}
+                                    {/* Progress Bar */}
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={fillPerCent}
+                                        sx={{
+                                            width: '80%',
+                                            height: 6,
+                                            borderRadius: 3,
+                                            backgroundColor: 'rgba(255,255,255,0.3)',
+                                            '& .MuiLinearProgress-bar': {
+                                                backgroundColor: getProgressColor(),
+                                            },
+                                            margin: '5px auto',
+                                        }}
+                                    />
+                                    {players.length} / {settings.playersPerClub}
+
                                 </Typography>
                             </Box>
+
                         </Box>
+                        {/* </Box> */}
 
-                        {/* Admin Badge */}
-                        {club.isAdmin && (
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    color: '#388e3c',
-                                    fontWeight: 'bold',
-                                    border: '1px solid #388e3c',
-                                    p: 1,
-                                    borderRadius: 1,
-                                    textAlign: 'center',
-                                    mb: 2,
-                                }}
-                            >
-                                Admin Privileges
-                            </Typography>
-                        )}
-
-                        {/* Buttons */}
-                        <Stack direction="row" spacing={2} justifyContent="center">
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                sx={{ textTransform: 'none' }}
-                                startIcon={<EditIcon />}
-                                onClick={() => setOpen(true)}
-                            >
-                                Edit
-                            </Button>
-
-                        </Stack>
-                    </CardContent>
-                </Card>
-            </Box>
-            <AddClubDialog open={open} onClose={() => setOpen(false)}
-                action='edit'
-                onSubmit={(newValue) =>
-                    // console.log(newValue)
-                    setClub(newValue)
-                }
-                value={club}
-            />
+                    </Grid>
+                </Grid>
+                <br />
+                <AddClubDialog open={open} onClose={() => setOpen(false)}
+                    action='edit'
+                    onSubmit={(newValue) =>
+                        // console.log(newValue)
+                        setClub(newValue)
+                    }
+                    value={club}
+                />
+            </Container>
         </>
     );
 };

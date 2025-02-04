@@ -9,8 +9,9 @@ import { IBid } from "../../auction/types/bid";
 
 
 
-export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string) => {
+export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string, club?: string) => {
     // Check if the searchKey matches any playerClass element with regex
+    console.log(filter, club, searchKey);
 
     // Construct filter-specific query conditions
     const filterCondition = (() => {
@@ -22,6 +23,22 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string)
         }
         return {}; // Default case for 'all'
     })();
+    console.log({
+        ...filterCondition, // Apply filter-specific conditions
+        ...(searchKey
+            ? {
+                name: {
+                    $regex: searchKey,
+                    $options: 'i',
+                },
+            }
+            : {}),
+        ...(club
+            ? {
+                club: club
+            }
+            : {})
+    });
 
     // Fetch players with combined conditions
     const _data = await Player.find({
@@ -34,6 +51,11 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string)
                 },
             }
             : {}),
+        ...(club
+            ? {
+                club: new mongoose.Types.ObjectId(club)
+            }
+            : {})
     })
         .populate(['image', 'bid']);
     const positionOrder: { [key: string]: number } = {
@@ -59,7 +81,8 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string)
 }
 export const getPlayersReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await getPlayers(req.query.filter as 'sold' | 'unsold', req.query.searchKey as string)
+
+        const data = await getPlayers(req.query.filter as 'sold' | 'unsold', req.query.searchKey as string, req.query.club as string)
         if (!(data.length > 0))
             sendApiResponse(res, 'NOT FOUND', [], 'Players Not Found');
 

@@ -28,6 +28,7 @@ export const getClubs = async (req: Request, res: Response, next: NextFunction) 
                     ],
                 }
                 : {})
+          
         })
             .populate('logo')
             .populate('manager.img')
@@ -145,6 +146,7 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
 
         const prevClubLogo = (prevClub?.logo as unknown as IFileModel);
         const isSameLogo = prevClubLogo.downloadURL === _updatedClub.logo;
+        console.log(prevClubLogo.downloadURL, _updatedClub.logo);
         let _file: IFileModel | null = null;
         const file1 = files?.file1?.[0];
         if (!isSameLogo && file1) {
@@ -165,7 +167,7 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
         const isSameManImg = prevManImg.downloadURL === _updatedClub.manager.img;
         const file2 = files?.file2?.[0];
         if (!isSameManImg && file2) {
-            _file = (await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '', prevClubLogo.fileId));
+            _file = (await uploadFiles(req.body.name, file2, process.env.MANAGER_FOLDER ?? '', prevClubLogo.fileId));
             if (_file) {
                 _updatedClub.manager.img = _file?._id
             }
@@ -188,7 +190,7 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
         delete _updatedClub.password;
 
         sendApiResponse(res, 'OK', _updatedClub,
-            `club updated successfully`);
+            `Club updated successfully`);
     } catch (error) {
         next(error);
     }

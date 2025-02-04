@@ -94,6 +94,7 @@ const ClubCard= (props:ClubCardProps) => {
                 <Avatar
                     src={props.club.manager.img}
                     alt={props.club.manager.name}
+                    variant='rounded'
                     sx={{
                         width: 50,
                         height: 50,

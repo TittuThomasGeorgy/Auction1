@@ -2,6 +2,7 @@ import { Avatar, SxProps } from '@mui/material';
 import React from 'react'
 import { Delete as DeleteIcon, Image as ImageIcon } from '@mui/icons-material';
 import { Theme } from '@emotion/react';
+import { enqueueSnackbar } from 'notistack';
 
 interface ImageUploaderProps {
     id?: string;
@@ -38,12 +39,12 @@ const ImageUploader = (props: ImageUploaderProps) => {
                     e.preventDefault(); // Prevent the default behavior of the file input
 
                     if (e.target.files) {
-                        console.log('size is', e.target.files[0].size / 1024);
-                        if (e.target.files[0].size > 1e6) {
-                            // enqueueSnackbar({
-                            //     message: 'File size cannot be greater than 1 MB',
-                            //     variant: 'error',
-                            // });
+                        console.log('Size is', e.target.files[0].size / 1024, 'KB');
+                        if ((e.target.files[0].size / 1024) > 10240) {
+                            enqueueSnackbar({
+                                message: 'File size cannot be greater than 10 MB',
+                                variant: 'error',
+                            });
                         } else {
                             props.onFileUpload(e.target.files[0])
                             const url = URL.createObjectURL(e.target.files[0]);
