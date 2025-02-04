@@ -17,7 +17,7 @@ const SquadComponent = ({ squad }: SquadComponentProps) => {
     <Box
       sx={{
         width: '100%',
-        height: '80vh',
+        height: '83vh',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -41,7 +41,8 @@ const SquadComponent = ({ squad }: SquadComponentProps) => {
       />
 
       {/* Grid2 Layout for Positions */}
-      <Grid container spacing={0} justifyContent="center" alignItems="center">
+      <Grid container spacing={0} justifyContent="center" alignItems="center" 
+      sx={{}}>
         {strikers.map((player) => (
           <Grid key={player._id} size={12 / strikers.length} sx={{ padding: '0px' }}>
             <PlayerCard player={player} />
@@ -67,7 +68,6 @@ const SquadComponent = ({ squad }: SquadComponentProps) => {
   );
 };
 
-// Extracted PlayerCard Component
 const PlayerCard = ({ player }: { player: IPlayer }) => (
   <Box
     sx={{
@@ -75,21 +75,83 @@ const PlayerCard = ({ player }: { player: IPlayer }) => (
       textAlign: 'center',
       margin: 'auto',
       padding: 1,
+      position: 'relative',
+      '&:hover .hover-effect': {
+        transform: 'scale(1.4)', // Slight zoom on hover
+        color: 'primary.main',
+      },
+      '&:hover .bid-amount': {
+        opacity: 1, // Show bid amount on hover
+        transform: 'translateY(0)',
+      },
+      '&:hover .position-box': {
+        opacity: 1, // Show position on hover
+        transform: 'translateX(0)',
+      },
     }}
   >
+    {/* Position Box (Appears to the left on hover) */}
+    <Box
+      className="position-box"
+      sx={{
+        position: 'absolute',
+        left: 0, // Position to the left of the image
+        top: '10%',
+        transform: 'translateY(-50%) translateX(-10px)',
+        // backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        color: 'white',
+        padding: '4px 6px',
+        borderRadius: '4px',
+        fontSize: '12px',
+        whiteSpace: 'nowrap',
+        opacity: 0,
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+      }}
+    >
+      {player.position}
+    </Box>
+
+    {/* Player Image */}
     <Box
       component="img"
       src={player.image}
       alt={player.name}
+      className="hover-effect"
       sx={{
-        width: '50%',
+        width: '80%',
         height: 100,
         objectFit: 'cover',
         borderRadius: 2,
+        transition: 'transform 0.3s ease',
       }}
     />
-    <Typography variant="subtitle1">{player.name}</Typography>
+
+    {/* Player Name */}
+    <Typography
+      variant="subtitle1"
+      className="hover-effect"
+      sx={{
+        transition: 'color 0.3s ease',
+      }}
+    >
+      {player.name}
+    </Typography>
+
+    {/* Bid Amount (Appears under name on hover) */}
+    <Typography
+      variant="body2"
+      className="bid-amount"
+      sx={{
+        opacity: 0,
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        transform: 'translateY(-10px)',
+        color: 'gray',
+      }}
+    >
+      ${player.bid || 'N/A'}
+    </Typography>
   </Box>
 );
+
 
 export default SquadComponent;

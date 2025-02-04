@@ -11,7 +11,7 @@ import { IBid } from "../../auction/types/bid";
 
 export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string, club?: string) => {
     // Check if the searchKey matches any playerClass element with regex
-    console.log(filter, club, searchKey);
+    // console.log(filter, club, searchKey);
 
     // Construct filter-specific query conditions
     const filterCondition = (() => {
@@ -23,22 +23,7 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string,
         }
         return {}; // Default case for 'all'
     })();
-    console.log({
-        ...filterCondition, // Apply filter-specific conditions
-        ...(searchKey
-            ? {
-                name: {
-                    $regex: searchKey,
-                    $options: 'i',
-                },
-            }
-            : {}),
-        ...(club
-            ? {
-                club: club
-            }
-            : {})
-    });
+ 
 
     // Fetch players with combined conditions
     const _data = await Player.find({

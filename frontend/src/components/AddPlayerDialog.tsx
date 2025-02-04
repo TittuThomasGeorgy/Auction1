@@ -138,8 +138,8 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                             </Grid>
                             <Grid size={12}>
                                 <Autocomplete
-                                    options={props.clubs}
                                     value={props.clubs.find(clb => clb._id === creatablePlayer?.club)}
+                                    options={props.clubs}
                                     renderOption={(props, option) => (
                                         <li {...props} key={option._id}>
                                             <Avatar src={option.logo} alt={option.name} sx={{ width: 24, height: 24, marginRight: 1 }} />
