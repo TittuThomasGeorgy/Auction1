@@ -187,32 +187,34 @@ const PlayerView = () => {
                     </Grid>
                 </Grid >
                 <br />
-                <AddPlayerDialog open={open === 'edit'} onClose={() => setOpen(null)}
-                    action={'edit'}
-                    onSubmit={(newValue) =>
-                        setPlayer(newValue)
-                    }
-                    value={player}
-                />
-                <ConfirmationDialog
-                    open={open === 'delete'} onClose={() => setOpen(null)}
-                    onConfirm={async () => {
-                        const res = await PlayerServ.delete(player._id);
-                        if (res.success) {
-                            enqueueSnackbar({
-                                variant: "success",
-                                message: res.message
-                            })
-                            navigate('/players/')
-                        }
-                        else
-                            enqueueSnackbar({
-                                variant: "error",
-                                message: `Deleting Failed`
-                            })
-                    }} title={`Are sure  want to delete ${player.name}?`} />
-
             </Container >
+
+            <AddPlayerDialog open={open === 'edit'} onClose={() => setOpen(null)}
+                action={'edit'}
+                onSubmit={(newValue) =>
+                    setPlayer(newValue)
+                }
+                value={player}
+                bidMultiple={settings.bidMultiple}
+            />
+            <ConfirmationDialog
+                open={open === 'delete'} onClose={() => setOpen(null)}
+                onConfirm={async () => {
+                    const res = await PlayerServ.delete(player._id);
+                    if (res.success) {
+                        enqueueSnackbar({
+                            variant: "success",
+                            message: res.message
+                        })
+                        navigate('/players/')
+                    }
+                    else
+                        enqueueSnackbar({
+                            variant: "error",
+                            message: `Deleting Failed`
+                        })
+                }} title={`Are sure  want to delete ${player.name}?`} />
+
         </>
     );
 }

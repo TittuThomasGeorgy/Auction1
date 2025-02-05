@@ -167,7 +167,6 @@ const AuctionPage = () => {
                 enqueueSnackbar({ variant: 'success', message: res.message });
                 setShowSold(true);
                 setPlaceBidClub(null);
-
             }
 
         })
@@ -466,7 +465,7 @@ const AuctionPage = () => {
                             <AuctionClubCard
                                 club={club}
                                 key={club._id}
-                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid)                                }
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid)}
                                 onClick={() => setPlaceBidClub(club)}
                                 playerCount={_playerCount}
                                 maxPlayers={settings.playersPerClub}
@@ -484,7 +483,7 @@ const AuctionPage = () => {
                             <BidDialog
                                 open={Boolean(placeBidClub)}
                                 onClose={() => setPlaceBidClub(null)}
-                                currentBid={liveAuction.auction?.bid?.bid ?? 100}
+                                currentBid={liveAuction.auction?.bid?.bid ?? 0}
                                 onSubmit={async (bid) => {
                                     const res = await AuctionServ.placeBid(
                                         placeBidClub._id,
@@ -506,6 +505,7 @@ const AuctionPage = () => {
                                 bidMultiple={settings.bidMultiple}
                                 maxBid={maxBid}
                                 minBid={settings.minBid}
+                                basePrice={players[currentPlayerIndex].basePrice}
                             />
                         );
                     })()

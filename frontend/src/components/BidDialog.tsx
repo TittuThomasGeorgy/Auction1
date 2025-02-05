@@ -24,6 +24,7 @@ interface BidPlayerDialogProps {
     bidMultiple: number,
     minBid: number,
     maxBid: number,
+    basePrice: number,
 }
 
 const BidDialog = (props: BidPlayerDialogProps) => {
@@ -44,7 +45,10 @@ const BidDialog = (props: BidPlayerDialogProps) => {
     };
 
     useEffect(() => {
-        setBidAmount(props.currentBid + props.bidMultiple)
+        if (props.currentBid == 0)
+            setBidAmount(props.basePrice)
+        else
+            setBidAmount(props.currentBid + props.bidMultiple)
     }, [props.currentBid])
     return (
         <Dialog open={props.open} onClose={props.onClose} aria-labelledby="bid-dialog-title">

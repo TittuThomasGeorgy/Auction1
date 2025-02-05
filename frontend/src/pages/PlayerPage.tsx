@@ -4,7 +4,7 @@ import { Add as AddIcon, Groups as GroupsIcon, Search as SearchIcon } from '@mui
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
 import AddPlayerDialog from '../components/AddPlayerDialog';
-import { defPlayer } from '../services/DefaultValues';
+import { defPlayer, defSettings } from '../services/DefaultValues';
 import usePlayer from '../services/PlayerService';
 import { IPlayer } from '../types/PlayerType';
 import ClubCard from '../components/ClubCard';
@@ -15,6 +15,8 @@ import BackButton from '../components/BackButton';
 import PlayerFilter from '../components/PlayerFilter';
 import { initSocket } from '../services/SocketClient';
 import { IBid } from '../types/BidType';
+import { ISettings } from '../types/SettingsType';
+import useSettings from '../services/SettingsService';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -23,19 +25,26 @@ const positionOrder: { [key: string]: number } = {
     GK: 4
 };
 const PlayerPage = () => {
-    const navigate= useNavigate();
+    const navigate = useNavigate();
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
+    const settingsServ = useSettings();
+
     const [open, setOpen] = useState(false)
     const [players, setPlayers] = useState<IPlayer[]>([])
     const [player, setPlayer] = useState<IPlayer>(defPlayer)
     const [clubs, setClubs] = useState<IClub[]>([])
     const [action, setAction] = useState<'add' | 'edit'>('add');
     const [searchKey, setSearchKey] = useState('');
-    const [filter, setFilter] = useState<'all' | 'sold' | 'unsold'>('all')
+    const [filter, setFilter] = useState<'all' | 'sold' | 'unsold'>('all');
+    const [settings, setSettings] = useState<ISettings>(defSettings);
+
     useEffect(() => {
         ClubServ.getAll()
             .then((res) => setClubs(res.data))
+        settingsServ.get()
+            .then((res) =>
+                setSettings(res.data))
     }, []);
     useEffect(() => {
         PlayerServ.getAll({ searchKey, filter })
@@ -46,7 +55,7 @@ const PlayerPage = () => {
         // Listen for the start of a new auction
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
             const bid = res.data.bid;
-            if (bid ) {
+            if (bid) {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
             }
 
@@ -137,7 +146,8 @@ const PlayerPage = () => {
                             return positionComparison; // If positions differ, prioritize position sorting
                         }))
                 }
-                value={player}            />
+                value={{ ...player, basePrice: settings.minBid }} 
+                bidMultiple={settings.bidMultiple}/>
         </>
     );
 };

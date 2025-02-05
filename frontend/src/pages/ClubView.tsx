@@ -32,11 +32,11 @@ import { IBid } from '../types/BidType';
 const ClubView = () => {
     const { id } = useParams();
     const ClubServ = useClub();
+    const settingsServ = useSettings();
     const PlayerServ = usePlayer();
     const [club, setClub] = useState<IClub>(defClub);
     const [open, setOpen] = useState(false);
     const [players, setPlayers] = useState<IPlayer[]>([])
-    const settingsServ = useSettings();
     const [settings, setSettings] = useState<ISettings>(defSettings);
     const [fillPerCent, setFillPerCent] = useState(0)
 

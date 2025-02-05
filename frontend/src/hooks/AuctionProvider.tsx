@@ -37,7 +37,10 @@ export const AuctionProvider = ({ children }: { children: ReactNode }) => {
         };
 
         const handlePlayerSold = (res: { data: { bid: IBid | null }, message: string }) => {
-            setAuction(auction => auction ? { ...auction, bid: null, timeRemaining: -2 } : null);
+            setAuction(auction => {
+                return auction ? { ...auction, bid: null, timeRemaining: -2 } : null
+            })
+
         };
 
         const handleAuctionStopped = () => {

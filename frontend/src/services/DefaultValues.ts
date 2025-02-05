@@ -6,7 +6,7 @@ export const defPlayer: IPlayer = {
     name: '',
     image: '',
     position: 'ST',
-    basePrice: 0,
+    basePrice: 100,
 }
 
 

@@ -14,7 +14,8 @@ interface AddPlayerDialogProps {
     onClose: () => void;
     onSubmit: (value: IPlayer) => void;
     action: 'add' | 'edit';
-    value: IPlayer, 
+    value: IPlayer,
+    bidMultiple: number,
     // clubs: IClub[]
 }
 const AddPlayerDialog = (props: AddPlayerDialogProps) => {
@@ -42,6 +43,11 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                         variant: "error",
                         message: `Image missing`
                     });
+                    return;
+                }
+                else if (creatablePlayer.basePrice % props.bidMultiple != 0) {
+                    enqueueSnackbar({ variant: 'warning', message: `Base Price Should be multiple of ${props.bidMultiple} ` })
+
                     return;
                 }
                 props.action === 'edit' ?
@@ -80,7 +86,6 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
             }}>
                 <DialogTitle>{(props.action === 'edit' ? 'Edit ' : 'Add ') + 'Player'}</DialogTitle>
                 <DialogContent>
-                    <Container>
                         <Grid container spacing={1}>
                             <Grid size={12}>
                                 <ImageUploader value={creatablePlayer.image} onChange={(newVal) => {
@@ -91,8 +96,8 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     }}
                                     sx={{
                                         background: 'linear-gradient(135deg, #0f3a67, #1c5c94)',
-                                         width: 200,
-                                        height: 300,
+                                        width: 200,
+                                        height: 290,
                                         objectFit: 'contain',
                                         // position: 'absolute',
                                         // top: '40%',
@@ -158,7 +163,6 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                             </Grid> */}
 
                         </Grid>
-                    </Container>
                 </DialogContent>
                 <DialogActions>
                     <Button variant='outlined' onClick={() => props.onClose()}>Cancel</Button>
