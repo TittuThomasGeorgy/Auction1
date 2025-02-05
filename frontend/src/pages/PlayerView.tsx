@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useClub from '../services/ClubService';
 import { defPlayer, defSettings } from '../services/DefaultValues';
 import usePlayer from '../services/PlayerService';
@@ -15,9 +15,12 @@ import AddPlayerDialog from '../components/AddPlayerDialog';
 import PlayerCard from '../components/PlayerCard';
 import { IClub } from '../types/ClubType';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import { enqueueSnackbar } from 'notistack';
 
 const PlayerView = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+
     const ClubServ = useClub();
     const PlayerServ = usePlayer();
     const settingsServ = useSettings();
@@ -193,9 +196,22 @@ const PlayerView = () => {
                 />
                 <ConfirmationDialog
                     open={open === 'delete'} onClose={() => setOpen(null)}
-                    onConfirm={function (): void {
-                        throw new Error('Function not implemented.');
+                    onConfirm={async () => {
+                        const res = await PlayerServ.delete(player._id);
+                        if (res.success) {
+                            enqueueSnackbar({
+                                variant: "success",
+                                message: res.message
+                            })
+                            navigate('/players/')
+                        }
+                        else
+                            enqueueSnackbar({
+                                variant: "error",
+                                message: `Deleting Failed`
+                            })
                     }} title={`Are sure  want to delete ${player.name}?`} />
+
             </Container >
         </>
     );

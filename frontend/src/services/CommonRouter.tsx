@@ -30,7 +30,7 @@ export const allModuleRoutes = [
   },
   {
     title: 'Player',
-    path: '/player',
+    path: '/players',
     element: <PlayerPage />,
   },
   {

@@ -17,14 +17,14 @@ router.use('/auction', auctionRouter);
 router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     console.info('Caught error by the error handler!!!');
     if (error.message === 'Unauthorized') {
-        sendApiResponse(res, 'UNAUTHORIZED', null, 'Unauthorized User');
+        return sendApiResponse(res, 'UNAUTHORIZED', null, 'Unauthorized User');
     } else {
 
         // log the error
         //   commonEvents.emit('error', error);
-        sendApiResponse(res, 'INTERNAL SERVER ERROR', {
+        return sendApiResponse(res, 'INTERNAL SERVER ERROR', {
         },
-        error.message
+            error.message
         );
     }
 });

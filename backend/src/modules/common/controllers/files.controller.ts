@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 
 export const uploadFiles = async (filename: string, file: Express.Multer.File, filePath: string, existingFileId?: string | null): Promise<IFileModel | null> => {
     try {
-        console.log(filePath, file);
+        // console.log(filePath, file);
 
         const fileID = await GoogleDrive.uploadFile({
             name: filename,
@@ -46,4 +46,16 @@ export const uploadFiles = async (filename: string, file: Express.Multer.File, f
         console.log(error);
         return (null);
     }
+}
+
+export const deleteFile = async (_id: string) => {
+    const file = await FileModel.findByIdAndDelete(_id);
+
+    GoogleDrive.deleteFile(file?.fileId as string)
+        .then(() =>
+            console.log('Deleted user image from Google Drive'.bgYellow)
+        ).catch((error) => {
+            console.log('File Delete Error =>', error);
+        });
+    return;
 }

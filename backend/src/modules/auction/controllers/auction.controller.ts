@@ -109,7 +109,7 @@ export const playPauseAuction = async (req: Request, res: Response, next: NextFu
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
 };
-const lastBid = async (playerId: string) => {
+export const lastBid = async (playerId: string) => {
     const result = await Bid.find({ player: playerId, state: 1 }).sort({ 'bid': -1 }).limit(1);
     return result[0] || null; // Return the first result or null if no bids match  return data?.toJSON()
 }

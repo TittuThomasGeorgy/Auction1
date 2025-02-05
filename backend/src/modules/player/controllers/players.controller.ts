@@ -1,11 +1,14 @@
 import mongoose, { ObjectId, Types } from "mongoose";
 import sendApiResponse from "../../../common/extras/sendApiResponse";
 import { NextFunction, Request, Response } from "express";
-import { uploadFiles } from "../../common/controllers/files.controller";
+import { deleteFile, uploadFiles } from "../../common/controllers/files.controller";
 import { IFileModel } from "../../common/types/fileModel";
 import Player from "../models/Player";
 import { IPlayer } from "../types/player";
 import { IBid } from "../../auction/types/bid";
+import { lastBid } from "../../auction/controllers/auction.controller";
+import Club from "../../club/models/Club";
+import Bid from "../../auction/models/Bid";
 
 
 
@@ -159,6 +162,32 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         }
         sendApiResponse(res, 'OK', _updatedPlayer,
             `Player updated successfully`);
+    } catch (error) {
+        next(error);
+    }
+}
+export const deletePlayer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const player = await Player.findById(req.params.id);
+        if (!player) {
+            return sendApiResponse(res, 'NOT FOUND', null, 'Player Not Found');
+        }
+        if (player.club) {
+            const _lastBid = await lastBid(req.params.id);
+            await Club.findByIdAndUpdate(player.club, { $inc: { balance: _lastBid.bid } });
+            console.log("Club balance updated");
+
+            await Bid.deleteMany({ player: req.params.id });
+            console.log("Bid Removed");
+        }
+        if (player.image)
+            await deleteFile(player.image.toString())
+        const deletedPlayer =   await Player.findByIdAndDelete(req.params.id)
+        if (!deletedPlayer) {
+            return sendApiResponse(res, 'CONFLICT', null, 'Player Not Deleted');
+        }
+        sendApiResponse(res, 'OK', player,
+            `Player deleted successfully`);
     } catch (error) {
         next(error);
     }

@@ -111,7 +111,7 @@ const HomePage = () => {
                     },
                     cursor: 'pointer',
                 }}
-                onClick={() => handleCardClick('/player')}
+                onClick={() => handleCardClick('/players')}
             >
                 <CardActionArea>
                     <CardContent
