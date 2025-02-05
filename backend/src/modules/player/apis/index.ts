@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { getPlayersReq, getPlayerById, createPlayer, updatePlayer, deletePlayer } from "../controllers/players.controller";
+import { getPlayersReq, getPlayerById, createPlayer, updatePlayer, deletePlayer, getBids } from "../controllers/players.controller";
 
 const playerRouter = Router();
 
@@ -11,6 +11,7 @@ const upload = multer({
 
 playerRouter.get('/', getPlayersReq);
 playerRouter.get('/:id', getPlayerById);
+playerRouter.get('/:id/bid', getBids);
 playerRouter.post('/', upload.single('file'), createPlayer);
 playerRouter.patch('/:id', upload.single('file'), updatePlayer);
 playerRouter.delete('/:id',  deletePlayer);

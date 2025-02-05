@@ -22,7 +22,7 @@ import BackButton from '../components/BackButton';
 import { defClub, defSettings } from '../services/DefaultValues';
 import usePlayer from '../services/PlayerService';
 import { IPlayer } from '../types/PlayerType';
-import SquadComponent from '../components/Squad';
+import SquadComponent from '../components/SquadComponent';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { initSocket } from '../services/SocketClient';

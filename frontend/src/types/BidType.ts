@@ -4,4 +4,5 @@ export interface IBid {
     player: string;
     club: string;
     bid: number;
+    state: 1 | 0;
 }

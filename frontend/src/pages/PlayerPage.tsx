@@ -105,7 +105,9 @@ const PlayerPage = () => {
                     }}>
 
                     {players.map(_player =>
-                        <PlayerCard key={_player._id} player={_player} club={clubs.find(clb => clb._id === _player.club) ?? null} onClick={() => {
+                        <PlayerCard key={_player._id} player={_player} 
+                        club={clubs.find(clb => clb._id === _player.club) ?? null}
+                         onClick={() => {
                             // setAction('edit');
                             // setPlayer(_player)
                             // setOpen(true)

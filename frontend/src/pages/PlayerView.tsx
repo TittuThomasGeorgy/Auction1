@@ -9,13 +9,15 @@ import { ISettings } from '../types/SettingsType';
 import { Container, Button, Stack, Box, Typography, Grid2 as Grid, Divider, LinearProgress } from '@mui/material';
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
-import SquadComponent from '../components/Squad';
+import SquadComponent from '../components/SquadComponent';
 import { AccountCircle as UserIcon, Edit as EditIcon, Delete as DeleteIcon, AttachMoney as SellIcon } from '@mui/icons-material';
 import AddPlayerDialog from '../components/AddPlayerDialog';
 import PlayerCard from '../components/PlayerCard';
 import { IClub } from '../types/ClubType';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import { enqueueSnackbar } from 'notistack';
+import { IBid } from '../types/BidType';
+import BidComponent from '../components/BidComponent';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -26,15 +28,18 @@ const PlayerView = () => {
     const settingsServ = useSettings();
     const [open, setOpen] = useState<'edit' | 'sell' | 'delete' | null>(null);
     const [player, setPlayer] = useState<IPlayer>(defPlayer)
-    const [club, setClub] = useState<IClub | null>(null);
+    const [clubs, setClubs] = useState<IClub[]>([]);
     const [settings, setSettings] = useState<ISettings>(defSettings);
+    const [bids, setBids] = useState<IBid[]>([])
     const getData = async (_id: string) => {
         const res = await PlayerServ.getById(_id);
         setPlayer(res.data);
     }
     const getClub = async (_id: string) => {
-        const res = await ClubServ.getById(_id);
-        setClub(res.data);
+        const res = await ClubServ.getAll();
+        setClubs(res.data);
+        const res2 = await PlayerServ.getAllBids(player._id)
+        setBids(res2.data)
     }
     useEffect(() => {
         if (id)
@@ -99,12 +104,14 @@ const PlayerView = () => {
                             padding: '20px',
                             position: 'relative',
                         }}>
-                            <PlayerCard player={player} club={club} onClick={() => {
-                                // setAction('edit');
-                                // setPlayer(_player)
-                                // setOpen(true)
-                                // navigate(`/player/${_player._id}`)
-                            }} />
+                            <PlayerCard player={player}
+                                club={clubs.find(clb => clb._id === player.club) ?? null}
+                                onClick={() => {
+                                    // setAction('edit');
+                                    // setPlayer(_player)
+                                    // setOpen(true)
+                                    // navigate(`/player/${_player._id}`)
+                                }} />
                             <Divider sx={{ my: 2 }} />
                             <Stack direction={'row'}>
                                 <Button
@@ -183,7 +190,7 @@ const PlayerView = () => {
 
                     </Grid >
                     <Grid size={{ xs: 12, md: 8 }}>
-                        {/* <SquadComponent squad={players} /> */}
+                        <BidComponent bids={bids} clubs={clubs} />
                     </Grid>
                 </Grid >
                 <br />

@@ -100,6 +100,19 @@ export const getPlayerById = async (req: Request, res: Response, next: NextFunct
         next(error);
     }
 }
+export const getBids = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = await Bid.find({player:req.params.id}).sort({'createdAt':-1})
+        if (data.length==0) {
+            return sendApiResponse(res, 'NOT FOUND', null, 'No Bids Found');
+        }
+        // console.log(data);
+
+        sendApiResponse(res, 'OK', data, 'Successfully fetched Bids');
+    } catch (error) {
+        next(error);
+    }
+}
 
 
 export const createPlayer = async (req: Request, res: Response, next: NextFunction) => {
