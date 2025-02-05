@@ -19,7 +19,7 @@ import useClub from '../services/ClubService';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
-import { defClub } from '../services/DefaultValues';
+import { defClub, defSettings } from '../services/DefaultValues';
 import usePlayer from '../services/PlayerService';
 import { IPlayer } from '../types/PlayerType';
 import SquadComponent from '../components/Squad';
@@ -37,16 +37,7 @@ const ClubView = () => {
     const [open, setOpen] = useState(false);
     const [players, setPlayers] = useState<IPlayer[]>([])
     const settingsServ = useSettings();
-    const [settings, setSettings] = useState<ISettings>({
-        _id: '',
-        bidTime: 0,
-        addOnTime: 0,
-        initialBalance: 0,
-        playersPerClub: 1,
-        bidMultiple: 100,
-        keepMinBid: true,
-        minBid: 100,
-    });
+    const [settings, setSettings] = useState<ISettings>(defSettings);
     const [fillPerCent, setFillPerCent] = useState(0)
 
     // Define dynamic colors based on player count
@@ -69,20 +60,20 @@ const ClubView = () => {
         if (id)
             getData(id);
     }, [id])
-     useEffect(() => {
-            const socket = initSocket();
-            // Listen for the start of a new auction
-            socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-                const bid = res.data.bid;
-                if (bid && bid.club===id) {
-                    getData(id);    
-                }
-    
-            })
-            return () => {
-                socket.off('playerSold');
-            };
-        }, []);
+    useEffect(() => {
+        const socket = initSocket();
+        // Listen for the start of a new auction
+        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+            const bid = res.data.bid;
+            if (bid && bid.club === id) {
+                getData(id);
+            }
+
+        })
+        return () => {
+            socket.off('playerSold');
+        };
+    }, []);
     return (
         <>
             <BackButton />
@@ -129,10 +120,11 @@ const ClubView = () => {
 
                 </Stack>
                 <Grid container spacing={1}>
-                    <Grid size={9}>
-                        <SquadComponent squad={players} />
-                    </Grid>
-                    <Grid size={3}>
+                    <Grid size={{ xs: 12, md: 3 }}
+                        borderRight={{
+                            md: '2px solid rgba(255, 255, 255, 0.2)',
+                            xs: 'none'
+                        }}>
                         <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -208,6 +200,9 @@ const ClubView = () => {
                         </Box>
                         {/* </Box> */}
 
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 9 }}>
+                        <SquadComponent squad={players} />
                     </Grid>
                 </Grid>
                 <br />

@@ -5,19 +5,11 @@ import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { enqueueSnackbar } from 'notistack';
 import { AccessTime, AttachMoney, Groups, MoreTime, SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, TimerOutlined, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
+import { defSettings } from '../services/DefaultValues';
 
 const SettingsPage = () => {
     const settingsServ = useSettings();
-    const [settings, setSettings] = useState<ISettings>({
-        _id: '',
-        bidTime: 0,
-        addOnTime: 0,
-        initialBalance: 0,
-        playersPerClub: 0,
-        bidMultiple: 0,
-        keepMinBid: true,
-        minBid: 0
-    });
+    const [settings, setSettings] = useState<ISettings>(defSettings);
 
     const [isEditing, setIsEditing] = useState(false);
     const [confirmReset, setConfirmReset] = useState(false);

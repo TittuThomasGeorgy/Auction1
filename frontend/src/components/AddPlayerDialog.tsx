@@ -14,7 +14,8 @@ interface AddPlayerDialogProps {
     onClose: () => void;
     onSubmit: (value: IPlayer) => void;
     action: 'add' | 'edit';
-    value: IPlayer, clubs: IClub[]
+    value: IPlayer, 
+    // clubs: IClub[]
 }
 const AddPlayerDialog = (props: AddPlayerDialogProps) => {
     const PlayerServ = usePlayer();
@@ -136,7 +137,7 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     required
                                 />
                             </Grid>
-                            <Grid size={12}>
+                            {/* <Grid size={12}>
                                 <Autocomplete
                                     value={props.clubs.find(clb => clb._id === creatablePlayer?.club)}
                                     options={props.clubs}
@@ -154,7 +155,7 @@ const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                     fullWidth
                                     renderInput={(params) => <TextField {...params} label="Club" variant='outlined' />}
                                 />
-                            </Grid>
+                            </Grid> */}
 
                         </Grid>
                     </Container>

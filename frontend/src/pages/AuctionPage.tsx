@@ -21,6 +21,7 @@ import { initSocket } from '../services/SocketClient';
 import PlayerSoldModal from '../components/PlayerSoldModal';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
+import { defSettings } from '../services/DefaultValues';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -46,16 +47,7 @@ const AuctionPage = () => {
     }>({ open: false, action: null });
     const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position');
     const [showSold, setShowSold] = useState(false)
-    const [settings, setSettings] = useState<ISettings>({
-        _id: '',
-        bidTime: 0,
-        addOnTime: 0,
-        initialBalance: 0,
-        playersPerClub: 0,
-        bidMultiple: 100,
-        keepMinBid: true,
-        minBid: 100,
-    });
+    const [settings, setSettings] = useState<ISettings>(defSettings);
 
     useEffect(() => {
         ClubServ.getAll().then((res) => setClubs(res.data));

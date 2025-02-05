@@ -23,7 +23,7 @@ export const getPlayers = async (filter?: 'sold' | 'unsold', searchKey?: string,
         }
         return {}; // Default case for 'all'
     })();
- 
+
 
     // Fetch players with combined conditions
     const _data = await Player.find({
@@ -79,23 +79,16 @@ export const getPlayersReq = async (req: Request, res: Response, next: NextFunct
 export const getPlayerById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const _data = await Player.findById((req.params.id))
-            .populate([
-                // {
-                //     path: 'club',
-                //     populate: {
-                //         path: 'logo',
-                //     },
-                // },
-                { path: 'image' },
-            ])
-            .sort({ 'name': 1 });
+            .populate(['image', 'bid'])
         if (!_data) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Player Not Found');
         }
         const logoObj = (_data.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
+        const bidAmount = (_data.bid as unknown as IBid)?.bid.toString() ?? null;
         const data: IPlayer = {
             ..._data.toObject(),  // Convert mongoose document to a plain object
             image: logoObj ?? '',  // Use the downloadURL if it exists
+            bid: bidAmount
         };
         // console.log(data);
 

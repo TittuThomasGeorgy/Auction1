@@ -23,6 +23,7 @@ const positionOrder: { [key: string]: number } = {
     GK: 4
 };
 const PlayerPage = () => {
+    const navigate= useNavigate();
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
     const [open, setOpen] = useState(false)
@@ -96,9 +97,10 @@ const PlayerPage = () => {
 
                     {players.map(_player =>
                         <PlayerCard key={_player._id} player={_player} club={clubs.find(clb => clb._id === _player.club) ?? null} onClick={() => {
-                            setAction('edit');
-                            setPlayer(_player)
-                            setOpen(true)
+                            // setAction('edit');
+                            // setPlayer(_player)
+                            // setOpen(true)
+                            navigate(`/player/${_player._id}`)
                         }} />
                     )}
                 </Box>
@@ -135,9 +137,7 @@ const PlayerPage = () => {
                             return positionComparison; // If positions differ, prioritize position sorting
                         }))
                 }
-                value={player}
-                clubs={clubs}
-            />
+                value={player}            />
         </>
     );
 };
