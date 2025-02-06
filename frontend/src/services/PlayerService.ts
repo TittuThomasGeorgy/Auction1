@@ -14,6 +14,8 @@ const usePlayer = () => {
     getById: (id: string) => getStandardResponse<IPlayer>(axios.get(`/player/${id}`)),
     delete: (id: string) =>
       getStandardResponse<IPlayer>(axios.delete(`/player/${id}`)),
+    removeClub: (id: string) =>
+      getStandardResponse<IPlayer>(axios.delete(`/player/${id}/club`)),
 
   }
 };

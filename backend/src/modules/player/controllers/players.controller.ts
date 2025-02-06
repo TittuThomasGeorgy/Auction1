@@ -6,9 +6,10 @@ import { IFileModel } from "../../common/types/fileModel";
 import Player from "../models/Player";
 import { IPlayer } from "../types/player";
 import { IBid } from "../../auction/types/bid";
-import { lastBid } from "../../auction/controllers/auction.controller";
+import { isAuctionRunning, lastBid } from "../../auction/controllers/auction.controller";
 import Club from "../../club/models/Club";
 import Bid from "../../auction/models/Bid";
+import { io } from "../../../server";
 
 
 
@@ -102,8 +103,8 @@ export const getPlayerById = async (req: Request, res: Response, next: NextFunct
 }
 export const getBids = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = await Bid.find({player:req.params.id}).sort({'createdAt':-1})
-        if (data.length==0) {
+        const data = await Bid.find({ player: req.params.id }).sort({ 'createdAt': -1 })
+        if (data.length == 0) {
             return sendApiResponse(res, 'NOT FOUND', null, 'No Bids Found');
         }
         // console.log(data);
@@ -117,6 +118,8 @@ export const getBids = async (req: Request, res: Response, next: NextFunction) =
 
 export const createPlayer = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        if (await isAuctionRunning())
+            return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
         if (!req.file) {
             return sendApiResponse(res, 'NOT FOUND', null,
                 `File Not Found`);
@@ -144,6 +147,8 @@ export const createPlayer = async (req: Request, res: Response, next: NextFuncti
 }
 export const updatePlayer = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        if (await isAuctionRunning())
+            return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
         const _updatedPlayer = req.body;
         const prevPlayer = await Player.findById(req.params.id).populate('image');
         if (!prevPlayer) {
@@ -173,6 +178,8 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         if (!updatedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Updated');
         }
+        io.emit('playerUpdated', { updatedPlayer });
+
         sendApiResponse(res, 'OK', _updatedPlayer,
             `Player updated successfully`);
     } catch (error) {
@@ -181,6 +188,8 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
 }
 export const deletePlayer = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        if (await isAuctionRunning())
+            return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
         const player = await Player.findById(req.params.id);
         if (!player) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Player Not Found');
@@ -195,12 +204,36 @@ export const deletePlayer = async (req: Request, res: Response, next: NextFuncti
         }
         if (player.image)
             await deleteFile(player.image.toString())
-        const deletedPlayer =   await Player.findByIdAndDelete(req.params.id)
+        const deletedPlayer = await Player.findByIdAndDelete(req.params.id)
         if (!deletedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Deleted');
         }
         sendApiResponse(res, 'OK', player,
             `Player deleted successfully`);
+    } catch (error) {
+        next(error);
+    }
+}
+export const removeClub = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (await isAuctionRunning())
+            return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
+        const player = await Player.findByIdAndUpdate(req.params.id, { bid: null, club: null });
+        if (!player) {
+            return sendApiResponse(res, 'NOT FOUND', null, 'Player Not Found');
+        }
+        if (player.club) {
+            const _lastBid = await lastBid(req.params.id);
+            await Club.findByIdAndUpdate(player.club, { $inc: { balance: _lastBid.bid } });
+            console.log("Club balance updated");
+
+            await Bid.deleteMany({ player: req.params.id });
+            console.log("Bid Removed");
+        }
+        io.emit('playerUpdated', { player });
+
+        sendApiResponse(res, 'OK', player,
+            `Player club removed successfully`);
     } catch (error) {
         next(error);
     }

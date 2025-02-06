@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import Settings from "../models/Settings";
 import Player from "../../player/models/Player";
 import Club from "../../club/models/Club";
-import { isAuctionExist } from "../../auction/controllers/auction.controller";
+import { isAuctionExist, isAuctionRunning } from "../../auction/controllers/auction.controller";
 import Auction from "../../auction/models/Auction";
 import Bid from "../../auction/models/Bid";
 
@@ -54,9 +54,8 @@ export const createSettings = async () => {
 }
 export const updateSettings = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const auction = await isAuctionExist(true);
-        if (auction?.status != 'stopped')
-            return sendApiResponse(res, 'CONFLICT', null, 'Auction Running. Please Stop auction.');
+        if(await isAuctionRunning())
+            return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
 
         const _updatedSettings = req.body;
         const prevSettings = await isSettingExist();

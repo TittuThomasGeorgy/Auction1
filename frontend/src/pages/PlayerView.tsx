@@ -26,7 +26,7 @@ const PlayerView = () => {
     const ClubServ = useClub();
     const PlayerServ = usePlayer();
     const settingsServ = useSettings();
-    const [open, setOpen] = useState<'edit' | 'sell' | 'delete' | null>(null);
+    const [open, setOpen] = useState<'edit' | 'sell' | 'delete' | 'removeClub' | null>(null);
     const [player, setPlayer] = useState<IPlayer>(defPlayer)
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [settings, setSettings] = useState<ISettings>(defSettings);
@@ -123,15 +123,25 @@ const PlayerView = () => {
                                 >
                                     Edit
                                 </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    sx={{ textTransform: 'none', float: 'right', mr: .5 }}
-                                    startIcon={<SellIcon />}
-                                    onClick={() => setOpen('sell')}
-                                >
-                                    Sell
-                                </Button>
+                                {player.club ?
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                        startIcon={<SellIcon />}
+                                        onClick={() => setOpen('removeClub')}
+                                    >
+                                        Remove Club
+                                    </Button> :
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                        startIcon={<SellIcon />}
+                                        onClick={() => setOpen('sell')}
+                                    >
+                                        Sell
+                                    </Button>}
                                 <Button
                                     variant="contained"
                                     color="error"
@@ -205,22 +215,41 @@ const PlayerView = () => {
                 bidMultiple={settings.bidMultiple}
             />
             <ConfirmationDialog
-                open={open === 'delete'} onClose={() => setOpen(null)}
+                open={open === 'delete' || open === 'removeClub'} onClose={() => setOpen(null)}
                 onConfirm={async () => {
-                    const res = await PlayerServ.delete(player._id);
-                    if (res.success) {
-                        enqueueSnackbar({
-                            variant: "success",
-                            message: res.message
-                        })
-                        navigate('/players/')
+                    if (open === 'delete') {
+
+                        const res = await PlayerServ.delete(player._id);
+                        if (res.success) {
+                            enqueueSnackbar({
+                                variant: "success",
+                                message: res.message
+                            })
+                            navigate('/players/')
+                        }
+                        else
+                            enqueueSnackbar({
+                                variant: "error",
+                                message: `Deleting Failed`
+                            })
                     }
-                    else
-                        enqueueSnackbar({
-                            variant: "error",
-                            message: `Deleting Failed`
-                        })
-                }} title={`Are sure  want to delete ${player.name}?`} />
+                    else if (open === 'removeClub') {
+                        const res = await PlayerServ.removeClub(player._id);
+                        if (res.success) {
+                            enqueueSnackbar({
+                                variant: "success",
+                                message: res.message
+                            })
+                            setPlayer(player => ({ ...player, club: '', bid: '' }));
+                            setBids([])
+                        }
+                        else
+                            enqueueSnackbar({
+                                variant: "error",
+                                message: `Removing Club Failed`
+                            })
+                    }
+                }} title={open === 'removeClub' ? `Are sure  want to remove ${player.name} from ${clubs.find(club => player.club === club._id)?.name}?` : `Are sure  want to delete ${player.name}?`} />
 
         </>
     );

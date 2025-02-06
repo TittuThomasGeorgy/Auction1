@@ -23,6 +23,11 @@ export const isAuctionExist = async (populateBid?: boolean): Promise<IAuction | 
     const data = await query.exec();
     return data ? data.toJSON() : null;
 };
+export const isAuctionRunning = async (): Promise<boolean> => {
+
+    const data = await isAuctionExist();
+    return data?.status !== 'stopped';
+};
 export const getAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = await isAuctionExist(true);
