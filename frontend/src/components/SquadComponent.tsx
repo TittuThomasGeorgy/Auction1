@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Typography,Grid2 as Grid } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Grid2 as Grid } from '@mui/material';
 import { IPlayer } from '../types/PlayerType';
 
 interface SquadComponentProps {
@@ -8,10 +8,16 @@ interface SquadComponentProps {
 
 const SquadComponent = ({ squad }: SquadComponentProps) => {
   // Categorize players based on position
-  const strikers = squad.filter((player) => player.position === 'ST');
-  const midfielders = squad.filter((player) => player.position === 'CM');
-  const defenders = squad.filter((player) => player.position === 'DF');
-  const goalkeepers = squad.filter((player) => player.position === 'GK');
+  const [strikers, setStrikers] = useState(squad.filter((player) => player.position === 'ST'));
+  const [midfielders, setMidfielders] = useState(squad.filter((player) => player.position === 'CM'))
+  const [defenders, setDefenders] = useState(squad.filter((player) => player.position === 'DF'))
+  const [goalkeepers, setGoalkeepers] = useState(squad.filter((player) => player.position === 'GK'))
+  useEffect(() => {
+    setStrikers(squad.filter((player) => player.position === 'ST'));
+    setMidfielders(squad.filter((player) => player.position === 'CM'));
+    setDefenders(squad.filter((player) => player.position === 'DF'));
+    setGoalkeepers(squad.filter((player) => player.position === 'GK'));
+  }, [squad])
 
   return (
     <Box
@@ -41,8 +47,8 @@ const SquadComponent = ({ squad }: SquadComponentProps) => {
       />
 
       {/* Grid2 Layout for Positions */}
-      <Grid container spacing={0} justifyContent="center" alignItems="center" 
-      sx={{}}>
+      <Grid container spacing={0} justifyContent="center" alignItems="center"
+        sx={{}}>
         {strikers.map((player) => (
           <Grid key={player._id} size={12 / strikers.length} sx={{ padding: '0px' }}>
             <PlayerCard player={player} />

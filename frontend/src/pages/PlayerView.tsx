@@ -22,7 +22,6 @@ import BidComponent from '../components/BidComponent';
 const PlayerView = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-
     const ClubServ = useClub();
     const PlayerServ = usePlayer();
     const settingsServ = useSettings();
@@ -47,7 +46,7 @@ const PlayerView = () => {
     }, [id])
     useEffect(() => {
         if (player.club)
-            getClub(player.club)
+            getClub(player.club);
     }, [player])
 
     return (
@@ -215,23 +214,25 @@ const PlayerView = () => {
                 bidMultiple={settings.bidMultiple}
             />
             <ConfirmationDialog
-                open={open === 'delete' || open === 'removeClub'} onClose={() => setOpen(null)}
+                open={open === 'delete' || open === 'removeClub'}
+                onClose={() => setOpen(null)}
                 onConfirm={async () => {
                     if (open === 'delete') {
-
                         const res = await PlayerServ.delete(player._id);
                         if (res.success) {
                             enqueueSnackbar({
                                 variant: "success",
                                 message: res.message
                             })
-                            navigate('/players/')
+                            setPlayer(defPlayer)
+                            setBids([])
                         }
                         else
                             enqueueSnackbar({
                                 variant: "error",
                                 message: `Deleting Failed`
                             })
+                        navigate('/players')
                     }
                     else if (open === 'removeClub') {
                         const res = await PlayerServ.removeClub(player._id);

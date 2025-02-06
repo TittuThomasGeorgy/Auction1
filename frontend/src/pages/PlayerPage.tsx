@@ -17,6 +17,7 @@ import { initSocket } from '../services/SocketClient';
 import { IBid } from '../types/BidType';
 import { ISettings } from '../types/SettingsType';
 import useSettings from '../services/SettingsService';
+import { enqueueSnackbar } from 'notistack';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -32,7 +33,7 @@ const PlayerPage = () => {
 
     const [open, setOpen] = useState(false)
     const [players, setPlayers] = useState<IPlayer[]>([])
-    const [player, setPlayer] = useState<IPlayer>(defPlayer)
+    const [newPlayer, setNewPlayer] = useState<IPlayer>(defPlayer)
     const [clubs, setClubs] = useState<IClub[]>([])
     const [action, setAction] = useState<'add' | 'edit'>('add');
     const [searchKey, setSearchKey] = useState('');
@@ -57,11 +58,68 @@ const PlayerPage = () => {
             const bid = res.data.bid;
             if (bid) {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
+                enqueueSnackbar({ message: res.message, variant: 'info' })
             }
+        })
+        socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
+            console.log(res.data);
+
+            setPlayers(_players => ([..._players, res.data.player].sort((a: IPlayer, b: IPlayer) => {
+                // First, sort by position
+                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+
+                // If positions are the same, sort by name alphabetically
+                if (positionComparison === 0) {
+                    return a.name.localeCompare(b.name); // Sort by name in ascending order
+                }
+
+                return positionComparison; // If positions differ, prioritize position sorting
+            })));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+        })
+        socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
+            console.log(res.data);
+            setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player).sort((a: IPlayer, b: IPlayer) => {
+                // First, sort by position
+                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+
+                // If positions are the same, sort by name alphabetically
+                if (positionComparison === 0) {
+                    return a.name.localeCompare(b.name); // Sort by name in ascending order
+                }
+
+                return positionComparison; // If positions differ, prioritize position sorting
+            }));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+
+        })
+        socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
+            setPlayers(_players => _players.map(_player => res.data._id === _player._id ? ({ ..._player, club: '', bid: '' }) : _player));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+
+        })
+        socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
+            setPlayers(_players => _players.filter(_player => res.data._id !== _player._id).sort((a: IPlayer, b: IPlayer) => {
+                // First, sort by position
+                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+
+                // If positions are the same, sort by name alphabetically
+                if (positionComparison === 0) {
+                    return a.name.localeCompare(b.name); // Sort by name in ascending order
+                }
+
+                return positionComparison; // If positions differ, prioritize position sorting
+            }));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
 
         })
         return () => {
             socket.off('playerSold');
+            socket.off('playerCreated');
+            socket.off('playerUpdated');
+            socket.off('playerDeleted');
+            socket.off('playerClubRemoved');
+
         };
     }, []);
     return (
@@ -105,14 +163,14 @@ const PlayerPage = () => {
                     }}>
 
                     {players.map(_player =>
-                        <PlayerCard key={_player._id} player={_player} 
-                        club={clubs.find(clb => clb._id === _player.club) ?? null}
-                         onClick={() => {
-                            // setAction('edit');
-                            // setPlayer(_player)
-                            // setOpen(true)
-                            navigate(`/player/${_player._id}`)
-                        }} />
+                        <PlayerCard key={_player._id} player={_player}
+                            club={clubs.find(clb => clb._id === _player.club) ?? null}
+                            onClick={() => {
+                                // setAction('edit');
+                                // setPlayer(_player)
+                                // setOpen(true)
+                                navigate(`/players/view/${_player._id}`)
+                            }} />
                     )}
                 </Box>
                 <br />
@@ -123,33 +181,33 @@ const PlayerPage = () => {
                     icon: <AddIcon />,
                     onChange: () => {
                         setOpen(true);
-                        setPlayer(defPlayer)
+                        setNewPlayer(defPlayer)
                     },
                 },
             ]} />
             <AddPlayerDialog open={open} onClose={() => setOpen(false)}
                 action={action}
-                onSubmit={(newValue) =>
-                    action === 'edit' ?
-                        setPlayers((prevPlayers) =>
-                            prevPlayers.map(prev => prev._id === newValue._id ? newValue : prev)) :
-                        setPlayers((prevPlayers) => [
-                            ...prevPlayers,
-                            newValue
-                        ].sort((a: IPlayer, b: IPlayer) => {
-                            // First, sort by position
-                            const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+                onSubmit={(newValue) =>{}
+                    // action === 'edit' ?
+                    //     setPlayers((prevPlayers) =>
+                    //         prevPlayers.map(prev => prev._id === newValue._id ? newValue : prev)) :
+                    //     setPlayers((prevPlayers) => [
+                    //         ...prevPlayers,
+                    //         newValue
+                    //     ].sort((a: IPlayer, b: IPlayer) => {
+                    //         // First, sort by position
+                    //         const positionComparison = positionOrder[a.position] - positionOrder[b.position];
 
-                            // If positions are the same, sort by name alphabetically
-                            if (positionComparison === 0) {
-                                return a.name.localeCompare(b.name); // Sort by name in ascending order
-                            }
+                    //         // If positions are the same, sort by name alphabetically
+                    //         if (positionComparison === 0) {
+                    //             return a.name.localeCompare(b.name); // Sort by name in ascending order
+                    //         }
 
-                            return positionComparison; // If positions differ, prioritize position sorting
-                        }))
-                }
-                value={{ ...player, basePrice: settings.minBid }} 
-                bidMultiple={settings.bidMultiple}/>
+                    //         return positionComparison; // If positions differ, prioritize position sorting
+                    //     }))
+                    }
+                value={{ ...newPlayer, basePrice: settings.minBid }}
+                bidMultiple={settings.bidMultiple} />
         </>
     );
 };

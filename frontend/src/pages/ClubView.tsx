@@ -27,6 +27,7 @@ import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { initSocket } from '../services/SocketClient';
 import { IBid } from '../types/BidType';
+import { enqueueSnackbar } from 'notistack';
 
 
 const ClubView = () => {
@@ -67,11 +68,39 @@ const ClubView = () => {
             const bid = res.data.bid;
             if (bid && bid.club === id) {
                 getData(id);
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+            }
+        })
+
+        socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
+            const player = players.find(_player => res.data.player._id == _player._id);
+            if (player) {
+                setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+            }
+        })
+        socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
+            const player = players.find(_player => res.data._id === _player._id);
+            if (player) {
+                setPlayers(_players => _players.filter(_player => res.data._id !== _player._id));
+                setClub(club => ({ ...club, balance: club.balance + Number(player.bid) }))
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+            }
+        })
+        socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
+            const player = players.find(_player => res.data._id === _player._id);
+            if (player) {
+                setPlayers(_players => _players.filter(_player => res.data._id !== _player._id));
+                setClub(club => ({ ...club, balance: club.balance + Number(player.bid) }))
+                enqueueSnackbar({ message: res.message, variant: 'info' })
             }
 
         })
         return () => {
             socket.off('playerSold');
+            socket.off('playerClubRemoved');
+            socket.off('playerUpdated');
+            socket.off('playerDeleted');
         };
     }, []);
     return (

@@ -1,5 +1,5 @@
 import HomePage from "../pages/HomePage";
-import { createBrowserRouter,  RouteObject, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 import ClubPage from "../pages/ClubPage";
 import AuctionPage from "../pages/AuctionPage";
 import PlayerPage from "../pages/PlayerPage";
@@ -30,12 +30,12 @@ export const allModuleRoutes = [
   },
   {
     title: 'Player',
-    path: '/players',
+    path: '/players/',
     element: <PlayerPage />,
   },
   {
     title: 'Player',
-    path: '/player/:id',
+    path: '/players/view/:id',
     element: <PlayerView />,
   },
   {

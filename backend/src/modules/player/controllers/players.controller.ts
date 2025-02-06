@@ -139,6 +139,8 @@ export const createPlayer = async (req: Request, res: Response, next: NextFuncti
         if (!newPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Created');
         }
+        io.emit('playerCreated', { data: { player: { ...newPlayer.toObject(), image: _file.downloadURL } }, message: `New Player Added: ${newPlayer.name}` });
+
         sendApiResponse(res, 'CREATED', newPlayer,
             `Added Player successfully`);
     } catch (error) {
@@ -150,7 +152,7 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
         if (await isAuctionRunning())
             return sendApiResponse(res, "FORBIDDEN", null, ' Auction Running. Please Stop auction.');
         const _updatedPlayer = req.body;
-        const prevPlayer = await Player.findById(req.params.id).populate('image');
+        const prevPlayer = await Player.findById(req.params.id).populate(['image', 'bid']);
         if (!prevPlayer) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Player Not Found');
         }
@@ -174,11 +176,13 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
 
         if (!req.body.club) _updatedPlayer.club = null;
         _updatedPlayer.bid = prevPlayer.bid ?? null;
-        const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, _updatedPlayer);
+        const updatedPlayer = await Player.findByIdAndUpdate(req.params.id, _updatedPlayer, { new: true }).populate(['image', 'bid']);
         if (!updatedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Updated');
         }
-        io.emit('playerUpdated', { updatedPlayer });
+        const logoObj = (updatedPlayer.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
+        const bidAmount = (updatedPlayer.bid as unknown as IBid)?.bid.toString() ?? null;
+        io.emit('playerUpdated', { data: { player: { ...updatedPlayer.toObject(), image: logoObj, bid: bidAmount } }, message: `${updatedPlayer.name} Updated` });
 
         sendApiResponse(res, 'OK', _updatedPlayer,
             `Player updated successfully`);
@@ -208,6 +212,8 @@ export const deletePlayer = async (req: Request, res: Response, next: NextFuncti
         if (!deletedPlayer) {
             return sendApiResponse(res, 'CONFLICT', null, 'Player Not Deleted');
         }
+        io.emit('playerDeleted', { data: { _id: req.params.id }, message: `${deletedPlayer.name} Deleted` });
+
         sendApiResponse(res, 'OK', player,
             `Player deleted successfully`);
     } catch (error) {
@@ -230,7 +236,7 @@ export const removeClub = async (req: Request, res: Response, next: NextFunction
             await Bid.deleteMany({ player: req.params.id });
             console.log("Bid Removed");
         }
-        io.emit('playerUpdated', { player });
+        io.emit('playerClubRemoved', { data: { _id: req.params.id }, message: `${player.name} Club Removed` });
 
         sendApiResponse(res, 'OK', player,
             `Player club removed successfully`);

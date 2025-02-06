@@ -16,7 +16,7 @@ const ConfirmationDialog = (props: ConfirmationDialogProps) => {
                 <Button onClick={() => props.onClose()} variant='outlined'>
                     Cancel
                 </Button>
-                <Button onClick={() => { props.onClose(); props.onConfirm() }} variant='contained' color="primary">
+                <Button onClick={(e) => { e.preventDefault(); props.onConfirm();props.onClose(); }} variant='contained' color="primary">
                     Confirm
                 </Button>
             </DialogActions>
