@@ -65,20 +65,20 @@ const PlayerView = () => {
         // Listen for the start of a new auction
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
             const bid = res.data.bid;
-            if (bid && bid._id == player._id) {
+            if (bid && bid.player === player._id) {
                 setPlayer(player => ({ ...player, club: bid.club, bid: bid.bid.toString() }));
                 enqueueSnackbar({ message: res.message, variant: 'info' })
                 setShowSold(true);
             }
         })
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
-            if (player._id == res.data.player._id) {
+            if (id === res.data.player._id) {
                 setPlayer(res.data.player);
                 enqueueSnackbar({ message: res.message, variant: 'info' })
             }
         })
         socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
-            if (player._id == res.data._id) {
+            if (id === res.data._id) {
                 setPlayer(player => ({ ...player, club: '', bid: '' }));
                 setBids([]);
                 enqueueSnackbar({ message: res.message, variant: 'info' })
@@ -86,7 +86,7 @@ const PlayerView = () => {
             }
         })
         socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
-            if (player._id == res.data._id) {
+            if (id === res.data._id) {
                 navigate('/players')
                 enqueueSnackbar({ message: res.message, variant: 'info' })
             }

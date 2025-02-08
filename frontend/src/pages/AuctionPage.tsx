@@ -175,7 +175,7 @@ const AuctionPage = () => {
 
             if (bid) {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
-                setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
+                setClubs(clubs => clubs.map(club => club._id === bid.club ? { ...club, balance: club.balance - bid.bid } : club))
                 enqueueSnackbar({ variant: 'success', message: res.message });
                 setShowSold({
                     open: true,
@@ -185,8 +185,50 @@ const AuctionPage = () => {
                 setPlaceBidClub(null);
             }
         })
+        socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
+            console.log(res.data);
+
+            setPlayers(_players => ([..._players, res.data.player].sort((a: IPlayer, b: IPlayer) => {
+                // First, sort by position
+                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+
+                // If positions are the same, sort by name alphabetically
+                if (positionComparison === 0) {
+                    return a.name.localeCompare(b.name); // Sort by name in ascending order
+                }
+
+                return positionComparison; // If positions differ, prioritize position sorting
+            })));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+
+        })
+        socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
+            setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+        }
+        )
+        socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
+            const updatedPlayer = players.find(player => player._id === res.data._id);
+            if (updatedPlayer) {
+                setPlayers(_players => _players.map(player => player._id === updatedPlayer._id ? { ...updatedPlayer, club: '', bid: '' } : player));
+                setClubs(clubs => clubs.map(club => club._id === updatedPlayer.club ? { ...club, balance: club.balance + Number(updatedPlayer.bid) } : club))
+            }
+            enqueueSnackbar({ message: res.message, variant: 'info' })
+        })
+        socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
+            const deletedPlayer = players.find(player => player._id === res.data._id);
+            if (deletedPlayer) {
+                setPlayers(_players => _players.filter(player => player._id === deletedPlayer._id));
+                setClubs(clubs => clubs.map(club => club._id === deletedPlayer.club ? { ...club, balance: club.balance + Number(deletedPlayer.bid) } : club))
+            }
+        })
         return () => {
             socket.off('playerSold');
+            socket.off('playerCreated');
+            socket.off('playerUpdated');
+            socket.off('playerDeleted');
+            socket.off('playerClubRemoved');
+
         };
     }, []);
 
@@ -541,7 +583,7 @@ const AuctionPage = () => {
                         </Button>
                         <Button onClick={() => {
                             const action = confirmation.action;
-                            if (action == 'next')
+                            if (action === 'next')
                                 nextPlayer()
                             else
                                 previousPlayer()
