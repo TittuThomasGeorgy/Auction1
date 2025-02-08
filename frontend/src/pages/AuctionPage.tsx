@@ -144,6 +144,7 @@ const AuctionPage = () => {
         setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
         setPlayers(_players)
     }, [sortBy, players]);
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (showSold) {

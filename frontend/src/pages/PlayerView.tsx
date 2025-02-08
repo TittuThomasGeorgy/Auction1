@@ -104,7 +104,7 @@ const PlayerView = () => {
             <BackButton />
             <br />
             <Container sx={{
-                bgcolor: 'rgba(24, 24, 24, 0.75)'
+                bgcolor: 'rgba(24, 24, 24, 0.75)',
             }}>
                 <br />
 
@@ -235,7 +235,7 @@ const PlayerView = () => {
                         {/* </Box> */}
 
                     </Grid >
-                    <Grid size={{ xs: 12, md: 8 }}>
+                    <Grid size={{ xs: 12, md: 8 }} sx={{ overflowY: 'auto', maxHeight: '70vh' }}>
                         <BidComponent bids={bids} clubs={clubs} />
                     </Grid>
                 </Grid >
