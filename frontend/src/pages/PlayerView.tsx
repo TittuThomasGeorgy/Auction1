@@ -19,6 +19,8 @@ import { enqueueSnackbar } from 'notistack';
 import { IBid } from '../types/BidType';
 import BidComponent from '../components/BidComponent';
 import SellPlayerDialog from '../components/SellPlayerDialog';
+import { initSocket } from '../services/SocketClient';
+import PlayerSoldModal from '../components/PlayerSoldModal';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -31,13 +33,14 @@ const PlayerView = () => {
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [settings, setSettings] = useState<ISettings>(defSettings);
     const [bids, setBids] = useState<IBid[]>([])
+    const [showSold, setShowSold] = useState(false)
     const getData = async (_id: string) => {
         const res = await PlayerServ.getById(_id);
         setPlayer(res.data);
         const res1 = await settingsServ.get()
         setSettings(res1.data)
-
     }
+
     const getClubs = async () => {
         const res = await ClubServ.getAll();
         setClubs(res.data);
@@ -57,6 +60,45 @@ const PlayerView = () => {
         }
     }, [player])
 
+    useEffect(() => {
+        const socket = initSocket();
+        // Listen for the start of a new auction
+        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
+            const bid = res.data.bid;
+            if (bid && bid._id == player._id) {
+                setPlayer(player => ({ ...player, club: bid.club, bid: bid.bid.toString() }));
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+                setShowSold(true);
+            }
+        })
+        socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
+            if (player._id == res.data.player._id) {
+                setPlayer(res.data.player);
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+            }
+        })
+        socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
+            if (player._id == res.data._id) {
+                setPlayer(player => ({ ...player, club: '', bid: '' }));
+                setBids([]);
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+
+            }
+        })
+        socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
+            if (player._id == res.data._id) {
+                navigate('/players')
+                enqueueSnackbar({ message: res.message, variant: 'info' })
+            }
+        })
+        return () => {
+            socket.off('playerSold');
+            socket.off('playerUpdated');
+            socket.off('playerDeleted');
+            socket.off('playerClubRemoved');
+
+        };
+    }, []);
     return (
         <>
             <BackButton />
@@ -236,8 +278,6 @@ const PlayerView = () => {
                                 variant: "success",
                                 message: res.message
                             })
-                            setPlayer(player => ({ ...player, club: '', bid: '' }));
-                            setBids([])
                         }
                         else
                             enqueueSnackbar({
@@ -252,6 +292,18 @@ const PlayerView = () => {
                 bidMultiple={settings.bidMultiple}
                 basePrice={player.basePrice}
             />
+            {(() => {
+                const _club = clubs.find((clb) => clb._id === player.club);
+                return (
+                    _club &&
+                    <PlayerSoldModal
+                        open={showSold}
+                        onClose={() => setShowSold(false)}
+                        club={_club}  // Fixed from `_clubs` to `_club`
+                        player={player}
+                    />
+                );
+            })()}
         </>
     );
 }
