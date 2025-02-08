@@ -19,7 +19,6 @@ import { enqueueSnackbar } from 'notistack';
 import { IBid } from '../types/BidType';
 import BidComponent from '../components/BidComponent';
 import SellPlayerDialog from '../components/SellPlayerDialog';
-import { initSocket } from '../services/SocketClient';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -58,82 +57,6 @@ const PlayerView = () => {
         }
     }, [player])
 
-    useEffect(() => {
-        const socket = initSocket();
-        // Listen for the start of a new auction
-        socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
-            const bid = res.data.bid;
-            if (bid && bid._id == player._id) {
-                setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
-                enqueueSnackbar({ message: res.message, variant: 'info' })
-                setShowSold({
-                    open: true,
-                    player: bid.player,
-                    club: bid.club,
-                });
-            }
-        })
-        socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
-            console.log(res.data);
-
-            setPlayers(_players => ([..._players, res.data.player].sort((a: IPlayer, b: IPlayer) => {
-                // First, sort by position
-                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
-
-                // If positions are the same, sort by name alphabetically
-                if (positionComparison === 0) {
-                    return a.name.localeCompare(b.name); // Sort by name in ascending order
-                }
-
-                return positionComparison; // If positions differ, prioritize position sorting
-            })));
-            enqueueSnackbar({ message: res.message, variant: 'info' })
-        })
-        socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
-            console.log(res.data);
-            setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player).sort((a: IPlayer, b: IPlayer) => {
-                // First, sort by position
-                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
-
-                // If positions are the same, sort by name alphabetically
-                if (positionComparison === 0) {
-                    return a.name.localeCompare(b.name); // Sort by name in ascending order
-                }
-
-                return positionComparison; // If positions differ, prioritize position sorting
-            }));
-            enqueueSnackbar({ message: res.message, variant: 'info' })
-
-        })
-        socket.on('playerClubRemoved', (res: { data: { _id: string }, message: string }) => {
-            setPlayers(_players => _players.map(_player => res.data._id === _player._id ? ({ ..._player, club: '', bid: '' }) : _player));
-            enqueueSnackbar({ message: res.message, variant: 'info' })
-
-        })
-        socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
-            setPlayers(_players => _players.filter(_player => res.data._id !== _player._id).sort((a: IPlayer, b: IPlayer) => {
-                // First, sort by position
-                const positionComparison = positionOrder[a.position] - positionOrder[b.position];
-
-                // If positions are the same, sort by name alphabetically
-                if (positionComparison === 0) {
-                    return a.name.localeCompare(b.name); // Sort by name in ascending order
-                }
-
-                return positionComparison; // If positions differ, prioritize position sorting
-            }));
-            enqueueSnackbar({ message: res.message, variant: 'info' })
-
-        })
-        return () => {
-            socket.off('playerSold');
-            socket.off('playerCreated');
-            socket.off('playerUpdated');
-            socket.off('playerDeleted');
-            socket.off('playerClubRemoved');
-
-        };
-    }, []);
     return (
         <>
             <BackButton />
