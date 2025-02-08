@@ -218,7 +218,7 @@ const AuctionPage = () => {
         socket.on('playerDeleted', (res: { data: { _id: string }, message: string }) => {
             const deletedPlayer = players.find(player => player._id === res.data._id);
             if (deletedPlayer) {
-                setPlayers(_players => _players.filter(player => player._id === deletedPlayer._id));
+                setPlayers(_players => _players.filter(player => player._id !== deletedPlayer._id));
                 setClubs(clubs => clubs.map(club => club._id === deletedPlayer.club ? { ...club, balance: club.balance + Number(deletedPlayer.bid) } : club))
             }
         })
