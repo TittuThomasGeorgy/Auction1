@@ -116,7 +116,7 @@ const playerSold = async (bid: IBid) => {
 }
 const sellPlayer = async () => {
     if (auction?.player && currentBid) {
-        const isValid = await validateSellPlayer(auction?.player?.toString())
+        const isValid = await validateSellPlayer(auction?.player?.toString(), true)
         if (isValid != 0) return
         await Player.findByIdAndUpdate(auction.player, { bid: currentBid._id, club: currentBid.club }, { new: true });
         await Club.findByIdAndUpdate(

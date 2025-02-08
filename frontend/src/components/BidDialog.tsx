@@ -41,7 +41,7 @@ const BidDialog = (props: BidPlayerDialogProps) => {
         } else if (bidAmount <= props.currentBid) {
             enqueueSnackbar({ variant: 'error', message: `Bid Should be greater than ${props.currentBid} ` });
         } else if (bidAmount > props.maxBid) {
-            enqueueSnackbar({ variant: 'error', message: `Bid Should not be greater than of ${props.maxBid} ` });
+            enqueueSnackbar({ variant: 'error', message: `Bid Should not be greater than ${props.maxBid} ` });
         } else if (bidAmount > props.currentBid) {
             props.onSubmit(bidAmount);
         } else {

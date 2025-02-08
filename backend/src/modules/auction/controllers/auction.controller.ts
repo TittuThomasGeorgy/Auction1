@@ -160,10 +160,10 @@ export const placeAuctionBid = async (req: Request, res: Response, next: NextFun
         next(error);
     }
 }
-export const validateSellPlayer = async (playerID: string) => {
+export const validateSellPlayer = async (playerID: string, checkAuction: boolean) => {
     const auction = await isAuctionExist();
 
-    if (!auction) {
+    if (!auction && checkAuction) {
         console.log("Auction Not Started".red);
         return 1;
     }
@@ -183,16 +183,20 @@ export const validateSellPlayer = async (playerID: string) => {
         return 4
     }
 
-    if (!_lastBid._id.equals(auction?.bid)) {
+    if (!_lastBid._id.equals(auction?.bid) && checkAuction) {
         console.log("Bids not matching".red, _lastBid._id, auction?.bid);
         return 5
+    }
+    if (auction && !checkAuction) {
+        console.log("Auction Running".red);
+        return 6;
     }
     return 0
 
 }
-export const sellPlayer = async (req: Request, res: Response, next: NextFunction) => {
+export const sellAuctionPlayer = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const isValid = await validateSellPlayer(req.body.player);
+        const isValid = await validateSellPlayer(req.body.player, true);
 
         if (isValid == 1)
             return sendApiResponse(res, 'CONFLICT', null, 'Auction Not Started');
@@ -246,7 +250,7 @@ const validateBid = async (res: Response, _bid: IBid) => {
             return 0; // Bid is valid
     }
 };
-const isBidValid = async (_bid: IBid) => {
+export const isBidValid = async (_bid: IBid) => {
     const auction = await isAuctionExist(true);
     const setting = (await isSettingExist()) as unknown as ISettings;
     const club = (await Club.findById(_bid.club))?.toJSON();
@@ -260,7 +264,7 @@ const isBidValid = async (_bid: IBid) => {
     const maxBid = !setting.keepMinBid && club ? club.balance : _maxBid;
 
     // 1️⃣ Player Mismatch
-    if (auctionPlayer !== bidPlayer) {
+    if (auctionPlayer && auctionPlayer !== bidPlayer) {
         console.log('Player Not Matching'.red, auctionPlayer, bidPlayer);
         return 1;
     }

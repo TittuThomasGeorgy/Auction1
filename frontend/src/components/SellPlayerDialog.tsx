@@ -3,6 +3,8 @@ import { IPlayer } from '../types/PlayerType';
 import { IClub } from '../types/ClubType';
 import { Autocomplete, Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, TextField } from '@mui/material'
 import { AttachMoney as SellIcon } from '@mui/icons-material';
+import { enqueueSnackbar } from 'notistack';
+import usePlayer from '../services/PlayerService';
 
 interface SellPlayerDialog {
     open: boolean;
@@ -10,11 +12,29 @@ interface SellPlayerDialog {
     clubs: IClub[];
     bidMultiple: number,
     basePrice: number,
+    player: string,
 }
 
 const SellPlayerDialog = (props: SellPlayerDialog) => {
     const [club, setClub] = useState<IClub | null>(null)
     const [bidAmount, setBidAmount] = useState<number>(props.basePrice);
+    const PlayerServ = usePlayer();
+
+    const handleSubmit = async () => {
+        if (!club) {
+            enqueueSnackbar({ variant: 'warning', message: `Select a Club` });
+        } else if (bidAmount % props.bidMultiple != 0) {
+            enqueueSnackbar({ variant: 'error', message: `Bid Should be multiple of ${props.bidMultiple} ` });
+        } else if (bidAmount < props.basePrice) {
+            enqueueSnackbar({ variant: 'error', message: `Bid Should be greater than or equal to basePrice $ ${props.basePrice}M ` });
+        } else {
+            const res = await PlayerServ.manualSell(props.player, club._id, bidAmount)
+            props.onClose();
+
+
+        }
+
+    };
 
     return (
         <Dialog open={props.open} onClose={() => props.onClose()} fullWidth>
@@ -60,9 +80,9 @@ const SellPlayerDialog = (props: SellPlayerDialog) => {
                 <Button onClick={() => props.onClose()} variant='outlined'>
                     Cancel
                 </Button>
-                {/* <Button onClick={(e) => { e.preventDefault(); props.onConfirm(); props.onClose(); }} variant='contained' color="primary">
+                <Button onClick={(e) => { e.preventDefault(); handleSubmit(); }} variant='contained' color="primary">
                     Confirm
-                </Button> */}
+                </Button>
             </DialogActions>
         </Dialog>
     )

@@ -16,6 +16,7 @@ const usePlayer = () => {
       getStandardResponse<IPlayer>(axios.delete(`/player/${id}`)),
     removeClub: (id: string) =>
       getStandardResponse<IPlayer>(axios.delete(`/player/${id}/club`)),
+    manualSell: (player: string, club: string, bid: number,) => getStandardResponse<IBid>(axios.post(`/player/${player}/sell`, { player, club, bid })),
 
   }
 };

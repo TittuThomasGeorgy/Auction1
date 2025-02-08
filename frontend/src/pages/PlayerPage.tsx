@@ -18,6 +18,7 @@ import { IBid } from '../types/BidType';
 import { ISettings } from '../types/SettingsType';
 import useSettings from '../services/SettingsService';
 import { enqueueSnackbar } from 'notistack';
+import PlayerSoldModal from '../components/PlayerSoldModal';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -39,7 +40,15 @@ const PlayerPage = () => {
     const [searchKey, setSearchKey] = useState('');
     const [filter, setFilter] = useState<'all' | 'sold' | 'unsold'>('all');
     const [settings, setSettings] = useState<ISettings>(defSettings);
-
+    const [showSold, setShowSold] = useState<{
+        open: boolean,
+        player: string,
+        club: string,
+    }>({
+        open: false,
+        player: '',
+        club: '',
+    })
     useEffect(() => {
         ClubServ.getAll()
             .then((res) => setClubs(res.data))
@@ -59,6 +68,11 @@ const PlayerPage = () => {
             if (bid) {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
                 enqueueSnackbar({ message: res.message, variant: 'info' })
+                setShowSold({
+                    open: true,
+                    player: bid.player,
+                    club: bid.club,
+                });
             }
         })
         socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
@@ -187,7 +201,7 @@ const PlayerPage = () => {
             ]} />
             <AddPlayerDialog open={open} onClose={() => setOpen(false)}
                 action={action}
-                onSubmit={(newValue) =>{}
+                onSubmit={(newValue) => { }
                     // action === 'edit' ?
                     //     setPlayers((prevPlayers) =>
                     //         prevPlayers.map(prev => prev._id === newValue._id ? newValue : prev)) :
@@ -205,9 +219,31 @@ const PlayerPage = () => {
 
                     //         return positionComparison; // If positions differ, prioritize position sorting
                     //     }))
-                    }
+                }
                 value={{ ...newPlayer, basePrice: settings.minBid }}
                 bidMultiple={settings.bidMultiple} />
+            {(() => {
+                const _club = clubs.find((clb) => clb._id === showSold.club);
+                const _player = players.find((player) => player._id === showSold.player);
+
+                return (
+                    _club &&
+                    _player && (
+                        <PlayerSoldModal
+                            open={showSold.open}
+                            onClose={() =>
+                                setShowSold({
+                                    open: false,
+                                    player: '',
+                                    club: '',
+                                })
+                            }
+                            club={_club}  // Fixed from `_clubs` to `_club`
+                            player={_player}
+                        />
+                    )
+                );
+            })()}
         </>
     );
 };

@@ -46,7 +46,15 @@ const AuctionPage = () => {
         action: "next" | "previous" | null;
     }>({ open: false, action: null });
     const [sortBy, setSortBy] = useState<'Sort by Position' | 'Sort by Status'>('Sort by Position');
-    const [showSold, setShowSold] = useState(false)
+    const [showSold, setShowSold] = useState<{
+        open: boolean,
+        player: string,
+        club: string,
+    }>({
+        open: false,
+        player: '',
+        club: '',
+    })
     const [settings, setSettings] = useState<ISettings>(defSettings);
 
     useEffect(() => {
@@ -139,7 +147,11 @@ const AuctionPage = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             if (showSold) {
-                setShowSold(false);
+                setShowSold({
+                    open: false,
+                    player: '',
+                    club: '',
+                });
             }
         }, 6000);
 
@@ -165,10 +177,13 @@ const AuctionPage = () => {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
                 setClubs(clubs => clubs.map(club => club._id == bid.club ? { ...club, balance: club.balance - bid.bid } : club))
                 enqueueSnackbar({ variant: 'success', message: res.message });
-                setShowSold(true);
+                setShowSold({
+                    open: true,
+                    player: bid.player,
+                    club: bid.club,
+                });
                 setPlaceBidClub(null);
             }
-
         })
         return () => {
             socket.off('playerSold');
@@ -302,7 +317,11 @@ const AuctionPage = () => {
                                             player={player}
                                             club={_club ?? null}
                                             onClick={_club ? () => {
-                                                setShowSold(true)
+                                                setShowSold({
+                                                    open: true,
+                                                    player: player._id,
+                                                    club: _club._id,
+                                                });
                                             } : undefined}
                                         />
                                     </Box>
@@ -532,15 +551,28 @@ const AuctionPage = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-                {
-                    players[currentPlayerIndex]?.club &&
-                    <PlayerSoldModal
-                        open={showSold}
-                        onClose={() => setShowSold(false)}
-                        club={clubs.find((clb) => clb._id === players[currentPlayerIndex].club) as IClub}
-                        player={players[currentPlayerIndex]}
-                    />
-                }
+                {(() => {
+                    const _club = clubs.find((clb) => clb._id === showSold.club);
+                    const _player = players.find((player) => player._id === showSold.player);
+
+                    return (
+                        _club &&
+                        _player && (
+                            <PlayerSoldModal
+                                open={showSold.open}
+                                onClose={() =>
+                                    setShowSold({
+                                        open: false,
+                                        player: '',
+                                        club: '',
+                                    })
+                                }
+                                club={_club}  // Fixed from `_clubs` to `_club`
+                                player={_player}
+                            />
+                        )
+                    );
+                })()}
             </Container >
         </>
     );

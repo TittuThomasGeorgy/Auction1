@@ -6,10 +6,11 @@ import { IFileModel } from "../../common/types/fileModel";
 import Player from "../models/Player";
 import { IPlayer } from "../types/player";
 import { IBid } from "../../auction/types/bid";
-import { isAuctionRunning, lastBid } from "../../auction/controllers/auction.controller";
+import { isAuctionRunning, isBidValid, lastBid, validateSellPlayer } from "../../auction/controllers/auction.controller";
 import Club from "../../club/models/Club";
 import Bid from "../../auction/models/Bid";
 import { io } from "../../../server";
+import { playerSold } from "../../auction/events/auctionEvents";
 
 
 
@@ -240,6 +241,54 @@ export const removeClub = async (req: Request, res: Response, next: NextFunction
 
         sendApiResponse(res, 'OK', player,
             `Player club removed successfully`);
+    } catch (error) {
+        next(error);
+    }
+}
+export const sellPlayer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const isValid = await validateSellPlayer(req.body.player, false);
+
+        if (isValid == 6)
+            return sendApiResponse(res, 'CONFLICT', null, ' Auction Running. Please Stop auction.');
+        else if (isValid == 2)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player Not Found');
+        else if (isValid == 3)
+            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+        const bidId = new mongoose.Types.ObjectId();
+        const newBid = new Bid({ ...req.body, _id: bidId });
+        // (await newBid).save();
+        const _isBidValid = await isBidValid(newBid);
+
+        switch (_isBidValid) {
+            case 1:
+                return sendApiResponse(res, 'CONFLICT', null, 'Player Not Matching');
+            case 2:
+                return sendApiResponse(res, 'CONFLICT', null, 'Not Enough Balance');
+            case 3:
+                return sendApiResponse(res, 'CONFLICT', null, 'Higher Bid Exists');
+            case 4:
+                return sendApiResponse(res, 'CONFLICT', null, 'Bid is Less than Minimum Bid');
+            case 5:
+                return sendApiResponse(res, 'CONFLICT', null, `Bid must be a multiple of the set value`);
+            case 6:
+                return sendApiResponse(res, 'CONFLICT', null, `Bid is greater than the allowed max bid`);
+            default:
+                await newBid.save();
+        }
+
+
+        const player = await Player.findByIdAndUpdate(req.body.player, { bid: newBid._id, club: newBid.club }, { new: true }).populate('bid');
+        if (!player) {
+            return sendApiResponse(res, 'CONFLICT', null, 'Player not Sold');
+        }
+        await Club.findByIdAndUpdate(
+            newBid.club,
+            { $inc: { balance: -newBid.bid } },
+            { new: true } // Optional: Returns the updated document
+        );
+        playerSold(newBid);
+        sendApiResponse(res, 'OK', player, 'Player Sold')
     } catch (error) {
         next(error);
     }
