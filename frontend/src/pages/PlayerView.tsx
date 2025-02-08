@@ -10,7 +10,7 @@ import { Container, Button, Stack, Box, Typography, Grid2 as Grid, Divider, Line
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
 import SquadComponent from '../components/SquadComponent';
-import { AccountCircle as UserIcon, Edit as EditIcon, Delete as DeleteIcon, AttachMoney as SellIcon } from '@mui/icons-material';
+import { AccountCircle as UserIcon, Edit as EditIcon, Delete as DeleteIcon, AttachMoney as SellIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import AddPlayerDialog from '../components/AddPlayerDialog';
 import PlayerCard from '../components/PlayerCard';
 import { IClub } from '../types/ClubType';
@@ -18,6 +18,7 @@ import ConfirmationDialog from '../components/ConfirmationDialog';
 import { enqueueSnackbar } from 'notistack';
 import { IBid } from '../types/BidType';
 import BidComponent from '../components/BidComponent';
+import SellPlayerDialog from '../components/SellPlayerDialog';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -33,20 +34,27 @@ const PlayerView = () => {
     const getData = async (_id: string) => {
         const res = await PlayerServ.getById(_id);
         setPlayer(res.data);
+        const res1 = await settingsServ.get()
+        setSettings(res1.data)
+
     }
-    const getClub = async (_id: string) => {
+    const getClubs = async () => {
         const res = await ClubServ.getAll();
         setClubs(res.data);
+    }
+    const getBids = async (_id: string) => {
         const res2 = await PlayerServ.getAllBids(player._id)
         setBids(res2.data)
     }
     useEffect(() => {
+        getClubs();
         if (id)
             getData(id);
     }, [id])
     useEffect(() => {
-        if (player.club)
-            getClub(player.club);
+        if (player.club) {
+            getBids(player.club);
+        }
     }, [player])
 
     return (
@@ -61,34 +69,6 @@ const PlayerView = () => {
                 <Typography variant="h4" color="initial" >
                     <UserIcon sx={{ mr: 1 }} fontSize="large" />
                     PLAYER</Typography>
-                {/* <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-
-                    <Box
-                        component="img"
-                        src={club.logo}
-                        alt={`${club.name} logo`}
-                        sx={{
-                            width: 50,
-                            height: 50,
-                            objectFit: 'contain',
-                            // position: 'absolute',
-                            top: 20,
-                            zIndex: 2,
-                        }}
-                    />
-
-                    <Typography
-                        variant="h4"
-                        component="div"
-                        sx={{ fontWeight: 'bold', color: '#1e88e5', justifyContent: 'center', textAlign: 'center' }}
-                    >
-                        {club.name}
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#757575' }}>
-                        {`(${club.code})`}
-                    </Typography>
-
-                </Stack> */}
                 <Grid container spacing={1}>
 
                     <Grid size={{ xs: 12, md: 4 }} borderRight={{
@@ -105,13 +85,46 @@ const PlayerView = () => {
                         }}>
                             <PlayerCard player={player}
                                 club={clubs.find(clb => clb._id === player.club) ?? null}
-                                onClick={() => {
-                                    // setAction('edit');
-                                    // setPlayer(_player)
-                                    // setOpen(true)
-                                    // navigate(`/player/${_player._id}`)
-                                }} />
+                            />
                             <Divider sx={{ my: 2 }} />
+                            <Stack direction={'row'}>
+                                {player.club ?
+                                    <>
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                            startIcon={<VisibilityIcon />}
+
+                                            onClick={() => {
+                                                window.open(`/club/${player.club}`, '_blank')
+                                                // navigate(`/club/${player.club}`)
+                                            }}
+                                        >
+                                            View Club
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                            startIcon={<SellIcon />}
+                                            onClick={() => setOpen('removeClub')}
+                                        >
+                                            Remove Club
+                                        </Button>
+                                    </>
+
+                                    :
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                        startIcon={<SellIcon />}
+                                        onClick={() => setOpen('sell')}
+                                    >
+                                        Sell
+                                    </Button>}
+                            </Stack>
                             <Stack direction={'row'}>
                                 <Button
                                     variant="contained"
@@ -122,25 +135,7 @@ const PlayerView = () => {
                                 >
                                     Edit
                                 </Button>
-                                {player.club ?
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
-                                        startIcon={<SellIcon />}
-                                        onClick={() => setOpen('removeClub')}
-                                    >
-                                        Remove Club
-                                    </Button> :
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
-                                        startIcon={<SellIcon />}
-                                        onClick={() => setOpen('sell')}
-                                    >
-                                        Sell
-                                    </Button>}
+
                                 <Button
                                     variant="contained"
                                     color="error"
@@ -251,7 +246,11 @@ const PlayerView = () => {
                             })
                     }
                 }} title={open === 'removeClub' ? `Are sure  want to remove ${player.name} from ${clubs.find(club => player.club === club._id)?.name}?` : `Are sure  want to delete ${player.name}?`} />
-
+            <SellPlayerDialog clubs={clubs} open={open === 'sell'}
+                onClose={() => setOpen(null)}
+                bidMultiple={settings.bidMultiple}
+                    basePrice={player.basePrice}
+            />
         </>
     );
 }

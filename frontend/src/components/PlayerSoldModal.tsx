@@ -93,13 +93,19 @@ const PlayerSoldModal = (props: PopupProps) => {
             {/* Centered Player Card with Fade Effect */}
             <Zoom in={props.open} timeout={2500}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                    <MemoizedPlayerCard player={props.player} club={props.club} />
+                    <MemoizedPlayerCard player={props.player} club={props.club} onClick={() => {
+                        window.open(`/players/view/${props.player._id}`, '_blank')
+                    }} />
                 </Box>
             </Zoom>
 
             {/* Club Logo & Name */}
             <Fade in={props.open} timeout={{ enter: 2000, exit: 300 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mt: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mt: 2, cursor: 'pointer' }}
+                    onClick={() => {
+                        window.open(`/club/${props.club._id}`, '_blank')
+                        // navigate(`/club/${player.club}`)
+                    }}>
                     <Box
                         component="img"
                         src={props.club.logo}

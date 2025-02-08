@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { IClub } from '../types/ClubType';
 import { enqueueSnackbar } from 'notistack';
+import { AttachMoney } from '@mui/icons-material';
 
 interface BidPlayerDialogProps {
     open: boolean;
@@ -37,6 +38,10 @@ const BidDialog = (props: BidPlayerDialogProps) => {
     const handleSubmit = () => {
         if (bidAmount % props.bidMultiple != 0) {
             enqueueSnackbar({ variant: 'error', message: `Bid Should be multiple of ${props.bidMultiple} ` });
+        } else if (bidAmount <= props.currentBid) {
+            enqueueSnackbar({ variant: 'error', message: `Bid Should be greater than ${props.currentBid} ` });
+        } else if (bidAmount > props.maxBid) {
+            enqueueSnackbar({ variant: 'error', message: `Bid Should not be greater than of ${props.maxBid} ` });
         } else if (bidAmount > props.currentBid) {
             props.onSubmit(bidAmount);
         } else {
@@ -130,10 +135,12 @@ const BidDialog = (props: BidPlayerDialogProps) => {
                             variant="outlined"
                             value={bidAmount}
                             onChange={handleManualBid}
-                            InputProps={{
-                                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                                endAdornment: <InputAdornment position="end">M</InputAdornment>,
-                                inputProps: { min: 0 },
+                            slotProps={{
+                                input: {
+                                    startAdornment: <InputAdornment position="start"><AttachMoney /></InputAdornment>,
+                                    endAdornment: <InputAdornment position="end">M</InputAdornment>,
+                                    inputProps: { min: 0 },
+                                }
                             }}
                             sx={{ fontSize: '1rem', fontWeight: 'bold', width: 150 }}
                             placeholder="Enter your bid"

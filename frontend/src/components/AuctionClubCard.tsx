@@ -53,6 +53,11 @@ const AuctionClubCard = (props: ClubCardProps) => {
                     props.onClick();
                 }
             }}
+            onDoubleClick={() => {
+                window.open(`/club/${props.club._id}`, '_blank')
+                // navigate(`/club/${player.club}`)
+            }}
+
         >
             {/* Decorative Background Element */}
             <Box

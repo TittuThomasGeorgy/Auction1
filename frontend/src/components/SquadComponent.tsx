@@ -81,10 +81,7 @@ const PlayerCard = ({ player }: { player: IPlayer }) => {
   return (
     <Box
       onClick={() => {
-        // setAction('edit');
-        // setPlayer(_player)
-        // setOpen(true)
-        navigate(`/players/view/${player._id}`)
+        window.open(`/players/view/${player._id}`, '_blank')
       }}
       sx={{
         width: 120,
@@ -104,6 +101,7 @@ const PlayerCard = ({ player }: { player: IPlayer }) => {
           opacity: 1, // Show position on hover
           transform: 'translateX(0)',
         },
+        cursor: 'pointer'
       }}
     >
       {/* Position Box (Appears to the left on hover) */}
