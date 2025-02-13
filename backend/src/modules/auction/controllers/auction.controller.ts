@@ -316,7 +316,7 @@ export const undoBid = async (req: Request, res: Response, next: NextFunction) =
 
         const playerSold = await isPlayerSold(auction?.player.toString());
         if (playerSold)
-            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+            await Player.findByIdAndUpdate(auction.player, { bid: null, club: null });
 
         const _lastBid = await lastBid(auction?.player.toString())
         if (_lastBid)

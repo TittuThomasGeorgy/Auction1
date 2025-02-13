@@ -203,6 +203,11 @@ const AuctionPage = () => {
             enqueueSnackbar({ message: res.message, variant: 'info' })
 
         })
+        socket.on('bidPlaced', (res: { data: IBid | null, message: string }) => {
+            setPlayers(_players => _players.map(_player => res.data?.player === _player._id && _player.club ? { ..._player, bid: '', club: '' } : _player));
+            // enqueueSnackbar({ message: res.message, variant: 'info' })
+        }
+        )
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
             setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
             enqueueSnackbar({ message: res.message, variant: 'info' })
