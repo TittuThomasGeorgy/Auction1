@@ -136,9 +136,9 @@ const AuctionPage = () => {
         } else {
             _players = _players
                 .sort((a, b) => {
-                    const clubComparison = b.club && a.club && b.club.localeCompare(a.club);
-                    return clubComparison || a.name.localeCompare(b.name);
-                })
+                    if (a.club && !b.club) return -1;
+                     return 1;
+                });
         }
         const currPlayerIdx = _players.findIndex(player => player && player._id === currentPlayer);
         setCurrentPlayerIndex(currPlayerIdx > 0 ? currPlayerIdx : 0)
