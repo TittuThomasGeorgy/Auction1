@@ -204,10 +204,30 @@ const AuctionPage = () => {
 
         })
         socket.on('bidPlaced', (res: { data: IBid | null, message: string }) => {
-            setPlayers(_players => _players.map(_player => res.data?.player === _player._id && _player.club ? { ..._player, bid: '', club: '' } : _player));
-            // enqueueSnackbar({ message: res.message, variant: 'info' })
-        }
-        )
+            const updatedPlayer = players.find(player => player._id === res.data?.player);
+            console.log(updatedPlayer, res.data);
+
+            if (updatedPlayer && Boolean(updatedPlayer.club)) {
+                setPlayers(_players =>
+                    _players.map(player =>
+                        player._id === res.data?.player
+                            ? { ...updatedPlayer, club: '', bid: '', _id: updatedPlayer._id } // Ensure `_id` is present
+                            : player
+                    )
+                );
+
+                setClubs(clubs =>
+                    clubs.map(club =>
+                        club._id === res.data?.club
+                            ? { ...club, balance: club.balance + Number(res.data.bid) }
+                            : club
+                    )
+                );
+            }
+
+            enqueueSnackbar({ message: res.message, variant: 'info' });
+        });
+
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
             setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
             enqueueSnackbar({ message: res.message, variant: 'info' })
@@ -532,7 +552,7 @@ const AuctionPage = () => {
                             <AuctionClubCard
                                 club={club}
                                 key={club._id}
-                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid)}
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid) || Boolean(players[currentPlayerIndex].club)}
                                 onClick={() => setPlaceBidClub(club)}
                                 playerCount={_playerCount}
                                 maxPlayers={settings.playersPerClub}

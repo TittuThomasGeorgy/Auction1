@@ -62,9 +62,9 @@ export const createAuction = async () => {
 export const startAuctionReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
-        const playerSold = await isPlayerSold(req.body.player);
-        if (playerSold)
-            return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
+        // const playerSold = await isPlayerSold(req.body.player);
+        // if (playerSold)
+        //     return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
         const _lastBid = await lastBid(req.body.player);
         const data = await Auction.findByIdAndUpdate(auction?._id, { status: 'live', player: req.body.player, bid: _lastBid }, { new: true });
         startLiveAuction();
@@ -314,18 +314,21 @@ export const undoBid = async (req: Request, res: Response, next: NextFunction) =
         if (!auction || auction?.status === 'stopped')
             return sendApiResponse(res, 'CONFLICT', null, 'Auction Stopped. Please Try again');
 
-        const playerSold = await isPlayerSold(auction?.player.toString());
-        if (playerSold)
-            await Player.findByIdAndUpdate(auction.player, { bid: null, club: null });
-
         const _lastBid = await lastBid(auction?.player.toString())
+        const playerSold = await isPlayerSold(auction?.player.toString());
+        if (playerSold) {
+            await Club.findByIdAndUpdate(_lastBid.club, { $inc: { balance: _lastBid.bid } });
+            await Player.findByIdAndUpdate(auction.player, { bid: null, club: null });
+            await placeBid(_lastBid);
+            return sendApiResponse(res, 'OK', _lastBid, 'Bid Undo');
+        }
         if (_lastBid)
             await Bid.findByIdAndUpdate(_lastBid?._id, { state: 0 });
 
         const _prevBid = await lastBid(auction?.player.toString())
         await Auction.findByIdAndUpdate(auction?._id, { bid: _prevBid?._id ?? null });
 
-        placeBid(_prevBid);
+        await placeBid(_prevBid);
         sendApiResponse(res, 'OK', _prevBid, 'Bid Undo')
     } catch (error) {
         next(error);
