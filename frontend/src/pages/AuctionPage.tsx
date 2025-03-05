@@ -137,7 +137,7 @@ const AuctionPage = () => {
             _players = _players
                 .sort((a, b) => {
                     if (a.club && !b.club) return -1;
-                     return 1;
+                    return 1;
                 });
         }
         const currPlayerIdx = _players.findIndex(player => player && player._id === currentPlayer);
@@ -203,30 +203,41 @@ const AuctionPage = () => {
             enqueueSnackbar({ message: res.message, variant: 'info' })
 
         })
-        socket.on('bidPlaced', (res: { data: IBid | null, message: string }) => {
-            const updatedPlayer = players.find(player => player._id === res.data?.player);
-            console.log(updatedPlayer, res.data);
-
-            if (updatedPlayer && Boolean(updatedPlayer.club)) {
-                setPlayers(_players =>
-                    _players.map(player =>
-                        player._id === res.data?.player
-                            ? { ...updatedPlayer, club: '', bid: '', _id: updatedPlayer._id } // Ensure `_id` is present
-                            : player
-                    )
-                );
-
-                setClubs(clubs =>
-                    clubs.map(club =>
-                        club._id === res.data?.club
-                            ? { ...club, balance: club.balance + Number(res.data.bid) }
-                            : club
-                    )
-                );
+        socket.on('bidPlaced', (res: { data: IBid | null; message: string }) => {
+            if (!players.length) {
+              console.warn("Players array is empty.");
             }
-
-            enqueueSnackbar({ message: res.message, variant: 'info' });
-        });
+          
+            console.log("Players array length:", players.length);
+            console.log("Searching for ID:", res.data?.player);
+          
+            setPlayers((prevPlayers) => {
+              const updatedPlayer = prevPlayers.find(
+                (player) => String(player._id) === String(res.data?.player)
+              );
+          
+              console.log("Updated Player:", updatedPlayer, "Response Data:", res.data);
+          
+              if (!updatedPlayer || !updatedPlayer.club) return prevPlayers; // No changes needed
+          
+              return prevPlayers.map((player) =>
+                player._id === res.data?.player
+                  ? { ...updatedPlayer, club: '', bid: '', _id: updatedPlayer._id }
+                  : player
+              );
+            });
+          
+            setClubs((prevClubs) =>
+              prevClubs.map((club) =>
+                club._id === res.data?.club
+                  ? { ...club, balance: club.balance + Number(res.data?.bid || 0) }
+                  : club
+              )
+            );
+          
+            // enqueueSnackbar({ message: res.message, variant: 'info' });
+          });
+          
 
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
             setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
@@ -257,6 +268,9 @@ const AuctionPage = () => {
 
         };
     }, []);
+useEffect(() => {
+  console.log(players);
+}, [players])
 
 
     return (

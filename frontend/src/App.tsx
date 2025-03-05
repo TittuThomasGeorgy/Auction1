@@ -8,6 +8,7 @@ import { useLoader } from "./hooks/Loader";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import Router from "./services/CommonRouter";
 import { AuctionProvider } from "./hooks/AuctionProvider";
+import { AuthProvider } from "./hooks/Authenticate";
 
 // Initialize Ionic
 setupIonicReact();
@@ -182,10 +183,11 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider>
-          <AuctionProvider>
-
-            <Router />
-          </AuctionProvider>
+          <AuthProvider>
+            <AuctionProvider>
+              <Router />
+            </AuctionProvider>
+          </AuthProvider>
           {/* <div>hi</div> */}
         </SnackbarProvider>
       </ThemeProvider>

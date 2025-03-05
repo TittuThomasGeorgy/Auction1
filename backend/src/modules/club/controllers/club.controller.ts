@@ -199,11 +199,9 @@ export const updateClub = async (req: Request, res: Response, next: NextFunction
 
 export const getClubLogin = async (req: Request, res: Response, next: NextFunction) => {
     const { username, password } = req.body;
-    console.log({ username, password }, req.body);
     try {
         const _data = await Club.findOne({ username: username, password: password })
-            .populate('logo')
-            .sort({ 'name': 1 });
+            .populate('logo');
         if (!_data) {
             return sendApiResponse(res, 'UNAUTHORIZED', null, 'Invalid Username or Password');
         }

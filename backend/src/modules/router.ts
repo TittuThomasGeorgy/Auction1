@@ -4,6 +4,7 @@ import clubRouter from "./club/apis";
 import playerRouter from "./player/apis";
 import settingsRouter from "./settings/apis";
 import { auctionRouter } from "./auction/apis";
+import { log } from "console";
 
 
 
@@ -19,13 +20,14 @@ router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error.message === 'Unauthorized') {
         return sendApiResponse(res, 'UNAUTHORIZED', null, 'Unauthorized User');
     } else {
+        console.log(error);
 
         // log the error
-        //   commonEvents.emit('error', error);
-        return sendApiResponse(res, 'INTERNAL SERVER ERROR', {
-        },
-            error.message
-        );
+        // //   commonEvents.emit('error', error);
+        // return sendApiResponse(res, 'INTERNAL SERVER ERROR', {
+        // },
+        //     error.message
+        // );
     }
 });
 
@@ -33,7 +35,7 @@ router.use((req: Request, res: Response) => {
     console.log('fi');
 
     //   commonEvents.emit('error', new Error(`404 Found for ${req.url}`));
-    sendApiResponse(res, 'NOT FOUND', {
+    return sendApiResponse(res, 'NOT FOUND', {
         error: '404 Not Found (REST API Endpoint not implemented)',
     },
         "Oops! Something went wrong! We're working on it!",
