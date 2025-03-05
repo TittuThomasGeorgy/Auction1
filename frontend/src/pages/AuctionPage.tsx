@@ -204,19 +204,12 @@ const AuctionPage = () => {
 
         })
         socket.on('bidPlaced', (res: { data: IBid | null; message: string }) => {
-            if (!players.length) {
-              console.warn("Players array is empty.");
-            }
-          
-            console.log("Players array length:", players.length);
-            console.log("Searching for ID:", res.data?.player);
-          
+   
             setPlayers((prevPlayers) => {
               const updatedPlayer = prevPlayers.find(
                 (player) => String(player._id) === String(res.data?.player)
               );
           
-              console.log("Updated Player:", updatedPlayer, "Response Data:", res.data);
           
               if (!updatedPlayer || !updatedPlayer.club) return prevPlayers; // No changes needed
           
