@@ -1,15 +1,13 @@
 // src/components/BackButton.tsx
-import React from 'react';
-import { Button, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 
-const BackButton= () => {
-    const navigate = useNavigate();
+const BackButton = (props: { onClick: () => void }) => {
 
     // Navigate to the previous page
     const handleBackClick = () => {
-        navigate(-1); // `-1` takes the user to the previous page in history
+        // navigate(-1); // `-1` takes the user to the previous page in history
+        props.onClick(); // `-1` takes the user to the previous page in history
     };
 
     return (

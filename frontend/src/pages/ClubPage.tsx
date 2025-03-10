@@ -14,6 +14,8 @@ import { ISettings } from '../types/SettingsType';
 
 
 const ClubPage = () => {
+    const navigate = useNavigate();
+
     const ClubServ = useClub();
     const SettingsServ = useSettings();
     const [open, setOpen] = useState(false);
@@ -30,7 +32,8 @@ const ClubPage = () => {
 
     return (
         <>
-            <BackButton />
+            <BackButton onClick={() => navigate('/')} />
+
 
             <br />
             <br />

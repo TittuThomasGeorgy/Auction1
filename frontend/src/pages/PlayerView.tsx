@@ -100,8 +100,8 @@ const PlayerView = () => {
         };
     }, []);
     return (
-        <>
-            <BackButton />
+        <>            <BackButton onClick={() => navigate('/players')} />
+
             <br />
             <Container sx={{
                 bgcolor: 'rgba(24, 24, 24, 0.75)',

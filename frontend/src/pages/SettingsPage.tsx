@@ -6,8 +6,11 @@ import { ISettings } from '../types/SettingsType';
 import { enqueueSnackbar } from 'notistack';
 import { AccessTime, AttachMoney, Groups, MoreTime, SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, TimerOutlined, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
 import { defSettings } from '../services/DefaultValues';
+import { useNavigate } from 'react-router-dom';
 
 const SettingsPage = () => {
+    const navigate = useNavigate();
+
     const settingsServ = useSettings();
     const [settings, setSettings] = useState<ISettings>(defSettings);
 
@@ -60,7 +63,8 @@ const SettingsPage = () => {
         }
     return (
         <>
-            <BackButton />
+            <BackButton onClick={() => navigate('/')} />
+
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Paper elevation={4} sx={{ p: 3, bgcolor: 'rgba(24, 24, 24, 0.75)', color: 'white' }}>
                     <Typography variant="h4">

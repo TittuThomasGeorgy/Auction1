@@ -13,7 +13,7 @@ import {
     Grid2 as Grid,
     LinearProgress
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { IClub } from '../types/ClubType';
 import useClub from '../services/ClubService';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
@@ -32,6 +32,8 @@ import { enqueueSnackbar } from 'notistack';
 
 const ClubView = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+
     const ClubServ = useClub();
     const settingsServ = useSettings();
     const PlayerServ = usePlayer();
@@ -105,7 +107,8 @@ const ClubView = () => {
     }, []);
     return (
         <>
-            <BackButton />
+            <BackButton onClick={()=>navigate('/club')}/>
+
             <br />
             <Container sx={{
                 bgcolor: 'rgba(24, 24, 24, 0.75)'

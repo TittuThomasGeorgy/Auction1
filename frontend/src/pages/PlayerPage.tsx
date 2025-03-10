@@ -138,7 +138,8 @@ const PlayerPage = () => {
     }, []);
     return (
         <>
-            <BackButton />
+            <BackButton onClick={() => navigate('/')} />
+
 
             <br />
             <br />

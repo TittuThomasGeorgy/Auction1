@@ -22,6 +22,7 @@ import PlayerSoldModal from '../components/PlayerSoldModal';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { defSettings } from '../services/DefaultValues';
+import { useNavigate } from 'react-router-dom';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -31,6 +32,8 @@ const positionOrder: { [key: string]: number } = {
 };
 
 const AuctionPage = () => {
+    const navigate = useNavigate();
+
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
     const AuctionServ = useAuction();
@@ -268,7 +271,7 @@ useEffect(() => {
 
     return (
         <>
-            <BackButton />
+            <BackButton onClick={()=>navigate('/')}/>
             <br />
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)', padding: '20px' }}>
