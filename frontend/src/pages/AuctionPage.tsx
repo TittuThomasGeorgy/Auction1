@@ -23,6 +23,7 @@ import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { defSettings } from '../services/DefaultValues';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Authenticate';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -32,6 +33,8 @@ const positionOrder: { [key: string]: number } = {
 };
 
 const AuctionPage = () => {
+    const curClub= useAuth();
+
     const navigate = useNavigate();
 
     const PlayerServ = usePlayer();
@@ -517,7 +520,8 @@ useEffect(() => {
 
 
 
-                <AuctionControls
+                {(curClub.club as IClub).isAdmin&& 
+    <AuctionControls
                     onPlay={async () => {
                         await AuctionServ.playPause('resume'); // A default synchronous return if needed
                     }} onPause={async () => {
@@ -534,7 +538,7 @@ useEffect(() => {
                         await AuctionServ.stop(); // A default synchronous return if needed
 
                     }}
-                />
+                />}
                 <br />
                 <Box
                     sx={{
@@ -562,7 +566,7 @@ useEffect(() => {
                             <AuctionClubCard
                                 club={club}
                                 key={club._id}
-                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid) || Boolean(players[currentPlayerIndex].club)}
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid) || Boolean(players[currentPlayerIndex].club)||(!((curClub.club as IClub).isAdmin)&&club._id!=(curClub.club as IClub)._id)}
                                 onClick={() => setPlaceBidClub(club)}
                                 playerCount={_playerCount}
                                 maxPlayers={settings.playersPerClub}

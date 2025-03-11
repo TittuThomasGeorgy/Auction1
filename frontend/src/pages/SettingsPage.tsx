@@ -7,8 +7,12 @@ import { enqueueSnackbar } from 'notistack';
 import { AccessTime, AttachMoney, Groups, MoreTime, SettingsBackupRestore as RestoreIcon, Settings as SettingsIcon, TimerOutlined, Visibility, VisibilityOff, VisibilityOffOutlined } from '@mui/icons-material';
 import { defSettings } from '../services/DefaultValues';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Authenticate';
+import { IClub } from '../types/ClubType';
 
 const SettingsPage = () => {
+    const curClub = useAuth();
+
     const navigate = useNavigate();
 
     const settingsServ = useSettings();
@@ -214,15 +218,15 @@ const SettingsPage = () => {
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
                             </Grid>
-                            <Grid size={4}>
+                            {(curClub.club as IClub).isAdmin &&<Grid size={4}>
                                 <Button variant="contained" color="error" startIcon={<RestoreIcon />}
                                     onClick={() => setConfirmReset(true)}>
                                     Reset
                                 </Button>
-                            </Grid>
+                            </Grid>}
 
                         </Grid>
-                        <Box mt={3} display="flex" justifyContent="flex-end">
+                        {(curClub.club as IClub).isAdmin && <Box mt={3} display="flex" justifyContent="flex-end">
                             {!isEditing ? (
                                 <Button
                                     variant="contained"
@@ -252,7 +256,7 @@ const SettingsPage = () => {
                                     </Button>
                                 </>
                             )}
-                        </Box>
+                        </Box>}
                     </Box>
                 </Paper>
             </Container>

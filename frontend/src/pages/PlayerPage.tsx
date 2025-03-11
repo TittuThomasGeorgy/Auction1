@@ -19,6 +19,7 @@ import { ISettings } from '../types/SettingsType';
 import useSettings from '../services/SettingsService';
 import { enqueueSnackbar } from 'notistack';
 import PlayerSoldModal from '../components/PlayerSoldModal';
+import { useAuth } from '../hooks/Authenticate';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -27,6 +28,8 @@ const positionOrder: { [key: string]: number } = {
     GK: 4
 };
 const PlayerPage = () => {
+    const curClub = useAuth();
+
     const navigate = useNavigate();
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
@@ -147,6 +150,24 @@ const PlayerPage = () => {
                 bgcolor: 'rgba(24, 24, 24, 0.75)'
             }}>
                 <br />
+                {(curClub.club as IClub).isAdmin &&
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ textTransform: 'none', float: 'right' }}
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                            setOpen(true);
+                            setNewPlayer(defPlayer)
+                        }}
+                    >
+                        ADD
+                    </Button>}
+                <Typography variant="h4" color="initial" >
+                    <GroupsIcon sx={{ mr: 1 }} fontSize="large" />
+                    PLAYERS</Typography>
+                <Divider />
+                <PlayerFilter filter={filter} onChange={(newFilter) => setFilter(newFilter)} />
                 <TextField
                     variant="standard"
                     value={searchKey}
@@ -160,11 +181,7 @@ const PlayerPage = () => {
                     }}
                     sx={{ float: 'right', bgcolor: 'grey' }}
                 />
-                <Typography variant="h4" color="initial" >
-                    <GroupsIcon sx={{ mr: 1 }} fontSize="large" />
-                    PLAYERS</Typography>
-                <Divider />
-                <PlayerFilter filter={filter} onChange={(newFilter) => setFilter(newFilter)} />
+                <br />
                 <br />
                 <Box
                     sx={{
@@ -190,7 +207,7 @@ const PlayerPage = () => {
                 </Box>
                 <br />
             </Container>
-            <FloatingButton actions={[
+            {/* <FloatingButton actions={[
                 {
                     name: 'Add',
                     icon: <AddIcon />,
@@ -199,7 +216,7 @@ const PlayerPage = () => {
                         setNewPlayer(defPlayer)
                     },
                 },
-            ]} />
+            ]} /> */}
             <AddPlayerDialog open={open} onClose={() => setOpen(false)}
                 action={action}
                 onSubmit={(newValue) => { }

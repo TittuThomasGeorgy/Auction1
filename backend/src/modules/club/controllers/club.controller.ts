@@ -27,7 +27,8 @@ export const getClubs = async (req: Request, res: Response, next: NextFunction) 
                         },
                     ],
                 }
-                : {})
+                : {}),
+                isAdmin:false
           
         })
             .populate('logo')

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Box, Container, Typography, Divider, Grid2 as Grid } from '@mui/material';
-import { Add as AddIcon, LocalPolice as ClubIcon, Groups as GroupsIcon } from '@mui/icons-material';
+import { Add, Add as AddIcon, LocalPolice as ClubIcon, Groups as GroupsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
 import useClub from '../services/ClubService';
@@ -11,9 +11,12 @@ import { defClub, defSettings } from '../services/DefaultValues';
 import BackButton from '../components/BackButton';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
+import { useAuth } from '../hooks/Authenticate';
 
 
 const ClubPage = () => {
+    const curClub = useAuth();
+
     const navigate = useNavigate();
 
     const ClubServ = useClub();
@@ -39,6 +42,16 @@ const ClubPage = () => {
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)' }}>
                 <br />
+                {(curClub.club as IClub).isAdmin &&
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ textTransform: 'none', float: 'right' }}
+                        startIcon={<AddIcon />}
+                        onClick={() => setOpen(true)}
+                    >
+                        ADD
+                    </Button>}
                 <Typography variant="h4" color="initial" >
                     <ClubIcon sx={{ mr: 1 }} fontSize="large" />
                     CLUBS</Typography>
@@ -58,7 +71,7 @@ const ClubPage = () => {
                 </Box>
                 <br />
             </Container>
-            <FloatingButton actions={[
+            {/* <FloatingButton actions={[
                 {
                     name: 'Add',
                     icon: <AddIcon />,
@@ -66,7 +79,7 @@ const ClubPage = () => {
                         setOpen(true);
                     },
                 },
-            ]} />
+            ]} /> */}
             <AddClubDialog open={open} onClose={() => setOpen(false)}
                 action='add'
                 onSubmit={(newValue) =>

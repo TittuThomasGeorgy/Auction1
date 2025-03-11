@@ -21,9 +21,12 @@ import BidComponent from '../components/BidComponent';
 import SellPlayerDialog from '../components/SellPlayerDialog';
 import { initSocket } from '../services/SocketClient';
 import PlayerSoldModal from '../components/PlayerSoldModal';
+import { useAuth } from '../hooks/Authenticate';
 
 const PlayerView = () => {
     const { id } = useParams();
+    const curClub = useAuth();
+
     const navigate = useNavigate();
     const ClubServ = useClub();
     const PlayerServ = usePlayer();
@@ -130,7 +133,7 @@ const PlayerView = () => {
                             />
                             <Divider sx={{ my: 2 }} />
                             <Stack direction={'row'}>
-                                {player.club ?
+                                {(curClub.club as IClub).isAdmin ? (player.club ?
                                     <>
                                         <Button
                                             variant="contained"
@@ -165,9 +168,21 @@ const PlayerView = () => {
                                         onClick={() => setOpen('sell')}
                                     >
                                         Sell
+                                    </Button>) : player.club && <Button
+                                        variant="contained"
+                                        color="success"
+                                        sx={{ textTransform: 'none', float: 'right', mr: .5 }}
+                                        startIcon={<VisibilityIcon />}
+
+                                        onClick={() => {
+                                            window.open(`/club/${player.club}`, '_blank')
+                                            // navigate(`/club/${player.club}`)
+                                        }}
+                                    >
+                                        View Club
                                     </Button>}
                             </Stack>
-                            <Stack direction={'row'}>
+                            {(curClub.club as IClub).isAdmin && <Stack direction={'row'}>
                                 <Button
                                     variant="contained"
                                     color="primary"
@@ -187,7 +202,7 @@ const PlayerView = () => {
                                 >
                                     Delete
                                 </Button>
-                            </Stack>
+                            </Stack>}
                             <br />
                             {/* <Typography
                                     sx={{

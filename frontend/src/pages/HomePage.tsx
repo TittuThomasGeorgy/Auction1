@@ -2,8 +2,11 @@ import React from 'react';
 import { Box, Card, CardContent, Typography, CardActionArea } from '@mui/material';
 import { Gavel as GavelIcon, LocalPolice as ClubIcon, Groups as GroupsIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/Authenticate';
+import { IClub } from '../types/ClubType';
 
 const HomePage = () => {
+    const club= useAuth();
     const navigate = useNavigate();
 
     const handleCardClick = (route: string) => {
@@ -129,7 +132,8 @@ const HomePage = () => {
                     </CardContent>
                 </CardActionArea>
             </Card>
-            <Card
+           {(club.club as IClub).isAdmin&& 
+           <Card
                 sx={{
                     width: 250,
                     height: 250,
@@ -163,7 +167,7 @@ const HomePage = () => {
                         </Typography>
                     </CardContent>
                 </CardActionArea>
-            </Card>
+            </Card>}
         </Box>
     );
 };

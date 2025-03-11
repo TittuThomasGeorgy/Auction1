@@ -28,9 +28,12 @@ import { ISettings } from '../types/SettingsType';
 import { initSocket } from '../services/SocketClient';
 import { IBid } from '../types/BidType';
 import { enqueueSnackbar } from 'notistack';
+import { useAuth } from '../hooks/Authenticate';
 
 
 const ClubView = () => {
+    const curClub= useAuth();
+
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -114,15 +117,15 @@ const ClubView = () => {
                 bgcolor: 'rgba(24, 24, 24, 0.75)'
             }}>
                 <br />
-                <Button
+                {(curClub.club as IClub).isAdmin &&<Button
                     variant="contained"
                     color="primary"
                     sx={{ textTransform: 'none', float: 'right' }}
                     startIcon={<EditIcon />}
                     onClick={() => setOpen(true)}
                 >
-                    Edit
-                </Button>
+                    EDIT
+                </Button>}
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
 
                     <Box

@@ -74,7 +74,7 @@ export const getPlayersReq = async (req: Request, res: Response, next: NextFunct
 
         const data = await getPlayers(req.query.filter as 'sold' | 'unsold', req.query.searchKey as string, req.query.club as string)
         if (!(data.length > 0))
-            sendApiResponse(res, 'NOT FOUND', [], 'Players Not Found');
+           return sendApiResponse(res, 'NOT FOUND', [], 'Players Not Found');
 
         sendApiResponse(res, 'OK', data, 'Successfully fetched list of Players');
     } catch (error) {
