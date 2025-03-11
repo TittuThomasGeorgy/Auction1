@@ -24,6 +24,7 @@ import { ISettings } from '../types/SettingsType';
 import { defSettings } from '../services/DefaultValues';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
+import SpeedDialComponent from '../components/SpeedDialComponent';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -360,7 +361,7 @@ useEffect(() => {
                         style={{ scrollSnapType: 'x mandatory' }}
                     >
                         {/* Previous Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0)&& (curClub.club as IClub).isAdmin)) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('previous')}
                                 disabled={players.length === 0 || isSwitching}
@@ -411,7 +412,7 @@ useEffect(() => {
                         </Box>
 
                         {/* Next Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0))) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0)&& (curClub.club as IClub).isAdmin)) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('next') || isSwitching}
                                 disabled={players.length === 0}
@@ -656,6 +657,7 @@ useEffect(() => {
                     );
                 })()}
             </Container >
+            <SpeedDialComponent/>
         </>
     );
 };

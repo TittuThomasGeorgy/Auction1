@@ -12,6 +12,7 @@ import BackButton from '../components/BackButton';
 import useSettings from '../services/SettingsService';
 import { ISettings } from '../types/SettingsType';
 import { useAuth } from '../hooks/Authenticate';
+import SpeedDialComponent from '../components/SpeedDialComponent';
 
 
 const ClubPage = () => {
@@ -88,6 +89,8 @@ const ClubPage = () => {
                 }
                 value={{ ...defClub, balance: settings.initialBalance }}
             />
+            <SpeedDialComponent />
+
         </>
     );
 };

@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/Authenticate';
 import { IClub } from '../types/ClubType';
 
 const HomePage = () => {
-    const club= useAuth();
+    const curClub= useAuth();
     const navigate = useNavigate();
 
     const handleCardClick = (route: string) => {
@@ -132,7 +132,7 @@ const HomePage = () => {
                     </CardContent>
                 </CardActionArea>
             </Card>
-           {(club.club as IClub).isAdmin&& 
+           {(curClub.club as IClub).isAdmin&& 
            <Card
                 sx={{
                     width: 250,

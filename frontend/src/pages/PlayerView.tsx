@@ -22,6 +22,7 @@ import SellPlayerDialog from '../components/SellPlayerDialog';
 import { initSocket } from '../services/SocketClient';
 import PlayerSoldModal from '../components/PlayerSoldModal';
 import { useAuth } from '../hooks/Authenticate';
+import SpeedDialComponent from '../components/SpeedDialComponent';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -319,6 +320,8 @@ const PlayerView = () => {
                     />
                 );
             })()}
+            <SpeedDialComponent />
+
         </>
     );
 }

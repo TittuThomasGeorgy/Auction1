@@ -49,6 +49,11 @@ export const allModuleRoutes = [
     path: '/settings',
     element: <SettingsPage />,
   },
+  {
+    title: 'Login',
+    path: '/login',
+    element: <LoginPage />,
+  },
 
 ];
 const Router = () => {
@@ -81,7 +86,7 @@ const Router = () => {
         path: page.path,
         element: club === null ?
           <LoadingPage /> :
-          club == false ?
+          club === false ?
             <LoginPage /> :
             page.element
         // element: page.element,

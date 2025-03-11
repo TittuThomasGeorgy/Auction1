@@ -16,7 +16,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { IClub } from '../types/ClubType';
 import useClub from '../services/ClubService';
-import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, Logout as LogoutIcon, } from '@mui/icons-material';
 import AddClubDialog from '../components/AddClubDialog';
 import BackButton from '../components/BackButton';
 import { defClub, defSettings } from '../services/DefaultValues';
@@ -29,10 +29,11 @@ import { initSocket } from '../services/SocketClient';
 import { IBid } from '../types/BidType';
 import { enqueueSnackbar } from 'notistack';
 import { useAuth } from '../hooks/Authenticate';
+import SpeedDialComponent from '../components/SpeedDialComponent';
 
 
 const ClubView = () => {
-    const curClub= useAuth();
+    const curClub = useAuth();
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -110,14 +111,27 @@ const ClubView = () => {
     }, []);
     return (
         <>
-            <BackButton onClick={()=>navigate('/club')}/>
+            <BackButton onClick={() => navigate('/club')} />
 
             <br />
             <Container sx={{
                 bgcolor: 'rgba(24, 24, 24, 0.75)'
             }}>
                 <br />
-                {(curClub.club as IClub).isAdmin &&<Button
+                {(curClub.club as IClub)._id===id&& <Button
+                    variant="contained"
+                    color="error"
+                    sx={{ textTransform: 'none', float: 'right' }}
+                    startIcon={<LogoutIcon />}
+                    onClick={() => {
+                        localStorage.removeItem('curClub');
+                        curClub.setClub(false);
+                        navigate('/login');
+                    }}
+                >
+                    LOGOUT
+                </Button>}
+                {(curClub.club as IClub).isAdmin && <Button
                     variant="contained"
                     color="primary"
                     sx={{ textTransform: 'none', float: 'right' }}
@@ -250,6 +264,8 @@ const ClubView = () => {
                     value={club}
                 />
             </Container>
+            <SpeedDialComponent />
+
         </>
     );
 };

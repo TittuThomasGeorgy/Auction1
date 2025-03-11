@@ -9,6 +9,7 @@ import { defSettings } from '../services/DefaultValues';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
 import { IClub } from '../types/ClubType';
+import SpeedDialComponent from '../components/SpeedDialComponent';
 
 const SettingsPage = () => {
     const curClub = useAuth();
@@ -218,7 +219,7 @@ const SettingsPage = () => {
                                     sx={{ bgcolor: 'white', borderRadius: 1 }}
                                 />
                             </Grid>
-                            {(curClub.club as IClub).isAdmin &&<Grid size={4}>
+                            {(curClub.club as IClub).isAdmin && <Grid size={4}>
                                 <Button variant="contained" color="error" startIcon={<RestoreIcon />}
                                     onClick={() => setConfirmReset(true)}>
                                     Reset
@@ -305,6 +306,8 @@ const SettingsPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <SpeedDialComponent/>
+
         </>
     );
 };
