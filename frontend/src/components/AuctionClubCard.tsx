@@ -1,65 +1,41 @@
 import React from 'react';
 import { Box, LinearProgress, Typography } from '@mui/material';
-import { IClub } from '../types/ClubType';
-// import { useNavigate } from 'react-router-dom';
 
 interface ClubCardProps {
-    club: IClub;
-    disabled?: boolean; // Optional property to disable the card
+    club: { _id: string; name: string; logo: string; balance: number };
+    disabled?: boolean;
     onClick: () => void;
     playerCount: number;
     maxPlayers: number;
 }
 
-const AuctionClubCard = (props: ClubCardProps) => {
-    // const navigate = useNavigate();
-    // Calculate fill percentage
-    const fillPercentage = (props.playerCount / props.maxPlayers) * 100;
+const AuctionClubCard: React.FC<ClubCardProps> = ({ club, disabled, onClick, playerCount, maxPlayers }) => {
+    const fillPercentage = (playerCount / maxPlayers) * 100;
+    const getProgressColor = () => (fillPercentage === 100 ? '#FF4747' : fillPercentage >= 75 ? '#FFA500' : '#4CAF50');
 
-    // Define dynamic colors based on player count
-    const getProgressColor = () => {
-        if (fillPercentage === 100) return '#FF4747'; // Red if full
-        if (fillPercentage >= 75) return '#FFA500'; // Orange if nearly full
-        return '#4CAF50'; // Green if room available
-    };
     return (
         <Box
             sx={{
-                width: 200,
-                height: 200, // Adjusted height to accommodate extra info
-                background: props.disabled
-                    ? 'gray' // Disabled state background
-                    : 'linear-gradient(135deg, #4b5320, #a9ba9d)', // Alternate green gradient for active cards
+                width: { xs: 150, sm: 180, md: 220 },
+                height: { xs: 180, sm: 220, md: 260 },
+                background: disabled ? 'gray' : 'linear-gradient(135deg, #4b5320, #a9ba9d)',
                 borderRadius: '20px',
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                boxShadow: props.disabled
-                    ? '0px 4px 10px rgba(0, 0, 0, 0.3)' // Subtle shadow for disabled
-                    : '0px 8px 20px rgba(0, 0, 0, 0.4)', // More pronounced shadow for active
-                padding: '10px 15px',
+                justifyContent: 'center',
+                boxShadow: disabled ? '0px 4px 10px rgba(0, 0, 0, 0.3)' : '0px 8px 20px rgba(0, 0, 0, 0.4)',
+                padding: '10px',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
-                cursor: props.disabled ? 'not-allowed' : 'pointer',
-                opacity: props.disabled ? 0.6 : 1, // Dim the card if disabled
-                '&:hover': props.disabled
-                    ? undefined // No hover effect if disabled
-                    : { transform: 'scale(1.05)' },
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.6 : 1,
+                '&:hover': disabled ? undefined : { transform: 'scale(1.05)' },
             }}
-            onClick={() => {
-                if (!props.disabled) {
-                    // navigate(`/club/${props.club._id}`);
-                    props.onClick();
-                }
-            }}
-            onDoubleClick={() => {
-                window.open(`/club/${props.club._id}`, '_blank')
-                // navigate(`/club/${player.club}`)
-            }}
-
+            onClick={() => !disabled && onClick()}
+            onDoubleClick={() => !disabled && window.open(`/club/${club._id}`, '_blank')}
         >
-            {/* Decorative Background Element */}
             <Box
                 sx={{
                     position: 'absolute',
@@ -72,61 +48,39 @@ const AuctionClubCard = (props: ClubCardProps) => {
                     zIndex: 1,
                 }}
             />
-
-            {/* Club Logo */}
             <Box
                 component="img"
-                src={props.club.logo}
-                alt={`${props.club.name} logo`}
+                src={club.logo}
+                alt={`${club.name} logo`}
                 sx={{
-                    width: 80,
-                    height: 80,
+                    width: { xs: 60, sm: 70, md: 90 },
+                    height: { xs: 60, sm: 70, md: 90 },
                     objectFit: 'contain',
                     position: 'absolute',
-                    top: 20,
+                    top: { xs: 10, sm: 15, md: 20 },
                     zIndex: 2,
                 }}
             />
-
-            {/* Club Name */}
             <Typography
                 sx={{
-                    fontSize: '18px',
+                    fontSize: { xs: '14px', sm: '16px', md: '18px' },
                     fontWeight: 'bold',
                     color: 'rgba(255, 255, 255, 0.9)',
                     position: 'absolute',
-                    top: 110,
-                    left: 15,
-                    right: 15,
+                    top: { xs: 80, sm: 100, md: 120 },
+                    left: 10,
+                    right: 10,
                     textAlign: 'center',
                     zIndex: 2,
                 }}
             >
-                {props.club.name}
+                {club.name}
             </Typography>
-
-            {/* Club Balance */}
-            <Box
-                sx={{
-                    position: 'absolute',
-                    bottom: 30,
-                    left: 0,
-                    right: 0,
-                    textAlign: 'center',
-                    zIndex: 2,
-                }}
-            >
-                <Typography
-                    sx={{
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                    }}
-                >
-                    ${props.club.balance.toLocaleString()} M
+            <Box sx={{ position: 'absolute', bottom: { xs: 40, sm: 50, md: 60 }, left: 0, right: 0, textAlign: 'center', zIndex: 2 }}>
+                <Typography sx={{ fontSize: { xs: '12px', sm: '14px', md: '16px' }, fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.9)' }}>
+                    ${club.balance.toLocaleString()} M
                 </Typography>
             </Box>
-            {/* Player Count Display */}
             <Box
                 sx={{
                     position: 'absolute',
@@ -135,37 +89,26 @@ const AuctionClubCard = (props: ClubCardProps) => {
                     right: 10,
                     textAlign: 'center',
                     zIndex: 2,
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: { xs: '4px', md: '10px' },
                 }}
             >
-                <Typography
+                <LinearProgress
+                    variant="determinate"
+                    value={fillPercentage}
                     sx={{
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        color: getProgressColor(),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '2px',
+                        width: { xs: '90%', md: '70%' },
+                        height: { xs: 4, sm: 5, md: 6 },
+                        borderRadius: 3,
+                        backgroundColor: 'rgba(255,255,255,0.3)',
+                        '& .MuiLinearProgress-bar': { backgroundColor: getProgressColor() },
                     }}
-                >
-                    {/* <SportsSoccerIcon sx={{ fontSize: 18 }} /> */}
-                    {/* Progress Bar */}
-                    <LinearProgress
-                        variant="determinate"
-                        value={fillPercentage}
-                        sx={{
-                            width: '80%',
-                            height: 6,
-                            borderRadius: 3,
-                            backgroundColor: 'rgba(255,255,255,0.3)',
-                            '& .MuiLinearProgress-bar': {
-                                backgroundColor: getProgressColor(),
-                            },
-                            margin: '5px auto',
-                        }}
-                    />
-                    {props.playerCount} / {props.maxPlayers}
-
+                />
+                <Typography sx={{ fontSize: { xs: '10px', sm: '12px', md: '14px' }, fontWeight: 'bold', color: getProgressColor(), whiteSpace: 'nowrap' }}>
+                    {playerCount} / {maxPlayers}
                 </Typography>
             </Box>
         </Box>

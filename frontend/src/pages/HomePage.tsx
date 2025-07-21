@@ -4,6 +4,7 @@ import { Gavel as GavelIcon, LocalPolice as ClubIcon, Groups as GroupsIcon, Sett
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
 import { IClub } from '../types/ClubType';
+import NavBar from '../components/NavBar';
 
 const HomePage = () => {
     const curClub= useAuth();
@@ -14,6 +15,7 @@ const HomePage = () => {
     };
 
     return (
+       <>
         <Box
             display="flex"
             justifyContent="center"
@@ -169,6 +171,8 @@ const HomePage = () => {
                 </CardActionArea>
             </Card>}
         </Box>
+        <NavBar value={0}/>
+        </>
     );
 };
 

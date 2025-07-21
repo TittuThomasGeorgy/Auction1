@@ -30,6 +30,7 @@ import { IBid } from '../types/BidType';
 import { enqueueSnackbar } from 'notistack';
 import { useAuth } from '../hooks/Authenticate';
 import SpeedDialComponent from '../components/SpeedDialComponent';
+import NavBar from '../components/NavBar';
 
 
 const ClubView = () => {
@@ -118,7 +119,7 @@ const ClubView = () => {
                 bgcolor: 'rgba(24, 24, 24, 0.75)'
             }}>
                 <br />
-                {(curClub.club as IClub)._id===id&& <Button
+                {(curClub.club as IClub)._id === id && <Button
                     variant="contained"
                     color="error"
                     sx={{ textTransform: 'none', float: 'right' }}
@@ -264,7 +265,7 @@ const ClubView = () => {
                     value={club}
                 />
             </Container>
-            <SpeedDialComponent />
+            <NavBar value={(curClub.club as IClub)._id === id ? 4 : 3} />
 
         </>
     );

@@ -21,6 +21,7 @@ import { enqueueSnackbar } from 'notistack';
 import PlayerSoldModal from '../components/PlayerSoldModal';
 import { useAuth } from '../hooks/Authenticate';
 import SpeedDialComponent from '../components/SpeedDialComponent';
+import NavBar from '../components/NavBar';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -263,7 +264,8 @@ const PlayerPage = () => {
                     )
                 );
             })()}
-            <SpeedDialComponent/>
+            <NavBar value={2} />
+
 
         </>
     );

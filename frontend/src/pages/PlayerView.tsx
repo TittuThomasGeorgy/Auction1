@@ -23,6 +23,7 @@ import { initSocket } from '../services/SocketClient';
 import PlayerSoldModal from '../components/PlayerSoldModal';
 import { useAuth } from '../hooks/Authenticate';
 import SpeedDialComponent from '../components/SpeedDialComponent';
+import NavBar from '../components/NavBar';
 
 const PlayerView = () => {
     const { id } = useParams();
@@ -320,7 +321,8 @@ const PlayerView = () => {
                     />
                 );
             })()}
-            <SpeedDialComponent />
+          <NavBar value={2}/>
+
 
         </>
     );

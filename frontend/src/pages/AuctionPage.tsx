@@ -25,6 +25,7 @@ import { defSettings } from '../services/DefaultValues';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
 import SpeedDialComponent from '../components/SpeedDialComponent';
+import NavBar from '../components/NavBar';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -657,7 +658,7 @@ useEffect(() => {
                     );
                 })()}
             </Container >
-            <SpeedDialComponent/>
+            <NavBar value={1}/>
         </>
     );
 };

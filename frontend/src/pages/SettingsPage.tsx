@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
 import { IClub } from '../types/ClubType';
 import SpeedDialComponent from '../components/SpeedDialComponent';
+import NavBar from '../components/NavBar';
 
 const SettingsPage = () => {
     const curClub = useAuth();
@@ -306,7 +307,7 @@ const SettingsPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <SpeedDialComponent/>
+            <NavBar value={5}/>
 
         </>
     );
