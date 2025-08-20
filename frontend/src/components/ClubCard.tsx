@@ -107,6 +107,7 @@ const ClubCard= (props:ClubCardProps) => {
                         fontWeight: 'bold',
                         marginTop: '10px',
                         color: 'rgba(255, 255, 255, 0.9)',
+                        ml:.5
                     }}
                 >
                     {props.club.manager.name}

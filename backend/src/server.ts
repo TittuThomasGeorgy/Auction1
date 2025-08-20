@@ -51,7 +51,7 @@ app.use((req: Request, res: Response) => {
 });
 
 console.log('Trying to connect to mongodb'.yellow);
-mongoose.connect('mongodb://127.0.0.1:27017/auction')
+mongoose.connect(process.env.MONGO_URI??'mongodb://127.0.0.1:27017/auction')
     .then(async () => {
         console.log('Connected to mongodb'.bgGreen);
         await createSettings();

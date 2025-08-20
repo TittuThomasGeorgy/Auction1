@@ -180,7 +180,7 @@ const AuctionPage = () => {
         // Listen for the start of a new auction
         socket.on('playerSold', (res: { data: { bid: IBid | null }, message: string }) => {
             const bid = res.data.bid;
-            console.log(res.data);
+            // console.log(res.data);
 
             if (bid) {
                 setPlayers(_players => _players.map(player => player._id === bid.player ? { ...player, club: bid.club, bid: bid.bid.toString() } : player));
@@ -195,7 +195,7 @@ const AuctionPage = () => {
             }
         })
         socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
-            console.log(res.data);
+            // console.log(res.data);
 
             setPlayers(_players => ([..._players, res.data.player].sort((a: IPlayer, b: IPlayer) => {
                 // First, sort by position
@@ -269,9 +269,6 @@ const AuctionPage = () => {
 
         };
     }, []);
-useEffect(() => {
-  console.log(players);
-}, [players])
 
 
     return (

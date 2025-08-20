@@ -81,7 +81,7 @@ const PlayerPage = () => {
             }
         })
         socket.on('playerCreated', (res: { data: { player: IPlayer }, message: string }) => {
-            console.log(res.data);
+            // console.log(res.data);
 
             setPlayers(_players => ([..._players, res.data.player].sort((a: IPlayer, b: IPlayer) => {
                 // First, sort by position
@@ -97,7 +97,7 @@ const PlayerPage = () => {
             enqueueSnackbar({ message: res.message, variant: 'info' })
         })
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
-            console.log(res.data);
+            // console.log(res.data);
             setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player).sort((a: IPlayer, b: IPlayer) => {
                 // First, sort by position
                 const positionComparison = positionOrder[a.position] - positionOrder[b.position];

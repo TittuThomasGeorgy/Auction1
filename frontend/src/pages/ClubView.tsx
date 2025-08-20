@@ -122,7 +122,7 @@ const ClubView = () => {
                 {(curClub.club as IClub)._id === id && <Button
                     variant="contained"
                     color="error"
-                    sx={{ textTransform: 'none', float: 'right' }}
+                    sx={{ textTransform: 'none', float: 'right',ml:.5 }}
                     startIcon={<LogoutIcon />}
                     onClick={() => {
                         localStorage.removeItem('curClub');

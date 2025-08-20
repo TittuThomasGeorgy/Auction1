@@ -48,7 +48,7 @@ const ImageUploader = (props: ImageUploaderProps) => {
                         } else {
                             props.onFileUpload(e.target.files[0])
                             const url = URL.createObjectURL(e.target.files[0]);
-                            console.log(url);
+                            // console.log(url);
 
                             props.onChange(url);
                         }
