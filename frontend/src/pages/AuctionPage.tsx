@@ -35,7 +35,7 @@ const positionOrder: { [key: string]: number } = {
 };
 
 const AuctionPage = () => {
-    const curClub= useAuth();
+    const curClub = useAuth();
 
     const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ const AuctionPage = () => {
     const ClubServ = useClub();
     const AuctionServ = useAuction();
     const settingsServ = useSettings();
-    
+
     const [players, setPlayers] = useState<IPlayer[]>([]);
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -66,7 +66,7 @@ const AuctionPage = () => {
     const [settings, setSettings] = useState<ISettings>(defSettings);
 
     useEffect(() => {
-              const fetchClubs = async () => {
+        const fetchClubs = async () => {
             try {
                 const res = await ClubServ.getAll();
                 const allClubs = res.data;
@@ -78,7 +78,7 @@ const AuctionPage = () => {
                     if (mainClub) {
                         // Filter out the main club to get the rest of the clubs
                         const otherClubs = allClubs.filter(club => club._id !== (curClub.club as IClub)?._id);
-                        
+
                         // Prepend the main club to the list of other clubs
                         setClubs([mainClub, ...otherClubs]);
                     } else {
@@ -136,6 +136,17 @@ const AuctionPage = () => {
         }
     }, [currentPlayerIndex, players, liveAuction.auction]);
 
+    const nextUnsoldPlayer = () => {
+        const remainingPlayers1 = players.slice(currentPlayerIndex)
+        const remainingPlayers2 = players.slice(0, currentPlayerIndex)
+        const unsoldPlayer = [...remainingPlayers1, ...remainingPlayers2].find(player => player.club === null)
+        if (unsoldPlayer) {
+            return unsoldPlayer._id
+        }
+
+        enqueueSnackbar({ variant: 'error', message: "No Unsold Players remaining" })
+        return null
+    }
     // Add keyboard navigation
     useEffect(() => {
         const handleKeyDown = async (event: KeyboardEvent) => {
@@ -241,33 +252,33 @@ const AuctionPage = () => {
 
         })
         socket.on('bidPlaced', (res: { data: IBid | null; message: string }) => {
-   
+
             setPlayers((prevPlayers) => {
-              const updatedPlayer = prevPlayers.find(
-                (player) => String(player._id) === String(res.data?.player)
-              );
-          
-          
-              if (!updatedPlayer || !updatedPlayer.club) return prevPlayers; // No changes needed
-          
-              return prevPlayers.map((player) =>
-                player._id === res.data?.player
-                  ? { ...updatedPlayer, club: '', bid: '', _id: updatedPlayer._id }
-                  : player
-              );
+                const updatedPlayer = prevPlayers.find(
+                    (player) => String(player._id) === String(res.data?.player)
+                );
+
+
+                if (!updatedPlayer || !updatedPlayer.club) return prevPlayers; // No changes needed
+
+                return prevPlayers.map((player) =>
+                    player._id === res.data?.player
+                        ? { ...updatedPlayer, club: '', bid: '', _id: updatedPlayer._id }
+                        : player
+                );
             });
-          
+
             setClubs((prevClubs) =>
-              prevClubs.map((club) =>
-                club._id === res.data?.club
-                  ? { ...club, balance: club.balance + Number(res.data?.bid || 0) }
-                  : club
-              )
+                prevClubs.map((club) =>
+                    club._id === res.data?.club
+                        ? { ...club, balance: club.balance + Number(res.data?.bid || 0) }
+                        : club
+                )
             );
-          
+
             // enqueueSnackbar({ message: res.message, variant: 'info' });
-          });
-          
+        });
+
 
         socket.on('playerUpdated', (res: { data: { player: IPlayer }, message: string }) => {
             setPlayers(_players => _players.map(_player => res.data.player._id === _player._id ? res.data.player : _player));
@@ -302,7 +313,7 @@ const AuctionPage = () => {
 
     return (
         <>
-            <BackButton onClick={()=>navigate('/')}/>
+            <BackButton onClick={() => navigate('/')} />
             <br />
             <br />
             <Container sx={{ bgcolor: 'rgba(24, 24, 24, 0.75)', padding: '20px' }}>
@@ -388,7 +399,7 @@ const AuctionPage = () => {
                         style={{ scrollSnapType: 'x mandatory' }}
                     >
                         {/* Previous Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0)&& (curClub.club as IClub).isAdmin)) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0) && (curClub.club as IClub).isAdmin)) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('previous')}
                                 disabled={players.length === 0 || isSwitching}
@@ -439,7 +450,7 @@ const AuctionPage = () => {
                         </Box>
 
                         {/* Next Player Button */}
-                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0)&& (curClub.club as IClub).isAdmin)) && (
+                        {(!liveAuction.auction || ((liveAuction.auction?.timeRemaining || liveAuction.auction?.timeRemaining === 0) && !(liveAuction.auction?.timeRemaining >= 0) && (curClub.club as IClub).isAdmin)) && (
                             <IconButton
                                 onClick={() => handleNextPlayer('next') || isSwitching}
                                 disabled={players.length === 0}
@@ -548,25 +559,27 @@ const AuctionPage = () => {
 
 
 
-                {(curClub.club as IClub).isAdmin&& 
-    <AuctionControls
-                    onPlay={async () => {
-                        await AuctionServ.playPause('resume'); // A default synchronous return if needed
-                    }} onPause={async () => {
-                        await AuctionServ.playPause('pause'); // A default synchronous return if needed
-                    }} onAddTime={async () => {
-                        await AuctionServ.addTime(); // A default synchronous return if needed
-                    }} onSell={async () => {
-                        await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed
-                    }} onUndo={async () => {
-                        await AuctionServ.undoBid(); // A default synchronous return if needed
-                    }} onStart={async () => {
-                        await AuctionServ.start(players[currentPlayerIndex]?._id); // A default synchronous return if needed
-                    }} onStop={async () => {
-                        await AuctionServ.stop(); // A default synchronous return if needed
+                {(curClub.club as IClub).isAdmin &&
+                    <AuctionControls
+                        onPlay={async () => {
+                            await AuctionServ.playPause('resume'); // A default synchronous return if needed
+                        }} onPause={async () => {
+                            await AuctionServ.playPause('pause'); // A default synchronous return if needed
+                        }} onAddTime={async () => {
+                            await AuctionServ.addTime(); // A default synchronous return if needed
+                        }} onSell={async () => {
+                            await AuctionServ.sell(players[currentPlayerIndex]?._id); // A default synchronous return if needed
+                        }} onUndo={async () => {
+                            await AuctionServ.undoBid(); // A default synchronous return if needed
+                        }} onStart={async () => {
+                            const unsoldPlayer = nextUnsoldPlayer();
+                            if (unsoldPlayer)
+                                await AuctionServ.start(unsoldPlayer); // A default synchronous return if needed
+                        }} onStop={async () => {
+                            await AuctionServ.stop(); // A default synchronous return if needed
 
-                    }}
-                />}
+                        }}
+                    />}
                 <br />
                 <Box
                     sx={{
@@ -594,7 +607,7 @@ const AuctionPage = () => {
                             <AuctionClubCard
                                 club={club}
                                 key={club._id}
-                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid) || Boolean(players[currentPlayerIndex].club)||(!((curClub.club as IClub).isAdmin)&&club._id!=(curClub.club as IClub)._id)}
+                                disabled={liveAuction.auction?.status !== 'live' || _playerCount === settings.playersPerClub || (typeof liveAuction.auction?.bid?.bid === 'number' && maxBid <= liveAuction.auction?.bid?.bid) || Boolean(players[currentPlayerIndex].club) || (!((curClub.club as IClub).isAdmin) && club._id != (curClub.club as IClub)._id)}
                                 onClick={() => setPlaceBidClub(club)}
                                 playerCount={_playerCount}
                                 maxPlayers={settings.playersPerClub}
@@ -684,7 +697,7 @@ const AuctionPage = () => {
                     );
                 })()}
             </Container >
-            <NavBar value={1}/>
+            <NavBar value={1} />
         </>
     );
 };
