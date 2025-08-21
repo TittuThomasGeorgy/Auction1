@@ -14,6 +14,17 @@ export const AuctionProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const socket = initSocket();
 
+         // 1. Initial Data Fetch
+        const fetchInitialAuctionData = async () => {
+            try {
+                const res = await auctionServ.getAuction();
+                setAuction(res.data);
+            } catch (error) {
+                console.error("Failed to fetch initial auction data:", error);
+            }
+        };
+
+        fetchInitialAuctionData();
         const handleAuctionStarted = (data: { auction: IAuction }) => {
             setAuction(data.auction);
             enqueueSnackbar({ variant: 'success', message: "Auction Started" });
@@ -72,7 +83,7 @@ export const AuctionProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const fetchAuctionData = async () => {
-            if (!auction || auction.status === 'stopped') {
+            if (!auction || auction.status === 'stopped'|| auction.timeRemaining === -2) {
                 const res = await auctionServ.getAuction();
                 if (res.data.status !== 'stopped') {
                     setAuction({ ...res.data, timeRemaining: -1 });

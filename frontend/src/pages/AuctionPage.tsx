@@ -139,7 +139,7 @@ const AuctionPage = () => {
     const nextUnsoldPlayer = () => {
         const remainingPlayers1 = players.slice(currentPlayerIndex)
         const remainingPlayers2 = players.slice(0, currentPlayerIndex)
-        const unsoldPlayer = [...remainingPlayers1, ...remainingPlayers2].find(player => player.club === null)
+        const unsoldPlayer = [...remainingPlayers1, ...remainingPlayers2].find(player => !player.club )
         if (unsoldPlayer) {
             return unsoldPlayer._id
         }
