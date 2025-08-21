@@ -105,7 +105,7 @@ export const addAuctionTime = async (req: Request, res: Response, next: NextFunc
 export const playPauseAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const auction = await isAuctionExist();
-        const playerSold = auction && await isPlayerSold(auction?.player.toString());
+        const playerSold = auction && await isPlayerSold(auction?.player?.toString());
         if (playerSold)
             return sendApiResponse(res, 'CONFLICT', null, 'Player already sold');
         const data = await playPauseLiveAuction(req.body.action);

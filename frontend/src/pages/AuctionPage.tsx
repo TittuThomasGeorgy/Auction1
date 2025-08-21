@@ -39,12 +39,12 @@ const AuctionPage = () => {
 
     const navigate = useNavigate();
 
+    const liveAuction = useLiveAuction();
     const PlayerServ = usePlayer();
     const ClubServ = useClub();
     const AuctionServ = useAuction();
     const settingsServ = useSettings();
-
-    const liveAuction = useLiveAuction();
+    
     const [players, setPlayers] = useState<IPlayer[]>([]);
     const [clubs, setClubs] = useState<IClub[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
