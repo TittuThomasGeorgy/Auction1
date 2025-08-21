@@ -66,7 +66,36 @@ const AuctionPage = () => {
     const [settings, setSettings] = useState<ISettings>(defSettings);
 
     useEffect(() => {
-        ClubServ.getAll().then((res) => setClubs(res.data));
+              const fetchClubs = async () => {
+            try {
+                const res = await ClubServ.getAll();
+                const allClubs = res.data;
+
+                if (curClub && curClub.club && curClub.club._id) {
+                    // Find the club that matches the current user's club ID
+                    const mainClub = allClubs.find(club => club._id === (curClub.club as IClub)?._id);
+
+                    if (mainClub) {
+                        // Filter out the main club to get the rest of the clubs
+                        const otherClubs = allClubs.filter(club => club._id !== (curClub.club as IClub)?._id);
+                        
+                        // Prepend the main club to the list of other clubs
+                        setClubs([mainClub, ...otherClubs]);
+                    } else {
+                        // If the main club is not found, just set the original list
+                        setClubs(allClubs);
+                    }
+                } else {
+                    // If no current club is available, just set the original list
+                    setClubs(allClubs);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch clubs:", error);
+            }
+        };
+
+        fetchClubs();
         PlayerServ.getAll({}).then((res) =>
             setPlayers(res.data)
         );
