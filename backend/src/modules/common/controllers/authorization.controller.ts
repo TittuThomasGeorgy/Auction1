@@ -3,8 +3,9 @@ import { getClubById } from "../../club/controllers/club.controller";
 import { IClub } from "../../club/types/club";
 import sendApiResponse from "../../../common/extras/sendApiResponse";
 import { Types } from "mongoose";
+import { NextFunction, Request, Response } from "express";
 
-export const authCheck = async (req, res, next) => {
+export const authCheck = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
 

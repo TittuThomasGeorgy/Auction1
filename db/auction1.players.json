@@ -1,0 +1,552 @@
+[{
+  "_id": {
+    "$oid": "68a580faaae99ffd0d9a262a"
+  },
+  "name": "Frank Lampard",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a580faaae99ffd0d9a2628"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:02:02.460Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:57:47.126Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a717bedd22bf0ce281a7ce"
+  },
+  "club": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a5840aaae99ffd0d9a262f"
+  },
+  "name": "Iker Casillas",
+  "position": "GK",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5840aaae99ffd0d9a262d"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:15:06.779Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T08:15:06.779Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68a5843eaae99ffd0d9a2634"
+  },
+  "name": "claude makélélé",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5843eaae99ffd0d9a2632"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:15:58.989Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:57:03.353Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a71792dd22bf0ce281a78f"
+  },
+  "club": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a5845baae99ffd0d9a2639"
+  },
+  "name": "Cristiano Ronaldo",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5845baae99ffd0d9a2637"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:16:27.632Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T09:37:07.671Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a59736dce84888c377c01d"
+  },
+  "club": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58473aae99ffd0d9a263e"
+  },
+  "name": "David de Gea",
+  "position": "GK",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58473aae99ffd0d9a263c"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:16:51.749Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T08:16:51.749Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68a5848faae99ffd0d9a2643"
+  },
+  "name": "Didier Drogba",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5848faae99ffd0d9a2641"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:17:19.472Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:09:13.619Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a70c5ce60cbc5d0e75f6dd"
+  },
+  "club": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a584a6aae99ffd0d9a2648"
+  },
+  "name": "Eden Hazard",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a584a6aae99ffd0d9a2646"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:17:42.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:29:03.831Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a7110215e3516dfd31bb30"
+  },
+  "club": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a584c7aae99ffd0d9a264d"
+  },
+  "name": "Gareth Bale",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a584c7aae99ffd0d9a264b"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:18:15.985Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:37:59.886Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a7131a15e3516dfd31bc36"
+  },
+  "club": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a584feaae99ffd0d9a2663"
+  },
+  "name": "Gerard Piqué",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a584feaae99ffd0d9a2661"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:19:10.249Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:13:47.601Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a71b7edd22bf0ce281acc1"
+  },
+  "club": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a5851daae99ffd0d9a2668"
+  },
+  "name": "Harry Maguire",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5851daae99ffd0d9a2666"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:19:41.176Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T14:35:40.694Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a72eba8273f052df887358"
+  },
+  "club": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58546aae99ffd0d9a266d"
+  },
+  "name": "Andrés Iniesta",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58546aae99ffd0d9a266b"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:20:22.495Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T09:38:55.998Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a597a2dce84888c377c0b9"
+  },
+  "club": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58567aae99ffd0d9a2672"
+  },
+  "name": "John Terry",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58567aae99ffd0d9a2670"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:20:55.682Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T15:34:19.994Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a73c788273f052df8873c0"
+  },
+  "club": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58591aae99ffd0d9a2688"
+  },
+  "name": "Marcelo",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58591aae99ffd0d9a2686"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:21:37.375Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T16:22:57.040Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a747de8273f052df887438"
+  },
+  "club": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a585aeaae99ffd0d9a268d"
+  },
+  "name": "Lionel Messi",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a585aeaae99ffd0d9a268b"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:22:06.966Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:50:18.890Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a72408ff12c6166b4de903"
+  },
+  "club": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a585cdaae99ffd0d9a2692"
+  },
+  "name": "Luka Modrić",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a585cdaae99ffd0d9a2690"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:22:37.521Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:59:05.515Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a7180cdd22bf0ce281a83f"
+  },
+  "club": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a585e8aae99ffd0d9a2697"
+  },
+  "name": "Paul Scholes",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a585e8aae99ffd0d9a2695"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:23:04.484Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:01:01.668Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a71880dd22bf0ce281a937"
+  },
+  "club": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58608aae99ffd0d9a269c"
+  },
+  "name": "Petr Čech",
+  "position": "GK",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58608aae99ffd0d9a269a"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:23:36.302Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T08:23:36.302Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68a5862eaae99ffd0d9a26a1"
+  },
+  "name": "Carles Puyol",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5862eaae99ffd0d9a269f"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:24:14.404Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:10:50.937Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a71ad6dd22bf0ce281abc2"
+  },
+  "club": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a5864daae99ffd0d9a26a6"
+  },
+  "name": "Sergio Ramos",
+  "position": "DF",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a5864daae99ffd0d9a26a4"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:24:45.165Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T16:23:47.733Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a748108273f052df88747c"
+  },
+  "club": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58666aae99ffd0d9a26ab"
+  },
+  "name": "Ronaldinho Gaúcho",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58666aae99ffd0d9a26a9"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:25:10.999Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:39:40.754Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a7138915e3516dfd31bcde"
+  },
+  "club": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a58680aae99ffd0d9a26b0"
+  },
+  "name": "Roy Keane",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58680aae99ffd0d9a26ae"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:25:36.808Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:40:28.577Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a713b815e3516dfd31bd88"
+  },
+  "club": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a586b2aae99ffd0d9a26b5"
+  },
+  "name": "Ryan Giggs",
+  "position": "CM",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a586b2aae99ffd0d9a26b3"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:26:26.684Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:08:38.860Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a719bfdd22bf0ce281aa93"
+  },
+  "club": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a586f9aae99ffd0d9a26cb"
+  },
+  "name": "Marc-André ter Stegen",
+  "position": "GK",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a586f9aae99ffd0d9a26c9"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:27:37.864Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T08:27:37.864Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68a58722aae99ffd0d9a26d0"
+  },
+  "name": "Wayne Rooney",
+  "position": "ST",
+  "basePrice": 100,
+  "image": {
+    "$oid": "68a58722aae99ffd0d9a26ce"
+  },
+  "createdAt": {
+    "$date": "2025-08-20T08:28:18.618Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T12:55:52.803Z"
+  },
+  "__v": 0,
+  "bid": {
+    "$oid": "68a71754dd22bf0ce281a6f6"
+  },
+  "club": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  }
+}]

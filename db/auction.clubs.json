@@ -1,0 +1,135 @@
+[{
+  "_id": {
+    "$oid": "677580141a7dc9040f74ae0e"
+  },
+  "name": "Barcelona",
+  "code": "FCB",
+  "username": "barca",
+  "password": "pass1234",
+  "isAdmin": false,
+  "manager": {
+    "name": "Pep Guardiola",
+    "img": {
+      "$oid": "68a57388aae99ffd0d9a2539"
+    }
+  },
+  "logo": {
+    "$oid": "68a57384aae99ffd0d9a2537"
+  },
+  "createdAt": {
+    "$date": "2025-01-01T17:49:08.854Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:50:18.901Z"
+  },
+  "__v": 0,
+  "balance": 1700
+},
+{
+  "_id": {
+    "$oid": "6777fe36c4fc199d2dff7d13"
+  },
+  "name": "REAL MADRID FC",
+  "code": "RMA",
+  "username": "real",
+  "password": "pass1234",
+  "isAdmin": false,
+  "manager": {
+    "name": "Zinedine Zidane",
+    "img": {
+      "$oid": "68a573c6aae99ffd0d9a2563"
+    }
+  },
+  "logo": {
+    "$oid": "68a70b8ce60cbc5d0e75f5f2"
+  },
+  "createdAt": {
+    "$date": "2025-01-03T15:11:50.242Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T16:23:47.742Z"
+  },
+  "__v": 0,
+  "balance": 2900
+},
+{
+  "_id": {
+    "$oid": "6777ff1fc4fc199d2dff7d32"
+  },
+  "name": "CHELSEA FC",
+  "code": "CHE",
+  "username": "chelsea",
+  "password": "pass1234",
+  "isAdmin": false,
+  "manager": {
+    "name": "José Mourinho",
+    "img": {
+      "$oid": "68a573a0aae99ffd0d9a2547"
+    }
+  },
+  "logo": {
+    "$oid": "68a70b0de60cbc5d0e75f597"
+  },
+  "createdAt": {
+    "$date": "2025-01-03T15:15:43.326Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T13:08:38.874Z"
+  },
+  "__v": 0,
+  "balance": 2200
+},
+{
+  "_id": {
+    "$oid": "6777ffc6c4fc199d2dff7d41"
+  },
+  "name": "MAN. UNITED FC",
+  "code": "MUFC",
+  "username": "manu",
+  "password": "pass1234",
+  "isAdmin": false,
+  "manager": {
+    "name": "Alex Ferguson",
+    "img": {
+      "$oid": "68a573b3aae99ffd0d9a2555"
+    }
+  },
+  "logo": {
+    "$oid": "68a70b51e60cbc5d0e75f5b8"
+  },
+  "createdAt": {
+    "$date": "2025-01-03T15:18:30.352Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-21T15:34:20.007Z"
+  },
+  "__v": 0,
+  "balance": 3500
+},
+{
+  "_id": {
+    "$oid": "67d055ceb400fd190b1dd95c"
+  },
+  "name": "ADMIN",
+  "code": "ADM",
+  "username": "admin",
+  "password": "pass1234",
+  "isAdmin": true,
+  "manager": {
+    "name": "T",
+    "img": {
+      "$oid": "67d055c8b400fd190b1dd958"
+    }
+  },
+  "balance": 6000,
+  "logo": {
+    "$oid": "67d055c8b400fd190b1dd958"
+  },
+  "createdAt": {
+    "$date": "2025-03-11T15:25:02.322Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-20T07:23:12.351Z"
+  },
+  "__v": 0
+}]
