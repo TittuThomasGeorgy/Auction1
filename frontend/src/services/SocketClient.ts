@@ -10,7 +10,7 @@ let socket: Socket | null = null;
  */
 export const initSocket = (): Socket => {
     if (!socket) {
-        socket = io(import.meta.env.VITE_SOCKET_SERVER_URL, {
+        socket = io(window.SOCKET_SERVER_URL, {
             reconnection: true, // Enable automatic reconnection
             reconnectionAttempts: Infinity, // Or a finite number of attempts
             reconnectionDelay: 1000, // Wait 1 second before retrying

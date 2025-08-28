@@ -3,3 +3,7 @@ node_modules
 backend/.env
 .env
 frontend/.env
+frontend/dist
+frontend/dist-obfuscated
+backend/dist
+backend/dist-obfuscated

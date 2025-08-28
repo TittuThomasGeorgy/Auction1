@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BottomNavigation, BottomNavigationAction, Paper, IconButton } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction, Paper, IconButton, Avatar } from '@mui/material';
 import { Home as HomeIcon, Person as PersonIcon, Groups as GroupsIcon, Settings as SettingsIcon, GavelRounded, LocalPolice as ClubIcon, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/Authenticate';
@@ -16,7 +16,7 @@ const NavBar = (props: { value: Number }) => {
         { label: 'Auction', icon: <GavelRounded />, route: '/auction' },
         { label: 'Players', icon: <GroupsIcon />, route: '/players' },
         { label: 'Clubs', icon: <ClubIcon />, route: '/club' },
-        { label: 'Profile', icon: <PersonIcon />, route: `/club/${(curClub.club as IClub)._id}` },
+        { label: 'Profile', icon: <Avatar src={(curClub.club as IClub).logo} />, route: `/club/${(curClub.club as IClub)._id}` },
     ];
 
     if ((curClub.club as IClub).isAdmin) {
