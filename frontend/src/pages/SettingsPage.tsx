@@ -307,7 +307,7 @@ const SettingsPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <NavBar value={5}/>
+            <NavBar value={4}/>
 
         </>
     );

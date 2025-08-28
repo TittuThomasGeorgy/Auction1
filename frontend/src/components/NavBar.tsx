@@ -16,12 +16,9 @@ const NavBar = (props: { value: Number }) => {
         { label: 'Auction', icon: <GavelRounded />, route: '/auction' },
         { label: 'Players', icon: <GroupsIcon />, route: '/players' },
         { label: 'Clubs', icon: <ClubIcon />, route: '/club' },
+        ...((curClub.club as IClub).isAdmin ? [{ label: 'Settings', icon: <SettingsIcon />, route: '/settings' }] : []),
         { label: 'Profile', icon: <Avatar src={(curClub.club as IClub).logo} />, route: `/club/${(curClub.club as IClub)._id}` },
     ];
-
-    if ((curClub.club as IClub).isAdmin) {
-        menuItems.push({ label: 'Settings', icon: <SettingsIcon />, route: '/settings' });
-    }
 
     return (
         <Paper

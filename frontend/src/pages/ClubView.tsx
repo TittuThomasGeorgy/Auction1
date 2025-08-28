@@ -122,7 +122,7 @@ const ClubView = () => {
                 {(curClub.club as IClub)._id === id && <Button
                     variant="contained"
                     color="error"
-                    sx={{ textTransform: 'none', float: 'right',ml:.5 }}
+                    sx={{ textTransform: 'none', float: 'right', ml: .5 }}
                     startIcon={<LogoutIcon />}
                     onClick={() => {
                         localStorage.removeItem('curClub');
@@ -265,7 +265,7 @@ const ClubView = () => {
                     value={club}
                 />
             </Container>
-            <NavBar value={(curClub.club as IClub)._id === id ? 4 : 3} />
+            <NavBar value={(curClub.club as IClub)._id === id ? (curClub.club as IClub).isAdmin ? 5 : 4 : 3} />
 
         </>
     );
