@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { io } from "../../../server";
-import { getAuction, nextPlayer, placeAuctionBid, playPauseAuction, sellAuctionPlayer, startAuctionReq, stopAuction,addAuctionTime, undoBid } from "../controllers/auction.controller";
+import { getAuction, nextPlayer, placeAuctionBid, playPauseAuction, sellAuctionPlayer, startAuctionReq, stopAuction,addAuctionTime, undoBid, getAuctions } from "../controllers/auction.controller";
 
 const auctionEvents = () => {
     // io.on('placeBid', placeBid)
@@ -8,6 +8,7 @@ const auctionEvents = () => {
 
 const auctionRouter = Router();
 
+auctionRouter.get('/', getAuctions);
 auctionRouter.get('/', getAuction);
 auctionRouter.post('/bid', placeAuctionBid);
 auctionRouter.post('/sell', sellAuctionPlayer);

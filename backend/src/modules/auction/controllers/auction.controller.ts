@@ -28,6 +28,17 @@ export const isAuctionRunning = async (): Promise<boolean> => {
     const data = await isAuctionExist();
     return data?.status !== 'stopped';
 };
+export const getAuctions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const type = req.query.type;
+        console.log(type, "ty");
+
+        const data = await Auction.find({ type })
+        sendApiResponse(res, 'OK', data, `Successfully fetched ${type} Auctions`);
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware for unexpected errors
+    }
+};
 export const getAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = await isAuctionExist(true);

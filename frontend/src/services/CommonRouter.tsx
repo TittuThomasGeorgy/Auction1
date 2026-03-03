@@ -1,7 +1,7 @@
 import HomePage from "../pages/HomePage";
 import { createBrowserRouter, RouteObject, RouterProvider } from 'react-router-dom';
 import ClubPage from "../pages/ClubPage";
-import AuctionPage from "../pages/AuctionPage";
+import LiveAuctionPage from "../pages/LiveAuctionPage";
 import PlayerPage from "../pages/PlayerPage";
 import ClubView from "../pages/ClubView";
 import SettingsPage from "../pages/SettingsPage";
@@ -12,6 +12,8 @@ import useClub from "./ClubService";
 import { IClub } from "../types/ClubType";
 import LoginPage from "../pages/Loginpage";
 import LoadingPage from "../pages/LoadingPage";
+import AuctionsViewPage from "../pages/AuctionsViewPage";
+import AuctionHomePage from "../pages/AuctionsHomePage";
 
 export const allModuleRoutes = [
   {
@@ -20,19 +22,34 @@ export const allModuleRoutes = [
     element: <HomePage />,
   },
   {
-    title: 'club',
+    title: 'Football',
+    path: '/auction/football',
+    element: <AuctionsViewPage type='football' />,
+  },
+  {
+    title: 'Cricket',
+    path: '/auction/cricket',
+    element: <AuctionsViewPage type='cricket' />,
+  },
+  {
+    title: 'Auction',
+    path: '/auction',
+    element: <AuctionHomePage  />,
+  },
+  {
+    title: 'Club',
     path: '/club',
     element: <ClubPage />,
   },
   {
-    title: 'club',
+    title: 'Club',
     path: '/club/:id',
     element: <ClubView />,
   },
   {
     title: 'Auction',
-    path: '/auction',
-    element: <AuctionPage />,
+    path: '/liveAuction',
+    element: <LiveAuctionPage />,
   },
   {
     title: 'Player',
@@ -63,7 +80,7 @@ const Router = () => {
 
   useEffect(() => {
     const storedClub = localStorage.getItem('curClub');
-    const _club: IClub = storedClub ? JSON.parse(storedClub) : null; 
+    const _club: IClub = storedClub ? JSON.parse(storedClub) : null;
 
     setClub(false);
     if (_club) {

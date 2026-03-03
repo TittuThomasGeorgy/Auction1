@@ -34,7 +34,7 @@ const positionOrder: { [key: string]: number } = {
     GK: 4
 };
 
-const AuctionPage = () => {
+const LiveAuctionPage = () => {
     const curClub = useAuth();
 
     const navigate = useNavigate();
@@ -702,4 +702,4 @@ const AuctionPage = () => {
     );
 };
 
-export default AuctionPage;
+export default LiveAuctionPage;

@@ -5,5 +5,7 @@ export interface IAuction {
     player: Types.ObjectId | string;
     bid: Types.ObjectId | string;
     timeRemaining?:number;
-    status: 'pause' | 'live' | 'stopped'
+    status: 'pause' | 'live' | 'stopped';
+    type:'football'|'cricket';
+    name:string;
 }

@@ -8,6 +8,7 @@ const useAuction = () => {
   return {
     update: (createAuction: IAuction) =>
       getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction })),
+    getAll: (type: "football" | "cricket") => getStandardResponse<IAuction[]>(axios.get(`/auction`, { params: { type } })),
     getAuction: () => getStandardResponse<IAuction>(axios.get(`/auction/`)),
     playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, { action })),
     start: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/start`, { player })),

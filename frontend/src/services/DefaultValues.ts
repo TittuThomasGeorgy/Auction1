@@ -1,3 +1,4 @@
+import { IAuction } from "../types/AuctionType";
 import { IPlayer, PlayerPosition } from "../types/PlayerType";
 import { ISettings } from "../types/SettingsType";
 
@@ -7,6 +8,14 @@ export const defPlayer: IPlayer = {
     image: '',
     position: 'ST',
     basePrice: 100,
+}
+export const defAuction: IAuction = {
+    _id: '',
+    player: '',
+    name: '',
+    bid: null,
+    status: 'stopped',
+    type: 'football',
 }
 
 

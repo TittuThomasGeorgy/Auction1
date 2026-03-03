@@ -13,7 +13,7 @@ const NavBar = (props: { value: Number }) => {
 
     const menuItems = [
         { label: 'Home', icon: <HomeIcon />, route: '/' },
-        { label: 'Auction', icon: <GavelRounded />, route: '/auction' },
+        { label: 'Auction', icon: <GavelRounded />, route: '/liveAuction' },
         { label: 'Players', icon: <GroupsIcon />, route: '/players' },
         { label: 'Clubs', icon: <ClubIcon />, route: '/club' },
         ...((curClub.club as IClub).isAdmin ? [{ label: 'Settings', icon: <SettingsIcon />, route: '/settings' }] : []),

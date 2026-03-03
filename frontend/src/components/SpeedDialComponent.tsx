@@ -25,7 +25,7 @@ const SpeedDialComponent = () => {
     ...((curClub.club as IClub).isAdmin?[{ icon: <SettingsIcon />, name: 'Settings', route: '/settings' }]:[]),
     { icon: <GroupsIcon />, name: 'Players', route: '/players' },
     { icon: <ClubIcon />, name: 'Club', route: '/club' },
-    { icon: <GavelRounded />, name: 'Auction', route: '/auction' },
+    { icon: <GavelRounded />, name: 'Auction', route: '/liveAuction' },
   ];
   return (
     <Box sx={{ position: 'relative', mt: 10 }}>
