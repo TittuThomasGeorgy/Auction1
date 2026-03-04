@@ -4,6 +4,7 @@ export interface IAuction {
     _id: Types.ObjectId;
     player: Types.ObjectId | string;
     bid: Types.ObjectId | string;
+    image: Types.ObjectId | string;
     timeRemaining?:number;
     status: 'pause' | 'live' | 'stopped';
     type:'football'|'cricket';

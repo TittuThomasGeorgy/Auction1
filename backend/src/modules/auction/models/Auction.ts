@@ -8,6 +8,8 @@ export const AuctionSchema = new Schema<IAuction>({
   status: { type: String, enum: ['pause', 'live', 'stopped'], required: true },
   type: { type: String, enum: ['football', 'cricket'], required: true },
   name: { type: String, required: true },
+  image: { type: Schema.Types.ObjectId, ref: 'files' },
+  
 }, {
   timestamps: true,
 });

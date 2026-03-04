@@ -59,7 +59,7 @@ mongoose.connect(process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/auction')
     .then(async () => {
         console.log('Connected to mongodb'.bgGreen);
         await createSettings();
-        await createAuction();
+        // await createAuction();
     })
     .catch((error) => console.log('Received an error event!'.bgRed, error));
 

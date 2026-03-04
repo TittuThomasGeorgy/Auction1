@@ -16,6 +16,7 @@ export const defAuction: IAuction = {
     bid: null,
     status: 'stopped',
     type: 'football',
+    image:''
 }
 
 

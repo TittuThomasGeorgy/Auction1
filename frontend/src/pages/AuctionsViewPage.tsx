@@ -25,6 +25,7 @@ import NavBar from '../components/NavBar';
 import useAuction from '../services/AuctionService';
 import { IAuction } from '../types/AuctionType';
 import AuctionCard from '../components/AuctionCard';
+import AddAuctionDialog from '../components/AddAuctionDialog';
 
 const positionOrder: { [key: string]: number } = {
     ST: 1,
@@ -32,7 +33,7 @@ const positionOrder: { [key: string]: number } = {
     DF: 3,
     GK: 4
 };
-const AuctionsViewPage = (props:{type:'cricket'|'football'}) => {
+const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
     const curClub = useAuth();
 
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ const AuctionsViewPage = (props:{type:'cricket'|'football'}) => {
     const [newAuction, setNewAuction] = useState<IAuction>(defAuction)
     const [action, setAction] = useState<'add' | 'edit'>('add');
     const [searchKey, setSearchKey] = useState('');
-  
+
     useEffect(() => {
         AuctionServ.getAll(props.type)
             .then((res) => setAuctions(res.data))
@@ -126,7 +127,7 @@ const AuctionsViewPage = (props:{type:'cricket'|'football'}) => {
                     },
                 },
             ]} /> */}
-            {/* <AddPlayerDialog open={open} onClose={() => setOpen(false)}
+            <AddAuctionDialog open={open} onClose={() => setOpen(false)}
                 action={action}
                 onSubmit={(newValue) => { }
                     // action === 'edit' ?
@@ -147,31 +148,9 @@ const AuctionsViewPage = (props:{type:'cricket'|'football'}) => {
                     //         return positionComparison; // If positions differ, prioritize position sorting
                     //     }))
                 }
-                value={{ ...newAuction, basePrice: settings.minBid }}
-                bidMultiple={settings.bidMultiple} />
-            {(() => {
-                const _club = clubs.find((clb) => clb._id === showSold.club);
-                const _player = auctions.find((player) => player._id === showSold.player);
-
-                return (
-                    _club &&
-                    _player && (
-                        <PlayerSoldModal
-                            open={showSold.open}
-                            onClose={() =>
-                                setShowSold({
-                                    open: false,
-                                    player: '',
-                                    club: '',
-                                })
-                            }
-                            club={_club}  // Fixed from `_clubs` to `_club`
-                            player={_player}
-                        />
-                    )
-                );
-            })()} */}
-            <NavBar value={2} />
+                value={{ ...newAuction }}
+            />
+            {/* <NavBar value={2} /> */}
 
 
         </>

@@ -6,6 +6,8 @@ export interface IAuction {
     bid: IBid | null;
     timeRemaining?: number;
     status: 'pause' | 'live' | 'stopped';
-    type:'football'|'cricket';
-    name:string;
+    type: 'football' | 'cricket';
+    name: string;
+    image: string;
+
 }

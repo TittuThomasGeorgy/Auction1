@@ -6,8 +6,10 @@ import { IPlayer } from '../types/PlayerType';
 
 const useAuction = () => {
   return {
-    update: (createAuction: IAuction) =>
-      getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction })),
+    create: (createAuction: IAuction, file: File) =>
+      getStandardResponse<IAuction>(axios.post(`/auction/`, { ...createAuction, file: file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
+    update: (createAuction: IAuction, file: File | undefined) =>
+      getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction, file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
     getAll: (type: "football" | "cricket") => getStandardResponse<IAuction[]>(axios.get(`/auction`, { params: { type } })),
     getAuction: () => getStandardResponse<IAuction>(axios.get(`/auction/`)),
     playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, { action })),
