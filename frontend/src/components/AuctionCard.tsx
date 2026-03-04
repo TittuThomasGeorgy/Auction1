@@ -50,27 +50,19 @@ const AuctionCard = (props: AuctionCardProps) => {
                 />
 
                 {/* Player Image */}
-                {/* <Box
+                <Box
+                    component="img"
+                    src={props.auction.image}
+                    alt={`${props.auction.name} logo`}
                     sx={{
                         width: 200,
+                        height: 200,
+                        objectFit: 'contain',
                         position: 'absolute',
-                        top: '40%',
-                        right: -10,
-                        transform: 'translateY(-50%)',
+                        top: 20,
                         zIndex: 2,
                     }}
-                >
-                    <Box
-                        component="img"
-                        src={props.player.image}
-                        alt={props.player.name}
-                        sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                        }}
-                    />
-                </Box> */}
+                />
 
                 {/* Player Name */}
                 <Box

@@ -26,30 +26,27 @@ import useAuction from '../services/AuctionService';
 import { IAuction } from '../types/AuctionType';
 import AuctionCard from '../components/AuctionCard';
 import AddAuctionDialog from '../components/AddAuctionDialog';
+import AuctionFilter from '../components/AuctionFilter';
 
-const positionOrder: { [key: string]: number } = {
-    ST: 1,
-    CM: 2,
-    DF: 3,
-    GK: 4
-};
+
 const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
     const curClub = useAuth();
 
     const navigate = useNavigate();
     const AuctionServ = useAuction();
-    const settingsServ = useSettings();
 
     const [open, setOpen] = useState(false)
     const [auctions, setAuctions] = useState<IAuction[]>([])
     const [newAuction, setNewAuction] = useState<IAuction>(defAuction)
     const [action, setAction] = useState<'add' | 'edit'>('add');
     const [searchKey, setSearchKey] = useState('');
+    const [filter, setFilter] = useState<'all' | 'football' | 'cricket'>('all');
 
     useEffect(() => {
-        AuctionServ.getAll(props.type)
-            .then((res) => setAuctions(res.data))
-    }, []);
+        if (props.type)
+            AuctionServ.getAll({ searchKey, filter })
+                .then((res) => setAuctions(res.data))
+    }, [searchKey, filter]);
 
     return (
         <>
@@ -79,6 +76,7 @@ const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
                     <GroupsIcon sx={{ mr: 1 }} fontSize="large" />
                     Auctions</Typography>
                 <Divider />
+                <AuctionFilter filter={filter} onChange={(newFilter) => setFilter(newFilter)} />
                 <TextField
                     variant="standard"
                     value={searchKey}
@@ -129,25 +127,21 @@ const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
             ]} /> */}
             <AddAuctionDialog open={open} onClose={() => setOpen(false)}
                 action={action}
-                onSubmit={(newValue) => { }
-                    // action === 'edit' ?
-                    //     setPlayers((prevPlayers) =>
-                    //         prevPlayers.map(prev => prev._id === newValue._id ? newValue : prev)) :
-                    //     setPlayers((prevPlayers) => [
-                    //         ...prevPlayers,
-                    //         newValue
-                    //     ].sort((a: IPlayer, b: IPlayer) => {
-                    //         // First, sort by position
-                    //         const positionComparison = positionOrder[a.position] - positionOrder[b.position];
+                onSubmit={(newValue) => {
+                    action === 'edit' && (newValue.type == filter || filter == 'all') ?
+                        setAuctions((prev) =>
+                            prev.map(prev => prev._id === newValue._id ? newValue : prev)) :
+                        setAuctions((prev) => [
+                            ...prev,
+                            newValue
+                        ].sort((a: IAuction, b: IAuction) => {
+                            // First, sort by position
 
-                    //         // If positions are the same, sort by name alphabetically
-                    //         if (positionComparison === 0) {
-                    //             return a.name.localeCompare(b.name); // Sort by name in ascending order
-                    //         }
+                            // If positions are the same, sort by name alphabetically
+                            return a.name.localeCompare(b.name); // Sort by name in ascending order
 
-                    //         return positionComparison; // If positions differ, prioritize position sorting
-                    //     }))
-                }
+                        }))
+                }}
                 value={{ ...newAuction }}
             />
             {/* <NavBar value={2} /> */}

@@ -10,7 +10,7 @@ const useAuction = () => {
       getStandardResponse<IAuction>(axios.post(`/auction/`, { ...createAuction, file: file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
     update: (createAuction: IAuction, file: File | undefined) =>
       getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction, file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
-    getAll: (type: "football" | "cricket") => getStandardResponse<IAuction[]>(axios.get(`/auction`, { params: { type } })),
+    getAll: (params: { searchKey?: string, filter?: 'all' | 'football' | 'cricket' }) => getStandardResponse<IAuction[]>(axios.get(`/auction`, { params: { searchKey: params.searchKey, filter: params.filter } })),
     getAuction: () => getStandardResponse<IAuction>(axios.get(`/auction/`)),
     playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, { action })),
     start: (player: string) => getStandardResponse<IAuction>(axios.post(`/auction/start`, { player })),

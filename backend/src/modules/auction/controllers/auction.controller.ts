@@ -31,11 +31,37 @@ export const isAuctionRunning = async (): Promise<boolean> => {
 };
 export const getAuctions = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const type = req.query.type;
-        console.log(type, "ty");
+        const filter = req.query.filter as 'football' | 'cricket' | 'all';
+        const searchKey = req.query.searchKey as string;
+        const filterCondition = (() => {
+            if (filter === 'all') {
+                return {}; // Players with a non-null club
+            }
+            else {
+                return { type: filter }; // Players with a null club
+            }
+        })();
 
-        const data = await Auction.find({ type })
-        sendApiResponse(res, 'OK', data, `Successfully fetched ${type} Auctions`);
+        const _data = await Auction.find({
+            ...filterCondition, // Apply filter-specific conditions
+            ...(searchKey
+                ? {
+                    name: {
+                        $regex: searchKey,
+                        $options: 'i',
+                    },
+                }
+                : {})
+        }).populate('image').sort({ 'name': 1 });
+        const data: IAuction[] = await Promise.all(_data.map(async (auction) => {
+            const logoObj = (auction.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
+            return {
+                ...auction.toObject(),  // Convert mongoose document to a plain object
+                image: logoObj ?? '',  // Use the downloadURL if it exists
+            };
+        }));
+        // return data
+        sendApiResponse(res, 'OK', data, `Successfully fetched ${filter} Auctions`);
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware for unexpected errors
     }
@@ -324,7 +350,7 @@ export const undoBid = async (req: Request, res: Response, next: NextFunction) =
         next(error);
     }
 }
-export const createAuction= async (req: Request, res: Response, next: NextFunction) => {
+export const createAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.file) {
             return sendApiResponse(res, 'NOT FOUND', null,
@@ -333,7 +359,7 @@ export const createAuction= async (req: Request, res: Response, next: NextFuncti
 
         const _file = await uploadFiles(req.body.name, req.file, process.env.AUCTION_FOLDER ?? '',);
 
-        const newAuction = new Auction({ ...req.body, _id: new mongoose.Types.ObjectId(), status:'stopped',player:null });
+        const newAuction = new Auction({ ...req.body, _id: new mongoose.Types.ObjectId(), status: 'stopped', player: null });
         if (_file) {
             newAuction.image = _file._id;
         }
@@ -355,7 +381,7 @@ export const createAuction= async (req: Request, res: Response, next: NextFuncti
 }
 export const updateAuction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-         const _updatedAuction = req.body;
+        const _updatedAuction = req.body;
         const prevAuction = await Auction.findById(req.params.id).populate(['image']);
         if (!prevAuction) {
             return sendApiResponse(res, 'NOT FOUND', null, 'Auction Not Found');
