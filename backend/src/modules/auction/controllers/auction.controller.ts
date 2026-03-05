@@ -53,6 +53,7 @@ export const getAuctions = async (req: Request, res: Response, next: NextFunctio
                 }
                 : {})
         }).populate('image').sort({ 'name': 1 });
+        
         const data: IAuction[] = await Promise.all(_data.map(async (auction) => {
             const logoObj = (auction.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
             return {
