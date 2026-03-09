@@ -4,7 +4,7 @@ import { Add as AddIcon, Groups as GroupsIcon, Search as SearchIcon } from '@mui
 import { useNavigate } from 'react-router-dom';
 import FloatingButton from '../components/FloatingButton';
 import AddPlayerDialog from '../components/AddPlayerDialog';
-import { defAuction, defPlayer, defSettings } from '../services/DefaultValues';
+import { defAuction, defClub, defPlayer, defSettings } from '../services/DefaultValues';
 import usePlayer from '../services/PlayerService';
 import { IPlayer } from '../types/PlayerType';
 import ClubCard from '../components/ClubCard';
@@ -37,7 +37,9 @@ const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
 
     const [open, setOpen] = useState(false)
     const [auctions, setAuctions] = useState<IAuction[]>([])
-    const [newAuction, setNewAuction] = useState<IAuction>(defAuction)
+    const [newAuction, setNewAuction] = useState<IAuction>(defAuction);
+    const [creatableClub, setCreatableClub] = useState<IClub>(defClub);
+
     const [action, setAction] = useState<'add' | 'edit'>('add');
     const [searchKey, setSearchKey] = useState('');
     const [filter, setFilter] = useState<'all' | 'football' | 'cricket'>('all');
@@ -128,12 +130,12 @@ const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
             <AddAuctionDialog open={open} onClose={() => setOpen(false)}
                 action={action}
                 onSubmit={(newValue) => {
-                    action === 'edit' && (newValue.type == filter || filter == 'all') ?
+                    action === 'edit' && (newValue.auction.type == filter || filter == 'all') ?
                         setAuctions((prev) =>
-                            prev.map(prev => prev._id === newValue._id ? newValue : prev)) :
+                            prev.map(prev => prev._id === newValue.auction._id ? newValue.auction : prev)) :
                         setAuctions((prev) => [
                             ...prev,
-                            newValue
+                            newValue.auction
                         ].sort((a: IAuction, b: IAuction) => {
                             // First, sort by position
 
@@ -142,7 +144,7 @@ const AuctionsViewPage = (props: { type: 'cricket' | 'football' }) => {
 
                         }))
                 }}
-                value={{ ...newAuction }}
+                value={{ auction: newAuction, club: creatableClub }}
             />
             {/* <NavBar value={2} /> */}
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getClubs, loggedClub, getClubByIdReq, createClub, getClubLogin, updateClub } from "../controllers/club.controller";
+import { getClubs, loggedClub, getClubByIdReq, createClubReq, getClubLogin, updateClub } from "../controllers/club.controller";
 import multer from "multer";
 import { authCheck } from "../../common/controllers/authorization.controller";
 
@@ -16,7 +16,7 @@ ClubRouter.get('/:id', getClubByIdReq);
 ClubRouter.post('/',  upload.fields([
     { name: 'file1', maxCount: 1 },
     { name: 'file2', maxCount: 1 },
-  ]), createClub);
+  ]), createClubReq);
 ClubRouter.post('/login', getClubLogin);
 ClubRouter.patch('/:id',  upload.fields([
     { name: 'file1', maxCount: 1 },

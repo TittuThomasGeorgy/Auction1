@@ -15,6 +15,8 @@ import { isPlayerSold } from "../../player/controllers/players.controller";
 import { Settings } from "http2";
 import { ISettings } from "../../settings/types/setting";
 import { IFileModel } from "../../common/types/fileModel";
+import { createClub } from "../../club/controllers/club.controller";
+import { IClub } from "../../club/types/club";
 
 export const isAuctionExist = async (populateBid?: boolean): Promise<IAuction | null> => {
     let query = Auction.findOne({});
@@ -53,7 +55,7 @@ export const getAuctions = async (req: Request, res: Response, next: NextFunctio
                 }
                 : {})
         }).populate('image').sort({ 'name': 1 });
-        
+
         const data: IAuction[] = await Promise.all(_data.map(async (auction) => {
             const logoObj = (auction.image as unknown as IFileModel).downloadURL; // Ensure that scl.logo is properly typed
             return {
@@ -351,28 +353,30 @@ export const undoBid = async (req: Request, res: Response, next: NextFunction) =
         next(error);
     }
 }
-export const createAuction = async (req: Request, res: Response, next: NextFunction) => {
+export const createAuction = async (req: Request, res: Response, next: NextFunction) => { //TODO: test this
     try {
         if (!req.file) {
             return sendApiResponse(res, 'NOT FOUND', null,
                 `File Not Found`);
         }
 
-        const _file = await uploadFiles(req.body.name, req.file, process.env.AUCTION_FOLDER ?? '',);
+        const _file1 = await uploadFiles(req.body.name, req.file, process.env.AUCTION_FOLDER ?? '',);
 
         const newAuction = new Auction({ ...req.body, _id: new mongoose.Types.ObjectId(), status: 'stopped', player: null });
-        if (_file) {
-            newAuction.image = _file._id;
+        if (_file1) {
+            newAuction.image = _file1._id;
         }
         else {
             return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
                 `File upload Failed`);
         }
-        newAuction.save();
-        if (!newAuction) {
+        const clubCreateResp = await createClub(req.body as IClub, req.file, req.file)
+        if (newAuction && clubCreateResp.club)
+            newAuction.save();
+
+        else {
             return sendApiResponse(res, 'CONFLICT', null, 'Auction Not Created');
         }
-        io.emit('playerCreated', { data: { player: { ...newAuction.toObject(), image: _file.downloadURL } }, message: `New Auction Added: ${newAuction.name}` });
 
         sendApiResponse(res, 'CREATED', newAuction,
             `Added Auction successfully`);

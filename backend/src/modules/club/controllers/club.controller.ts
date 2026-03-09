@@ -28,8 +28,8 @@ export const getClubs = async (req: Request, res: Response, next: NextFunction) 
                     ],
                 }
                 : {}),
-                isAdmin:false
-          
+            isAdmin: false
+
         })
             .populate('logo')
             .populate('manager.img')
@@ -99,39 +99,58 @@ const userNameExist = async (username: string) => {
     const _club = await Club.find({ username: username });
     return _club;
 }
-export const createClub = async (req: Request, res: Response, next: NextFunction) => {
+export const createClub = async (_club: IClub, file1: Express.Multer.File, file2: Express.Multer.File) => {
     try {
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-        const file1 = files?.file1?.[0];
-        const file2 = files?.file2?.[0];
         if (!file1 || !file2) {
-            return sendApiResponse(res, 'NOT FOUND', null,
-                `File Not Found`);
+            return { message: `FileNotFound`, club: null };
         }
-        const isUserNameExist = await userNameExist(req.body.username);
+        const isUserNameExist = await userNameExist(_club.username as string);
         if (isUserNameExist.length > 0)
-            return sendApiResponse(res, 'CONFLICT', null,
-                `Username Already Exist`);
-        const _file1 = await uploadFiles(req.body.name, file1, process.env.CLUB_FOLDER ?? '',);
-        const _file2 = await uploadFiles(req.body.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
-        const newClub = new Club({ ...req.body, _id: new mongoose.Types.ObjectId() });
+            return { message: `UsernameExist`, club: null };
+        const _file1 = await uploadFiles(_club.name, file1, process.env.CLUB_FOLDER ?? '',);
+        const _file2 = await uploadFiles(_club.manager.name, file2, process.env.MANAGER_FOLDER ?? '',);
+        const newClub = new Club({ ..._club, _id: new mongoose.Types.ObjectId() });
+
+
         if (_file1 && _file2) {
             newClub.logo = _file1._id;
             newClub.manager.img = _file2._id;
         }
         else {
-            return sendApiResponse(res, 'SERVICE UNAVAILABLE', null,
-                `File upload Failed`);
+            return { message: `FileUploadFailed`, club: null };
         }
         newClub.save();
         if (!newClub) {
-            return sendApiResponse(res, 'CONFLICT', null, 'club Not Created');
+            return { message: 'Club Not Created', club: null };
         }
         delete newClub.password;
 
-        sendApiResponse(res, 'CREATED', newClub,
-            `Added club successfully`);
+        return { message: `Added club successfully`, club: newClub };
+    } catch (error) {
+        throw (error);
+    }
+}
+export const createClubReq = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+        const file1 = files?.file1?.[0];
+        const file2 = files?.file2?.[0];
+
+        const clubCreateResp = await createClub(req.body as IClub, file1, file2)
+        if (clubCreateResp.club)
+
+            return sendApiResponse(res, 'CREATED', clubCreateResp.club,
+                `Added club successfully`);
+        else if (clubCreateResp.message == 'FileNotFound') {
+            return sendApiResponse(res, 'NOT FOUND', null,
+                `File Not Found`);
+        }
+        else {
+            return sendApiResponse(res, 'CONFLICT', null, clubCreateResp.message);
+        }
+
     } catch (error) {
         next(error);
     }

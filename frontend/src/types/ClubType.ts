@@ -10,6 +10,7 @@ export interface ICreatableClub {
         name: string;
     }
     balance: number;
+    type?: 'football' | 'cricket'
 }
 export interface IClub extends ICreatableClub {
     _id: string;
