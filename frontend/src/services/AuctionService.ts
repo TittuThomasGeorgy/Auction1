@@ -3,13 +3,14 @@ import { IAuction } from '../types/AuctionType';
 import { getStandardResponse, getStandardSocketResponse } from './CommonServices';
 import { IBid } from '../types/BidType';
 import { IPlayer } from '../types/PlayerType';
+import { IClub } from '../types/ClubType';
 
 const useAuction = () => {
   return {
-    create: (createAuction: IAuction, file: File) =>
-      getStandardResponse<IAuction>(axios.post(`/auction/`, { ...createAuction, file: file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
-    update: (createAuction: IAuction, file: File | undefined) =>
-      getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { ...createAuction, file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
+    create: (createAuction: IAuction, createClub: IClub, file: File) =>
+      getStandardResponse<IAuction>(axios.post(`/auction/`, { auction: createAuction, club: createClub, file: file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
+    update: (createAuction: IAuction, createClub: IClub, file: File | undefined) =>
+      getStandardResponse<IAuction>(axios.patch(`/auction/${createAuction._id}`, { auction: createAuction, club: createClub, file }, { headers: { 'Content-Type': 'multipart/form-data' } })),
     getAll: (params: { searchKey?: string, filter?: 'all' | 'football' | 'cricket' }) => getStandardResponse<IAuction[]>(axios.get(`/auction`, { params: { searchKey: params.searchKey, filter: params.filter } })),
     getAuction: () => getStandardResponse<IAuction>(axios.get(`/auction/`)),
     playPause: (action: 'resume' | 'pause') => getStandardResponse<IAuction>(axios.post(`/auction/pause`, { action })),
