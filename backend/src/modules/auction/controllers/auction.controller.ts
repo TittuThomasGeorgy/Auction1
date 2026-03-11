@@ -353,6 +353,7 @@ export const undoBid = async (req: Request, res: Response, next: NextFunction) =
         next(error);
     }
 }
+
 export const createAuction = async (req: Request, res: Response, next: NextFunction) => { //TODO: test this
     try {
         if (!req.file) {
