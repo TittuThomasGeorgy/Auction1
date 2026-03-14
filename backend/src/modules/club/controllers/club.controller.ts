@@ -131,6 +131,7 @@ export const createClub = async (_club: IClub, file1: Express.Multer.File, file2
         throw (error);
     }
 }
+
 export const createClubReq = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
